@@ -1,0 +1,5 @@
+model User{
+  fullName String
+  phoneNumber String
+  address? String
+}
