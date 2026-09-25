@@ -22,7 +22,10 @@
     "next": "16.3.5",
     "pg": "^8.23.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "bcrypt": "^6.0.0",
+    "jose": "^6.0.0",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -35,7 +38,8 @@
     "eslint-config-next": "16.3.5",
     "prisma": "7.10.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/bcrypt": "^5.0.0"
   },
   "packageManager": "pnpm@12.3.4"
 }
