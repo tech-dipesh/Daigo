@@ -1,5 +1,16 @@
-model User{
-  fullName String
-  phoneNumber String
-  address? String
+model User {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String             @unique
+  passwordHash      String             @map("password_hash")
+  activeRole        UserRole           @default(RIDER) @map("active_role")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  emergencyContacts EmergencyContact[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  RIDER
+  DRIVER
 }
