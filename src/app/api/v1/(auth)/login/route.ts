@@ -24,13 +24,14 @@ export async function POST(request: NextRequest) {
       throw new AppError("Please Enter Correct Password", 401)
     }
 
+    const { accessToken, refreshToken } = await issueTokenPair(user.id)
 
     const response = NextResponse.json(
       { success: true, data: { userId: user.id, email: user.email }, error: null },
       { status: 200 },
     )
 
-    return NextResponse.json(response )
+    return setAuthCookies(response, accessToken, refreshToken)
   } catch (error) {
     return errorResponse(error)
   }
