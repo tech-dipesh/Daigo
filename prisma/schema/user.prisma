@@ -7,7 +7,8 @@ model User {
   updatedAt         DateTime           @updatedAt @map("updated_at")
   emergencyContacts EmergencyContact[]
   refreshTokens     RefreshToken[]
-
+  driverDocuments DriverDocument[]
+  vehicles          Vehicle[]
   @@map("users")
 }
 

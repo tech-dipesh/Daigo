@@ -1,0 +1,45 @@
+
+model Vehicle {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId            String             @map("owner_id") @db.Uuid
+  type               VehicleType
+  make               String
+  model              String
+  plateNumber        String             @unique @map("plate_number")
+  seatCapacity       Int                @map("seat_capacity")
+  rcNumber           String             @map("rc_number")
+  rcPhotoUrl         String             @map("rc_photo_url")
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  owner              User               @relation(fields: [ownerId], references: [id])
+
+  @@map("vehicles")
+}
+
+enum VehicleType {
+  BIKE
+  SCOOTER
+  CAR
+  AUTO
+  CAB
+}
+
+model DriverDocument {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String             @map("user_id") @db.Uuid
+  licenseNumber      String             @map("license_number")
+  licensePhotoUrl    String             @map("license_photo_url")
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  user               User               @relation(fields: [userId], references: [id])
+
+  @@map("driver_documents")
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
