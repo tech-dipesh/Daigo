@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
+import "@/lib/infra/validation"
 
 export class AppError extends Error {
   status: number
