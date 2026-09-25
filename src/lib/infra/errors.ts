@@ -24,7 +24,6 @@ export function errorResponse(error: unknown) {
       { status: 400 },
     )
   }
-
   return NextResponse.json(
     { success: false, data: null, error: { message: "Something went wrong. Please try again." } },
     { status: 500 },
