@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server"
 import { compare } from "bcrypt"
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
 import { issueTokenPair } from "@/lib/infra/auth"
-import { AppError } from "@/lib/infra/errors"
+import { AppError, successResponse } from "@/lib/infra/response"
 import { setAuthCookies } from "@/lib/infra/cookies"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 
@@ -24,10 +23,7 @@ export const POST = withErrorHandling(async (request) => {
 
   const { accessToken, refreshToken } = await issueTokenPair(user.id)
 
-  const response = NextResponse.json(
-    { success: true, data: { userId: user.id, email: user.email }, error: null },
-    { status: 200 },
-  )
+  const response = successResponse({ userId: user.id, email: user.email }, 200)
 
   return setAuthCookies(response, accessToken, refreshToken)
 })

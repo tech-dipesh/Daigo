@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server"
 import { db } from "@/lib/infra/db"
 import { requireUserId } from "@/lib/infra/auth"
-import { AppError } from "@/lib/infra/errors"
+import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 
 export const GET = withErrorHandling(async (request) => {
@@ -16,5 +15,5 @@ export const GET = withErrorHandling(async (request) => {
     throw new AppError("User not found", 404)
   }
 
-  return NextResponse.json({ success: true, data: user, error: null }, { status: 200 })
+  return successResponse(user)
 })
