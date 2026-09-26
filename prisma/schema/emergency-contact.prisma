@@ -7,5 +7,6 @@ model EmergencyContact {
   createdAt DateTime @default(now()) @map("created_at")
   user      User     @relation(fields: [userId], references: [id])
 
+  @@unique([userId, phone])
   @@map("emergency_contacts")
 }

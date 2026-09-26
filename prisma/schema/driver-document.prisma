@@ -1,0 +1,12 @@
+model DriverDocument {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String             @map("user_id") @db.Uuid
+  licenseNumber      String             @unique @map("license_number")
+  licensePhotoUrl    String             @map("license_photo_url")
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  user               User               @relation(fields: [userId], references: [id])
+
+  @@map("driver_documents")
+}
