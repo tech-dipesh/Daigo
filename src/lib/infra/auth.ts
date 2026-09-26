@@ -3,13 +3,14 @@ import { hash } from "bcrypt"
 import type { NextRequest } from "next/server"
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
-import { AppError } from "@/lib/infra/errors"
+import { AppError } from "@/lib/infra/response"
 
 const tokenPayloadSchema = z.object({
   userId: z.string(),
 })
 
 type TokenPayload = z.infer<typeof tokenPayloadSchema>
+type TransactionClient = Parameters<Parameters<typeof db.$transaction>[0]>[0]
 
 const accessTokenSecret = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET)
 const refreshTokenSecret = new TextEncoder().encode(process.env.REFRESH_TOKEN_SECRET)
@@ -49,11 +50,11 @@ export function verifyRefreshToken(token: string) {
   return verifyToken(token, refreshTokenSecret)
 }
 
-export async function issueTokenPair(userId: string) {
+export async function issueTokenPair(userId: string, client: TransactionClient | typeof db = db) {
   const accessToken = await signAccessToken({ userId })
   const refreshToken = await signRefreshToken({ userId })
 
-  await db.refreshToken.create({
+  await client.refreshToken.create({
     data: {
       userId,
       tokenHash: await hash(refreshToken, 10),
@@ -64,18 +65,12 @@ export async function issueTokenPair(userId: string) {
   return { accessToken, refreshToken }
 }
 
-export async function requireUserId(request: NextRequest): Promise<string> {
-  const accessTokenCookie = request.cookies.get("access_token")?.value
+export function getUserId(request: NextRequest): string {
+  const userId = request.headers.get("x-user-id")
 
-  if (!accessTokenCookie) {
+  if (!userId) {
     throw new AppError("Not authenticated", 401)
   }
 
-  const payload = await verifyAccessToken(accessTokenCookie)
-
-  if (!payload) {
-    throw new AppError("Not authenticated", 401)
-  }
-
-  return payload.userId
+  return userId
 }

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { Prisma } from "@/generated/prisma/client"
 import "@/lib/infra/validation"
 
 export class AppError extends Error {
@@ -10,6 +9,12 @@ export class AppError extends Error {
     super(message)
     this.status = status
   }
+}
+
+function isUniqueConstraintError(
+  error: unknown,
+): error is { code: string; meta?: { target?: unknown } } {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002"
 }
 
 export function successResponse<T>(data: T, status = 200) {
@@ -31,7 +36,7 @@ export function errorResponse(error: unknown) {
     )
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+  if (isUniqueConstraintError(error)) {
     const target = error.meta?.target
 
     const fields = Array.isArray(target)
@@ -43,7 +48,7 @@ export function errorResponse(error: unknown) {
       { status: 409 },
     )
   }
-  console.log("Error ", error);
+
   return NextResponse.json(
     { success: false, data: null, error: { message: "Something went wrong. Please try again." } },
     { status: 500 },
