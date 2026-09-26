@@ -3,7 +3,7 @@ import { verifyAccessToken } from "@/lib/infra/auth"
 
 const publicPaths = ["/api/v1/signup", "/api/v1/login", "/api/v1/refresh"]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (publicPaths.includes(request.nextUrl.pathname)) {
     return NextResponse.next()
   }
