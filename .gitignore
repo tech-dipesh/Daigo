@@ -38,7 +38,6 @@ yarn-error.log*
 .vercel
 
 /prisma/generated/
-prisma/migrations/
 *.md
 !README.md
 *.zip
