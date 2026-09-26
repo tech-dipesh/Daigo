@@ -35,12 +35,14 @@ export const POST = withErrorHandling(async (request) => {
     throw new AppError("Refresh token not recognized", 401)
   }
 
-  await db.refreshToken.update({
-    where: { id: matchedTokenId },
-    data: { revokedAt: new Date() },
-  })
+  const { accessToken, refreshToken } = await db.$transaction(async (tx) => {
+    await tx.refreshToken.update({
+      where: { id: matchedTokenId },
+      data: { revokedAt: new Date() },
+    })
 
-  const { accessToken, refreshToken } = await issueTokenPair(payload.userId)
+    return issueTokenPair(payload.userId, tx)
+  })
 
   const response = successResponse(null, 200)
 

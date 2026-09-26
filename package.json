@@ -12,7 +12,9 @@
     "validate": "prisma validate",
     "pull": "prisma db pull",
     "push": "prisma db push",
-    "reset": "prisma migrate reset"
+    "reset": "prisma migrate reset",
+    "route": "pnx next-list",
+    "type": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -37,7 +39,8 @@
     "prisma": "7.10.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "@types/bcrypt": "^5.0.0"
+    "@types/bcrypt": "^5.0.0",
+    "next-list": "2.0.0"
   },
   "packageManager": "pnpm@12.3.4"
 }
