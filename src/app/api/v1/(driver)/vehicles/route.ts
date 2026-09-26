@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
-import { requireUserId } from "@/lib/infra/auth"
+import { getUserId } from "@/lib/infra/auth"
 import { successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 
@@ -15,7 +15,7 @@ const vehicleSchema = z.object({
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const ownerId = await requireUserId(request)
+  const ownerId = getUserId(request)
   const body = await request.json()
   const data = vehicleSchema.parse(body)
 
@@ -25,7 +25,7 @@ export const POST = withErrorHandling(async (request) => {
 })
 
 export const GET = withErrorHandling(async (request) => {
-  const ownerId = await requireUserId(request)
+  const ownerId = getUserId(request)
   const vehicles = await db.vehicle.findMany({ where: { ownerId } })
 
   return successResponse(vehicles)

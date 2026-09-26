@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
-import { requireUserId } from "@/lib/infra/auth"
+import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 
@@ -21,7 +21,7 @@ const routeSchema = z.object({
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const driverId = await requireUserId(request)
+  const driverId = getUserId(request)
   const user = await db.user.findUnique({ where: { id: driverId } })
 
   if (user?.activeRole !== "DRIVER") {
@@ -51,7 +51,7 @@ export const POST = withErrorHandling(async (request) => {
 })
 
 export const GET = withErrorHandling(async (request) => {
-  const driverId = await requireUserId(request)
+  const driverId = getUserId(request)
   const routes = await db.route.findMany({ where: { driverId } })
 
   return successResponse(routes)

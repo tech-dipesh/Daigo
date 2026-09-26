@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
-import { requireUserId } from "@/lib/infra/auth"
+import { getUserId } from "@/lib/infra/auth"
 import { successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 
@@ -11,7 +11,7 @@ const emergencyContactSchema = z.object({
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const userId = await requireUserId(request)
+  const userId = getUserId(request)
   const body = await request.json()
   const data = emergencyContactSchema.parse(body)
 
@@ -21,7 +21,7 @@ export const POST = withErrorHandling(async (request) => {
 })
 
 export const GET = withErrorHandling(async (request) => {
-  const userId = await requireUserId(request)
+  const userId = getUserId(request)
   const contacts = await db.emergencyContact.findMany({ where: { userId } })
 
   return successResponse(contacts)
