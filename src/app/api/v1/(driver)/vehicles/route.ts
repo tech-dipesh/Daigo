@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
 import { requireUserId } from "@/lib/infra/auth"
+import { successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 
 const vehicleSchema = z.object({
@@ -21,12 +21,12 @@ export const POST = withErrorHandling(async (request) => {
 
   const vehicle = await db.vehicle.create({ data: { ...data, ownerId } })
 
-  return NextResponse.json({ success: true, data: vehicle, error: null }, { status: 201 })
+  return successResponse(vehicle, 201)
 })
 
 export const GET = withErrorHandling(async (request) => {
   const ownerId = await requireUserId(request)
   const vehicles = await db.vehicle.findMany({ where: { ownerId } })
 
-  return NextResponse.json({ success: true, data: vehicles, error: null }, { status: 200 })
+  return successResponse(vehicles)
 })
