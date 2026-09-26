@@ -1,0 +1,35 @@
+
+model Route {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  driverId       String      @map("driver_id") @db.Uuid
+  vehicleId      String      @map("vehicle_id") @db.Uuid
+  routeType      RouteType   @map("route_type")
+  fromLabel      String      @map("from_label")
+  fromLat        Float       @map("from_lat")
+  fromLng        Float       @map("from_lng")
+  toLabel        String      @map("to_label")
+  toLat          Float       @map("to_lat")
+  toLng          Float       @map("to_lng")
+  daysOfWeek     Int[]       @map("days_of_week")
+  departureDate  DateTime?   @map("departure_date")
+  departureTime  DateTime    @map("departure_time") @db.Time()
+  detourLimitKm  Float       @map("detour_limit_km")
+  seatsAvailable Int         @map("seats_available")
+  status         RouteStatus @default(ACTIVE)
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  driver         User        @relation(fields: [driverId], references: [id])
+  vehicle        Vehicle     @relation(fields: [vehicleId], references: [id])
+
+  @@map("routes")
+}
+
+enum RouteType {
+  REGULAR
+  ADVANCE
+}
+
+enum RouteStatus {
+  ACTIVE
+  PAUSED
+}

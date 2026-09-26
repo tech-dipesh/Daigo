@@ -1,0 +1,32 @@
+model RideRequest {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  riderId           String            @map("rider_id") @db.Uuid
+  fromLabel         String            @map("from_label")
+  fromLat           Float             @map("from_lat")
+  fromLng           Float             @map("from_lng")
+  toLabel           String            @map("to_label")
+  toLat             Float             @map("to_lat")
+  toLng             Float             @map("to_lng")
+  windowStart       DateTime          @map("window_start")
+  windowEnd         DateTime          @map("window_end")
+  groupSize         Int               @default(1) @map("group_size")
+  hasLuggage        Boolean           @default(false) @map("has_luggage")
+  notes             String?
+  isVulnerable      Boolean           @default(false) @map("is_vulnerable")
+  womenOnly         Boolean           @default(false) @map("women_only")
+  acOnly            Boolean           @default(false) @map("ac_only")
+  vehiclePreference VehicleType?      @map("vehicle_preference")
+  status            RideRequestStatus @default(PENDING)
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  rider             User              @relation(fields: [riderId], references: [id])
+
+  @@map("ride_requests")
+}
+
+enum RideRequestStatus {
+  PENDING
+  MATCHED
+  EXPIRED
+  CANCELLED
+}
