@@ -20,6 +20,7 @@ model RideRequest {
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   rider             User              @relation(fields: [riderId], references: [id])
+  matches           Match[]
 
   @@map("ride_requests")
 }

@@ -1,4 +1,3 @@
-
 model Route {
   id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   driverId       String      @map("driver_id") @db.Uuid
@@ -20,6 +19,7 @@ model Route {
   updatedAt      DateTime    @updatedAt @map("updated_at")
   driver         User        @relation(fields: [driverId], references: [id])
   vehicle        Vehicle     @relation(fields: [vehicleId], references: [id])
+  matches        Match[]
 
   @@map("routes")
 }

@@ -1,0 +1,21 @@
+model Match {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rideRequestId String      @map("ride_request_id") @db.Uuid
+  routeId       String      @map("route_id") @db.Uuid
+  distanceKm    Float       @map("distance_km")
+  status        MatchStatus @default(PENDING)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  rideRequest   RideRequest @relation(fields: [rideRequestId], references: [id])
+  route         Route       @relation(fields: [routeId], references: [id])
+
+  @@unique([rideRequestId, routeId])
+  @@map("matches")
+}
+
+enum MatchStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
