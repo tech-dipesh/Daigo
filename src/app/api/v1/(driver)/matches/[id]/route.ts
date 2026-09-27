@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto"
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
@@ -31,14 +32,28 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
     })
 
     if (status === "ACCEPTED") {
-      await tx.rideRequest.update({
+      const rideRequest = await tx.rideRequest.update({
         where: { id: match.rideRequestId },
         data: { status: "MATCHED" },
       })
 
       await tx.route.update({
         where: { id: match.routeId },
-        data: { seatsAvailable: { decrement: 1 } },
+        data: { seatsAvailable: { decrement: 1 } }
+      })
+
+      const pickupOtp = randomInt(100000, 999999).toString()
+
+      await tx.trip.create({
+        data: {
+          matchId: match.id,
+          rideRequestId: match.rideRequestId,
+          routeId: match.routeId,
+          riderId: rideRequest.riderId,
+          driverId,
+          priceEstimate: match.priceEstimate,
+          pickupOtp,
+        },
       })
     }
 
