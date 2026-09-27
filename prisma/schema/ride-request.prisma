@@ -19,8 +19,9 @@ model RideRequest {
   status            RideRequestStatus @default(PENDING)
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
-  rider             User              @relation(fields: [riderId], references: [id])
   matches           Match[]
+  rider             User              @relation(fields: [riderId], references: [id])
+  trips             Trip[]
 
   @@map("ride_requests")
 }

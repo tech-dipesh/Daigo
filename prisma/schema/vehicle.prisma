@@ -11,8 +11,9 @@ model Vehicle {
   verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
-  owner              User               @relation(fields: [ownerId], references: [id])
   routes             Route[]
+  owner              User               @relation(fields: [ownerId], references: [id])
+
   @@map("vehicles")
 }
 

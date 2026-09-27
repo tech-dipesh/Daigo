@@ -1,14 +1,15 @@
 model Match {
-  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  rideRequestId     String      @map("ride_request_id") @db.Uuid
-  routeId           String      @map("route_id") @db.Uuid
-  detourDistanceKm  Float       @map("detour_distance_km")
-  priceEstimate     Int         @map("price_estimate")
-  status            MatchStatus @default(PENDING)
-  createdAt         DateTime    @default(now()) @map("created_at")
-  updatedAt         DateTime    @updatedAt @map("updated_at")
-  rideRequest       RideRequest @relation(fields: [rideRequestId], references: [id])
-  route             Route       @relation(fields: [routeId], references: [id])
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rideRequestId    String      @map("ride_request_id") @db.Uuid
+  routeId          String      @map("route_id") @db.Uuid
+  status           MatchStatus @default(PENDING)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  detourDistanceKm Float       @map("detour_distance_km")
+  priceEstimate    Int         @map("price_estimate")
+  rideRequest      RideRequest @relation(fields: [rideRequestId], references: [id])
+  route            Route       @relation(fields: [routeId], references: [id])
+  trip             Trip?
 
   @@unique([rideRequestId, routeId])
   @@map("matches")

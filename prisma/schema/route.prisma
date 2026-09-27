@@ -11,15 +11,16 @@ model Route {
   toLng          Float       @map("to_lng")
   daysOfWeek     Int[]       @map("days_of_week")
   departureDate  DateTime?   @map("departure_date")
-  departureTime  DateTime    @map("departure_time") @db.Time()
+  departureTime  DateTime    @map("departure_time") @db.Time(6)
   detourLimitKm  Float       @map("detour_limit_km")
   seatsAvailable Int         @map("seats_available")
   status         RouteStatus @default(ACTIVE)
   createdAt      DateTime    @default(now()) @map("created_at")
   updatedAt      DateTime    @updatedAt @map("updated_at")
+  matches        Match[]
   driver         User        @relation(fields: [driverId], references: [id])
   vehicle        Vehicle     @relation(fields: [vehicleId], references: [id])
-  matches        Match[]
+  trips          Trip[]
 
   @@map("routes")
 }

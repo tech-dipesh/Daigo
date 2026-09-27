@@ -5,18 +5,16 @@ model User {
   activeRole        UserRole           @default(RIDER) @map("active_role")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
+  driverDocuments   DriverDocument[]
   emergencyContacts EmergencyContact[]
   refreshTokens     RefreshToken[]
-  driverDocuments   DriverDocument[]
-  vehicles          Vehicle[]
-  routes            Route[]
   rideRequests      RideRequest[]
-  @@map("users")
-}
+  routes            Route[]
+  driverTrips       Trip[]             @relation("DriverTrips")
+  riderTrips        Trip[]             @relation("RiderTrips")
+  vehicles          Vehicle[]
 
-enum UserRole {
-  RIDER
-  DRIVER
+  @@map("users")
 }
 
 model RefreshToken {
@@ -29,4 +27,9 @@ model RefreshToken {
   user      User      @relation(fields: [userId], references: [id])
 
   @@map("refresh_tokens")
+}
+
+enum UserRole {
+  RIDER
+  DRIVER
 }
