@@ -17,5 +17,63 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
     throw new AppError("Ride request not found", 404)
   }
 
-   return successResponse("Successfully Create a Ride")
+  const tripDistanceKm = distanceKm(
+    rideRequest.fromLat,
+    rideRequest.fromLng,
+    rideRequest.toLat,
+    rideRequest.toLng,
+  )
+
+  const candidateRoutes = await db.route.findMany({
+    where: {
+      status: "ACTIVE",
+      seatsAvailable: { gte: rideRequest.groupSize },
+      ...(rideRequest.vehiclePreference
+        ? { vehicle: { type: rideRequest.vehiclePreference } }
+        : {}),
+    },
+    include: { vehicle: true, driver: { select: { id: true } } },
+  })
+
+  const candidates = candidateRoutes
+    .map((route) => {
+      const pickupDistanceKm = distanceKm(
+        rideRequest.fromLat,
+        rideRequest.fromLng,
+        route.fromLat,
+        route.fromLng,
+      )
+      const dropoffDistanceKm = distanceKm(
+        rideRequest.toLat,
+        rideRequest.toLng,
+        route.toLat,
+        route.toLng,
+      )
+
+      return {
+        route,
+        detourDistanceKm: pickupDistanceKm + dropoffDistanceKm,
+        withinLimit: pickupDistanceKm <= route.detourLimitKm && dropoffDistanceKm <= route.detourLimitKm,
+      }
+    })
+    .filter(({ withinLimit }) => withinLimit)
+    .sort((a, b) => a.detourDistanceKm - b.detourDistanceKm)
+
+  const created = await Promise.all(
+    candidates.map(({ route, detourDistanceKm }) =>
+      db.match.upsert({
+        where: { rideRequestId_routeId: { rideRequestId: rideRequest.id, routeId: route.id } },
+        create: {
+          rideRequestId: rideRequest.id,
+          routeId: route.id,
+          detourDistanceKm,
+          priceEstimate: estimatePrice(route.vehicle.type, tripDistanceKm),
+        },
+        update: {},
+        include: { route: { include: { vehicle: true } } },
+      }),
+    ),
+  )
+
+  return successResponse(created)
 })
