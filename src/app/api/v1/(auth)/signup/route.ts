@@ -5,6 +5,7 @@ import { issueTokenPair } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { setAuthCookies } from "@/lib/infra/cookies"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/request"
 
 const signupSchema = z.object({
   email: z.email(),
@@ -12,7 +13,7 @@ const signupSchema = z.object({
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const body = await request.json()
+  const body = await parseJsonBody(request)
   const { email, password } = signupSchema.parse(body)
 
   const existingUser = await db.user.findUnique({ where: { email } })

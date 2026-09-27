@@ -3,6 +3,7 @@ import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/request"
 
 const rideRequestSchema = z.object({
   fromLabel: z.string().min(1),
@@ -30,7 +31,7 @@ export const POST = withErrorHandling(async (request) => {
     throw new AppError("Switch to rider mode to post a request", 403)
   }
 
-  const body = await request.json()
+  const body = await parseJsonBody(request)
   const data = rideRequestSchema.parse(body)
 
   if (data.windowEnd <= data.windowStart) {

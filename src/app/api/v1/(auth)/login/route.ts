@@ -5,6 +5,7 @@ import { issueTokenPair } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { setAuthCookies } from "@/lib/infra/cookies"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/request"
 
 const loginSchema = z.object({
   email: z.email(),
@@ -12,7 +13,7 @@ const loginSchema = z.object({
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const body = await request.json()
+  const body = await parseJsonBody(request)
   const { email, password } = loginSchema.parse(body)
 
   const user = await db.user.findUnique({ where: { email } })

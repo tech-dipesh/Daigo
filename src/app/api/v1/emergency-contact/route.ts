@@ -3,6 +3,7 @@ import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
 import { successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/request"
 
 const emergencyContactSchema = z.object({
   name: z.string().min(3).max(15),
@@ -12,7 +13,7 @@ const emergencyContactSchema = z.object({
 
 export const POST = withErrorHandling(async (request) => {
   const userId = getUserId(request)
-  const body = await request.json()
+  const body = await parseJsonBody(request)
   const data = emergencyContactSchema.parse(body)
 
   const contact = await db.emergencyContact.create({ data: { ...data, userId } })

@@ -1,8 +1,9 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
-import { successResponse } from "@/lib/infra/response"
+import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/request"
 
 const vehicleSchema = z.object({
   type: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]),
@@ -16,7 +17,13 @@ const vehicleSchema = z.object({
 
 export const POST = withErrorHandling(async (request) => {
   const ownerId = getUserId(request)
-  const body = await request.json()
+  const owner = await db.user.findUnique({ where: { id: ownerId } })
+
+  if (owner?.activeRole !== "DRIVER") {
+    throw new AppError("Switch to driver mode to add a vehicle", 403)
+  }
+
+  const body = await parseJsonBody(request)
   const data = vehicleSchema.parse(body)
 
   const vehicle = await db.vehicle.create({ data: { ...data, ownerId } })

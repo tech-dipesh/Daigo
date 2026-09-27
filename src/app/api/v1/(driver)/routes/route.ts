@@ -3,6 +3,7 @@ import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/request"
 
 const routeSchema = z.object({
   vehicleId: z.string(),
@@ -28,7 +29,7 @@ export const POST = withErrorHandling(async (request) => {
     throw new AppError("Switch to driver mode to create a route", 403)
   }
 
-  const body = await request.json()
+  const body = await parseJsonBody(request)
   const data = routeSchema.parse(body)
 
   const vehicle = await db.vehicle.findFirst({
