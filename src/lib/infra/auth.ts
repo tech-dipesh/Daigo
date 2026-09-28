@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from "jose"
-import { hash } from "bcrypt"
+import { hash, compare } from "bcrypt"
 import type { NextRequest } from "next/server"
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
@@ -63,6 +63,38 @@ export async function issueTokenPair(userId: string, client: TransactionClient |
   })
 
   return { accessToken, refreshToken }
+}
+
+export async function rotateRefreshToken(refreshTokenCookie: string) {
+  const payload = await verifyRefreshToken(refreshTokenCookie)
+
+  if (!payload) {
+    return null
+  }
+
+  const storedTokens = await db.refreshToken.findMany({
+    where: { userId: payload.userId, revokedAt: null },
+  })
+
+  let matchedTokenId: string | null = null
+
+  for (const storedToken of storedTokens) {
+    if (await compare(refreshTokenCookie, storedToken.tokenHash)) {
+      matchedTokenId = storedToken.id
+      break
+    }
+  }
+
+  if (!matchedTokenId) {
+    return null
+  }
+
+  const tokens = await db.$transaction(async (tx) => {
+    await tx.refreshToken.update({ where: { id: matchedTokenId }, data: { revokedAt: new Date() } })
+    return issueTokenPair(payload.userId, tx)
+  })
+
+  return { ...tokens, userId: payload.userId }
 }
 
 export function getUserId(request: NextRequest): string {
