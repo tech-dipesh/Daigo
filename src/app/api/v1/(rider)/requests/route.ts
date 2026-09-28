@@ -38,6 +38,23 @@ export const POST = withErrorHandling(async (request) => {
     throw new AppError("The time window end must be after the start", 400)
   }
 
+  const duplicateRequest = await db.rideRequest.findFirst({
+    where: {
+      riderId,
+      status: "PENDING",
+      fromLat: data.fromLat,
+      fromLng: data.fromLng,
+      toLat: data.toLat,
+      toLng: data.toLng,
+      windowStart: { lt: data.windowEnd },
+      windowEnd: { gt: data.windowStart },
+    },
+  })
+
+  if (duplicateRequest) {
+    throw new AppError("You already have an active request for this trip", 409)
+  }
+
   const rideRequest = await db.rideRequest.create({ data: { ...data, riderId } })
 
   return successResponse(rideRequest, 201)
