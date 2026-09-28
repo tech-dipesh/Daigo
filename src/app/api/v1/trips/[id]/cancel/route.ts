@@ -5,6 +5,7 @@ import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
 import { getTripForUser } from "@/lib/infra/trip-access"
+import { cancellationPenalty, clampTrust } from "@/lib/infra/trust"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -26,6 +27,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const { reason } = cancelSchema.parse(body)
 
   const cancelledBy = trip.riderId === userId ? "RIDER" : "DRIVER"
+  const minutesSinceCommit = (Date.now() - trip.createdAt.getTime()) / 60000
 
   const updated = await db.$transaction(async (tx) => {
     const cancelledTrip = await tx.trip.update({
@@ -41,6 +43,14 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     await tx.rideRequest.update({
       where: { id: trip.rideRequestId },
       data: { status: "PENDING" },
+    })
+    const { trustScore } = await tx.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { trustScore: true },
+    })
+    await tx.user.update({
+      where: { id: userId },
+      data: { trustScore: clampTrust(trustScore - cancellationPenalty(cancelledBy, minutesSinceCommit)) },
     })
 
     return cancelledTrip
