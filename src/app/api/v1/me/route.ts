@@ -10,7 +10,7 @@ export const GET = withErrorHandling(async (request) => {
 
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, activeRole: true, createdAt: true },
+    select: { id: true, email: true, activeRole: true, trustScore: true, createdAt: true },
   })
 
   if (!user) {
