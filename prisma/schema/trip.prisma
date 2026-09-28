@@ -1,25 +1,27 @@
 model Trip {
-  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId       String      @unique @map("match_id") @db.Uuid
-  rideRequestId String      @map("ride_request_id") @db.Uuid
-  routeId       String      @map("route_id") @db.Uuid
-  riderId       String      @map("rider_id") @db.Uuid
-  driverId      String      @map("driver_id") @db.Uuid
-  priceEstimate Int         @map("price_estimate")
-  pickupOtp     String      @map("pickup_otp")
-  otpVerifiedAt DateTime?   @map("otp_verified_at")
-  status        TripStatus  @default(PENDING_PICKUP)
-  cancelledBy   TripParty?  @map("cancelled_by")
-  cancelReason  String?     @map("cancel_reason")
-  cancelledAt   DateTime?   @map("cancelled_at")
-  completedAt   DateTime?   @map("completed_at")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-  driver        User        @relation("DriverTrips", fields: [driverId], references: [id])
-  match         Match       @relation(fields: [matchId], references: [id])
-  rideRequest   RideRequest @relation(fields: [rideRequestId], references: [id])
-  rider         User        @relation("RiderTrips", fields: [riderId], references: [id])
-  route         Route       @relation(fields: [routeId], references: [id])
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId       String     @unique @map("match_id") @db.Uuid
+  rideRequestId String     @map("ride_request_id") @db.Uuid
+  routeId       String     @map("route_id") @db.Uuid
+  riderId       String     @map("rider_id") @db.Uuid
+  driverId      String     @map("driver_id") @db.Uuid
+  priceEstimate Int        @map("price_estimate")
+  pickupOtp     String     @map("pickup_otp")
+  otpVerifiedAt DateTime?  @map("otp_verified_at")
+  status        TripStatus @default(PENDING_PICKUP)
+  cancelledBy   TripParty? @map("cancelled_by")
+  cancelReason  String?    @map("cancel_reason")
+  cancelledAt   DateTime?  @map("cancelled_at")
+  completedAt   DateTime?  @map("completed_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  match       Match       @relation(fields: [matchId], references: [id])
+  rideRequest RideRequest @relation(fields: [rideRequestId], references: [id])
+  route       Route       @relation(fields: [routeId], references: [id])
+  rider       User        @relation("RiderTrips", fields: [riderId], references: [id])
+  driver      User        @relation("DriverTrips", fields: [driverId], references: [id])
+  ratings     Rating[]
 
   @@map("trips")
 }

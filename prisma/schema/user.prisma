@@ -3,18 +3,26 @@ model User {
   email             String             @unique
   passwordHash      String             @map("password_hash")
   activeRole        UserRole           @default(RIDER) @map("active_role")
+  trustScore        Int                @default(100) @map("trust_score")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
-  driverDocuments   DriverDocument[]
   emergencyContacts EmergencyContact[]
   refreshTokens     RefreshToken[]
-  rideRequests      RideRequest[]
-  routes            Route[]
-  driverTrips       Trip[]             @relation("DriverTrips")
-  riderTrips        Trip[]             @relation("RiderTrips")
   vehicles          Vehicle[]
+  driverDocuments   DriverDocument[]
+  routes            Route[]
+  rideRequests      RideRequest[]
+  riderTrips        Trip[]             @relation("RiderTrips")
+  driverTrips       Trip[]             @relation("DriverTrips")
+  ratingsGiven      Rating[]           @relation("RatingsGiven")
+  ratingsReceived   Rating[]           @relation("RatingsReceived")
 
   @@map("users")
+}
+
+enum UserRole {
+  RIDER
+  DRIVER
 }
 
 model RefreshToken {
@@ -27,9 +35,4 @@ model RefreshToken {
   user      User      @relation(fields: [userId], references: [id])
 
   @@map("refresh_tokens")
-}
-
-enum UserRole {
-  RIDER
-  DRIVER
 }
