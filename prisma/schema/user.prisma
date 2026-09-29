@@ -4,6 +4,7 @@ model User {
   passwordHash      String             @map("password_hash")
   activeRole        UserRole           @default(RIDER) @map("active_role")
   trustScore        Int                @default(100) @map("trust_score")
+  staffRole         StaffRole?         @map("staff_role")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
   emergencyContacts EmergencyContact[]
@@ -23,6 +24,11 @@ model User {
 enum UserRole {
   RIDER
   DRIVER
+}
+
+enum StaffRole {
+  MODERATOR
+  SUPER_ADMIN
 }
 
 model RefreshToken {

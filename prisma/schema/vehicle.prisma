@@ -9,10 +9,12 @@ model Vehicle {
   rcNumber           String             @map("rc_number")
   rcPhotoUrl         String             @map("rc_photo_url")
   verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  rejectionReason    String?            @map("rejection_reason")
+  reviewedAt         DateTime?          @map("reviewed_at")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
-  routes             Route[]
   owner              User               @relation(fields: [ownerId], references: [id])
+  routes             Route[]
 
   @@map("vehicles")
 }
