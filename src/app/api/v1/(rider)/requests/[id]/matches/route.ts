@@ -27,6 +27,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
   const candidateRoutes = await db.route.findMany({
     where: {
       status: "ACTIVE",
+      driverId: { not: riderId },
       seatsAvailable: { gte: rideRequest.groupSize },
       ...(rideRequest.vehiclePreference
         ? { vehicle: { type: rideRequest.vehiclePreference } }

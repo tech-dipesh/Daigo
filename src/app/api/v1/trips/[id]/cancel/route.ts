@@ -35,19 +35,23 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
       data: { status: "CANCELLED", cancelledBy, cancelReason: reason, cancelledAt: new Date() },
     })
 
-    await tx.route.update({
-      where: { id: trip.routeId },
-      data: { seatsAvailable: { increment: 1 } },
-    })
-
-    await tx.rideRequest.update({
+    const { groupSize } = await tx.rideRequest.update({
       where: { id: trip.rideRequestId },
       data: { status: "PENDING" },
     })
+
+    await tx.route.update({
+      where: { id: trip.routeId },
+      data: { seatsAvailable: { increment: groupSize } },
+    })
+
+    await tx.match.update({ where: { id: trip.matchId }, data: { status: "EXPIRED" } })
+
     const { trustScore } = await tx.user.findUniqueOrThrow({
       where: { id: userId },
       select: { trustScore: true },
     })
+
     await tx.user.update({
       where: { id: userId },
       data: { trustScore: clampTrust(trustScore - cancellationPenalty(cancelledBy, minutesSinceCommit)) },
