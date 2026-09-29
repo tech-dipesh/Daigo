@@ -22,6 +22,7 @@ model Trip {
   rider       User        @relation("RiderTrips", fields: [riderId], references: [id])
   driver      User        @relation("DriverTrips", fields: [driverId], references: [id])
   ratings     Rating[]
+  payment     Payment?
 
   @@map("trips")
 }

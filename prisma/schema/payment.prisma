@@ -1,0 +1,27 @@
+model Payment {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId        String        @unique @map("trip_id") @db.Uuid
+  amount        Int
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  gatewayRef    String?       @map("gateway_ref")
+  proofPhotoUrl String?       @map("proof_photo_url")
+  paidAt        DateTime?     @map("paid_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  trip Trip @relation(fields: [tripId], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  ONLINE
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
