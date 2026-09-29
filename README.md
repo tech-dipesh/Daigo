@@ -21,7 +21,11 @@
 - September 24: Core auth: User, EmergencyContact models; signup, login, refresh, forced-emergency-contact-form, /me routes
 - @5 Start Building the Driver vehicl registration with licesnisng and the admin review system.
 - Working on the Ride Request form a group request with invite by the mail with a vulnerable flag From a Matching a single driver orute overlap with a some limit from a stadia map and the postgres
-
+- IMplementing the Matching Algorithm for people to match to the either bidirectional way.
+- every trip you're on, as rider or driver
+- either party, any time before completion; releases the seat back to the route and resets the ride request to PENDING so it can be matched again. Records who cancelled and an optional reason
+- Initiate a Redis instance with a Upstash where also token is provided, with set only auth user can access it.
+- 
 
 ## Feature That I Will Build Earlier:
 ### Must Build:
@@ -31,3 +35,33 @@ Regular routes (auto-posting) plus advance requests, saved routes
 - Ride requests: group requests, invite-by-email, vulnerable flag with explainer
 - Matching: single-driver route overlap with detour limit and suggested meeting point (Postgres + Stadia Maps)
 - Real-time accept flow: WebSocket + Redis pub/sub, big driver alert, 75s countdown, manual/auto-accept, first-accept-wins
+
+
+## I'm Plan To Add This Feature:
+Race conditions.
+Payment integrity.
+Duplicate transactions.
+Idempotency.
+Webhook verification.
+Secondary: Concurrency Control, Idempotency, Webhook Integration, Payment Gateway Integration, RBAC, CI/CDOthers: Git, Linux, Postman,
+Features i can addd on my Projects:
+Idemptoenty Keys, while applying to the jobs.
+Create also a one routes of the popular-routes for showing most pouplar jobs.
+Implement a Redis For here.
+Caching Layers on the /popular-jobs 
+on the resume also hav to add a engineering problems ok
+Race conditions.
+Payment integrity.
+Duplicate transactions.
+Idempotency.
+Webhook verification.
+Secondary: Concurrency Control, Idempotency, Webhook Integration, Payment Gateway Integration, RBAC, CI/CDOthers: Git, Linux, Postman,
+Features i can addd on my Projects:
+Idemptoenty Keys, while applying to the jobs.
+Create also a one routes of the popular-routes for showing most pouplar jobs.
+Implement a Redis For here.
+Caching Layers on the /popular-jobs 
+Designed direct-to-storage file upload workflow using signed URLs to reduce backend resource consumption.
+Implement a token Refresh
+Accont Lock
+use a Redis Stream for when the expired rides or running rides event, message queue and notification worker
