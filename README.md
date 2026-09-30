@@ -5,6 +5,16 @@
 - With a mvp also include a that real life a map system
 - Where the Driver and the rider will connect and somethings unique features they cna make a multi driver for reach to the point, it's somethiing like blabla rather a Uber
 
+## Tech Stack As of Now:
+- Next.js
+- TypeScript
+- Zod
+- Prisma
+- Postgres
+- Redis
+- React.js
+- 
+
 ## Something Tha I must Carefully Care:
 - WE Make sure that the jsonwebtoken also must be the revokable for some user that we can suspsend based on that activity we can't just let those people to use it unless that time is expired we must have hte power to revoke that.
 - With Prisma must be go with a unified folder for all the generation, schema and migration.
