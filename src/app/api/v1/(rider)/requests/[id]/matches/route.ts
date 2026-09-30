@@ -2,6 +2,7 @@ import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { idFrom } from "@/lib/infra/route-params"
 import { distanceKm } from "@/lib/infra/geo"
 import { estimatePrice } from "@/lib/infra/pricing"
 
@@ -9,7 +10,7 @@ type RouteParams = { params: Promise<{ id: string }> }
 
 export const GET = withErrorHandling<RouteParams>(async (request, { params }) => {
   const riderId = getUserId(request)
-  const { id } = await params
+  const id = await idFrom(params)
 
   const rideRequest = await db.rideRequest.findFirst({ where: { id, riderId } })
 
@@ -36,8 +37,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
     include: { vehicle: true, driver: { select: { id: true } } },
   })
 
-  const candidates = candidateRoutes
-    .map((route) => {
+  const candidates = candidateRoutes.map((route) => {
       const pickupDistanceKm = distanceKm(
         rideRequest.fromLat,
         rideRequest.fromLng,

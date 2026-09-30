@@ -4,6 +4,7 @@ import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { idFrom } from "@/lib/infra/route-params"
 import { parseJsonBody } from "@/lib/infra/request"
 
 type RouteParams = { params: Promise<{ id: string }> }
@@ -14,7 +15,7 @@ const matchDecisionSchema = z.object({
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)
-  const { id } = await params
+  const id = await idFrom(params)
 
   const match = await db.match.findFirst({
     where: { id, route: { driverId } },

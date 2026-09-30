@@ -3,6 +3,7 @@ import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { idFrom } from "@/lib/infra/route-params"
 import { parseJsonBody } from "@/lib/infra/request"
 import { getTripForUser } from "@/lib/infra/trip-access"
 
@@ -14,7 +15,7 @@ const confirmSchema = z.object({
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const userId = getUserId(request)
-  const { id } = await params
+  const id = await idFrom(params)
 
   const trip = await getTripForUser(id, userId)
 
