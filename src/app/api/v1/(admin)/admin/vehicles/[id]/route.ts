@@ -19,7 +19,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   const id = await idFrom(params)
   const { status, reason } = reviewSchema.parse(await parseJsonBody(request))
 
-  const document = await db.driverDocument.update({
+  const vehicle = await db.vehicle.update({
     where: { id },
     data: {
       verificationStatus: status,
@@ -28,5 +28,5 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
     },
   })
 
-  return successResponse(document)
+  return successResponse(vehicle)
 })

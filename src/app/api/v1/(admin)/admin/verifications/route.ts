@@ -14,5 +14,20 @@ export const GET = withErrorHandling(async (request) => {
   const { status } = querySchema.parse({
     status: request.nextUrl.searchParams.get("status") ?? undefined,
   })
-  return successResponse("Vehicle Confirm")
+  const where = { verificationStatus: status }
+
+  const [vehicles, documents] = await Promise.all([
+    db.vehicle.findMany({
+      where,
+      include: { owner: { select: { id: true, email: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.driverDocument.findMany({
+      where,
+      include: { user: { select: { id: true, email: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+  ])
+
+  return successResponse({ vehicles, documents })
 })
