@@ -40,6 +40,18 @@ export const POST = withErrorHandling(async (request) => {
     throw new AppError("Vehicle not found", 404)
   }
 
+  if (vehicle.verificationStatus !== "APPROVED") {
+    throw new AppError("This vehicle hasn't been approved yet", 403)
+  }
+
+  const licence = await db.driverDocument.findFirst({
+    where: { userId: driverId, verificationStatus: "APPROVED" },
+  })
+
+  if (!licence) {
+    throw new AppError("Your licence hasn't been approved yet", 403)
+  }
+
   const route = await db.route.create({
     data: {
       ...data,
