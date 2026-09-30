@@ -31,3 +31,16 @@ function regularDepartsInWindow(route: ScheduleFields, windowStart: Date, window
 
   return false
 }
+
+function advanceDepartsInWindow(route: ScheduleFields, windowStart: Date, windowEnd: Date) {
+  if (!route.departureDate) return false
+
+  const departure = combineDateAndTime(route.departureDate, route.departureTime)
+  return departure >= windowStart && departure <= windowEnd
+}
+
+export function routeDepartsInWindow(route: ScheduleFields, windowStart: Date, windowEnd: Date) {
+  return route.routeType === "ADVANCE"
+    ? advanceDepartsInWindow(route, windowStart, windowEnd)
+    : regularDepartsInWindow(route, windowStart, windowEnd)
+}
