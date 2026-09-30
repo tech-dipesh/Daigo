@@ -5,6 +5,8 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { idFrom } from "@/lib/infra/route-params"
 import { distanceKm } from "@/lib/infra/geo"
 import { estimatePrice } from "@/lib/infra/pricing"
+import { routeDepartsInWindow } from "@/lib/infra/schedule"
+import { findGeoCandidates } from "@/lib/infra/postgis"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -25,39 +27,38 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
     rideRequest.toLng,
   )
 
-  const candidateRoutes = await db.route.findMany({
-    where: {
-      status: "ACTIVE",
-      driverId: { not: riderId },
-      seatsAvailable: { gte: rideRequest.groupSize },
-      ...(rideRequest.vehiclePreference
-        ? { vehicle: { type: rideRequest.vehiclePreference } }
-        : {}),
-    },
-    include: { vehicle: true, driver: { select: { id: true } } },
+  const geoCandidates = await findGeoCandidates({
+    riderId,
+    groupSize: rideRequest.groupSize,
+    fromLat: rideRequest.fromLat,
+    fromLng: rideRequest.fromLng,
+    toLat: rideRequest.toLat,
+    toLng: rideRequest.toLng,
   })
 
-  const candidates = candidateRoutes.map((route) => {
-      const pickupDistanceKm = distanceKm(
-        rideRequest.fromLat,
-        rideRequest.fromLng,
-        route.fromLat,
-        route.fromLng,
-      )
-      const dropoffDistanceKm = distanceKm(
-        rideRequest.toLat,
-        rideRequest.toLng,
-        route.toLat,
-        route.toLng,
-      )
+  if (!geoCandidates.length) {
+    return successResponse([])
+  }
 
+  const distanceByRouteId = new Map(geoCandidates.map((c) => [c.id, c]))
+
+  const routes = await db.route.findMany({
+    where: {
+      id: { in: geoCandidates.map((c) => c.id) },
+      ...(rideRequest.vehiclePreference ? { vehicle: { type: rideRequest.vehiclePreference } } : {}),
+    },
+    include: { vehicle: true },
+  })
+
+  const candidates = routes
+    .filter((route) => routeDepartsInWindow(route, rideRequest.windowStart, rideRequest.windowEnd))
+    .map((route) => {
+      const distances = distanceByRouteId.get(route.id)
       return {
         route,
-        detourDistanceKm: pickupDistanceKm + dropoffDistanceKm,
-        withinLimit: pickupDistanceKm <= route.detourLimitKm && dropoffDistanceKm <= route.detourLimitKm,
+        detourDistanceKm: (distances?.pickup_distance_km ?? 0) + (distances?.dropoff_distance_km ?? 0),
       }
     })
-    .filter(({ withinLimit }) => withinLimit)
     .sort((a, b) => a.detourDistanceKm - b.detourDistanceKm)
 
   const created = await Promise.all(
