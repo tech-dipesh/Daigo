@@ -1,4 +1,5 @@
 const ratingDeltas: Record<number, number> = { 5: 2, 4: 1, 3: 0, 2: -2, 1: -4 }
+export const relayLatePenalty = 2
 
 export const ratingDelta = (score: number) => ratingDeltas[score] ?? 0
 

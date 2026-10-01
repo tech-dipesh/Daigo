@@ -40,7 +40,5 @@ function advanceDepartsInWindow(route: ScheduleFields, windowStart: Date, window
 }
 
 export function routeDepartsInWindow(route: ScheduleFields, windowStart: Date, windowEnd: Date) {
-  return route.routeType === "ADVANCE"
-    ? advanceDepartsInWindow(route, windowStart, windowEnd)
-    : regularDepartsInWindow(route, windowStart, windowEnd)
+  return route.routeType === "ADVANCE" ? advanceDepartsInWindow(route, windowStart, windowEnd) : regularDepartsInWindow(route, windowStart, windowEnd)
 }
