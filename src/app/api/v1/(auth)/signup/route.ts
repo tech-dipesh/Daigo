@@ -19,7 +19,7 @@ export const POST = withErrorHandling(async (request) => {
   const existingUser = await db.user.findUnique({ where: { email } })
 
   if (existingUser) {
-    throw new AppError("An account with this email already exists", 409)
+    throw new AppError("An account with The same email already exists", 409)
   }
 
   const passwordHash = await hash(password, 12)

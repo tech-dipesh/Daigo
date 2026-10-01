@@ -41,7 +41,7 @@ export const POST = withErrorHandling(async (request) => {
   }
 
   if (vehicle.verificationStatus !== "APPROVED") {
-    throw new AppError("This vehicle hasn't been approved yet", 403)
+    throw new AppError("The vehicle hasn't been approved yet", 403)
   }
 
   const licence = await db.driverDocument.findFirst({

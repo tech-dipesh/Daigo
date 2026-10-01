@@ -14,11 +14,11 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const trip = await getTripForUser(id, driverId)
 
   if (trip.driverId !== driverId) {
-    throw new AppError("Only the driver can complete this trip", 403)
+    throw new AppError("Only the driver can complete The trip", 403)
   }
 
   if (trip.status !== "IN_PROGRESS") {
-    throw new AppError("This trip is not in progress", 409)
+    throw new AppError("The trip is not in progress", 409)
   }
 
   const updated = await db.trip.update({

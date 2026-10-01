@@ -23,7 +23,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   })
 
   if (!match) throw new AppError("Match not found", 404)
-  if (match.status !== "PENDING") throw new AppError("This match has already been decided", 409)
+  if (match.status !== "PENDING") throw new AppError("The match has already been decided", 409)
 
   const body = await parseJsonBody(request)
   const { status } = matchDecisionSchema.parse(body)
@@ -37,14 +37,14 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
         data: { status: "MATCHED" },
       })
 
-      if (!claimed.count) throw new AppError("This request is already matched", 409)
+      if (!claimed.count) throw new AppError("The request is already matched", 409)
 
       const seated = await tx.route.updateMany({
         where: { id: match.routeId, status: "ACTIVE", seatsAvailable: { gte: groupSize } },
         data: { seatsAvailable: { decrement: groupSize } },
       })
 
-      if (!seated.count) throw new AppError("This route is full or no longer active", 409)
+      if (!seated.count) throw new AppError("The route is full or no longer active", 409)
 
       await tx.trip.create({
         data: {

@@ -23,9 +23,9 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
 
   const payment = await db.payment.findUnique({ where: { tripId: trip.id } })
 
-  if (!payment) throw new AppError("No payment has been started for this trip", 404)
+  if (!payment) throw new AppError("No payment has been started for The trip", 404)
   if (payment.method !== "CASH") throw new AppError("Only cash payments need confirmation", 409)
-  if (payment.status !== "PENDING") throw new AppError("This payment is already settled", 409)
+  if (payment.status !== "PENDING") throw new AppError("The payment is already settled", 409)
 
   const body = await parseJsonBody(request)
   const { proofPhotoUrl } = confirmSchema.parse(body)

@@ -24,7 +24,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   }
 
   if (trip.status !== "PENDING_PICKUP") {
-    throw new AppError("This trip is not waiting for pickup", 409)
+    throw new AppError("The trip is not waiting for pickup", 409)
   }
 
   const body = await parseJsonBody(request)

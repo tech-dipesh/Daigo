@@ -31,7 +31,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   })
 
   if (alreadyRated) {
-    throw new AppError("You have already rated this trip", 409)
+    throw new AppError("You have already rated The trip", 409)
   }
 
   const body = await parseJsonBody(request)
