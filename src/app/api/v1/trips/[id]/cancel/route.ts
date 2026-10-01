@@ -21,7 +21,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const trip = await getTripForUser(id, userId)
 
   if (trip.status === "COMPLETED" || trip.status === "CANCELLED") {
-    throw new AppError("This trip can no longer be cancelled", 409)
+    throw new AppError("The trip can no longer be cancelled", 409)
   }
 
   const body = await parseJsonBody(request)
@@ -46,7 +46,9 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
       data: { seatsAvailable: { increment: groupSize } },
     })
 
-    await tx.match.update({ where: { id: trip.matchId }, data: { status: "EXPIRED" } })
+    if (trip.matchId) {
+      await tx.match.update({ where: { id: trip.matchId }, data: { status: "EXPIRED" } })
+    }
 
     const { trustScore } = await tx.user.findUniqueOrThrow({
       where: { id: userId },

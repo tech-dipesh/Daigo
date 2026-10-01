@@ -7,6 +7,7 @@ import { distanceKm } from "@/lib/infra/geo"
 import { estimatePrice } from "@/lib/infra/pricing"
 import { routeDepartsInWindow } from "@/lib/infra/schedule"
 import { findGeoCandidates } from "@/lib/infra/postgis"
+import { findRelayCandidates } from "@/lib/infra/relay-matching"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -36,21 +37,19 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
     toLng: rideRequest.toLng,
   })
 
-  if (!geoCandidates.length) {
-    return successResponse([])
-  }
-
   const distanceByRouteId = new Map(geoCandidates.map((c) => [c.id, c]))
 
-  const routes = await db.route.findMany({
-    where: {
-      id: { in: geoCandidates.map((c) => c.id) },
-      ...(rideRequest.vehiclePreference ? { vehicle: { type: rideRequest.vehiclePreference } } : {}),
-    },
-    include: { vehicle: true },
-  })
+  const directRoutes = geoCandidates.length
+    ? await db.route.findMany({
+        where: {
+          id: { in: geoCandidates.map((c) => c.id) },
+          ...(rideRequest.vehiclePreference ? { vehicle: { type: rideRequest.vehiclePreference } } : {}),
+        },
+        include: { vehicle: true },
+      })
+    : []
 
-  const candidates = routes
+  const directCandidates = directRoutes
     .filter((route) => routeDepartsInWindow(route, rideRequest.windowStart, rideRequest.windowEnd))
     .map((route) => {
       const distances = distanceByRouteId.get(route.id)
@@ -61,21 +60,54 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
     })
     .sort((a, b) => a.detourDistanceKm - b.detourDistanceKm)
 
-  const created = await Promise.all(
-    candidates.map(({ route, detourDistanceKm }) =>
-      db.match.upsert({
-        where: { rideRequestId_routeId: { rideRequestId: rideRequest.id, routeId: route.id } },
+  if (directCandidates.length) {
+    const matches = await Promise.all(
+      directCandidates.map(({ route, detourDistanceKm }) =>
+        db.match.upsert({
+          where: { rideRequestId_routeId: { rideRequestId: rideRequest.id, routeId: route.id } },
+          create: {
+            rideRequestId: rideRequest.id,
+            routeId: route.id,
+            detourDistanceKm,
+            priceEstimate: estimatePrice(route.vehicle.type, tripDistanceKm),
+          },
+          update: {},
+          include: { route: { include: { vehicle: true } } },
+        }),
+      ),
+    )
+
+    return successResponse({ direct: matches, relay: [] })
+  }
+  // find all relay candiate if not find
+  const relayPairs = await findRelayCandidates(rideRequest)
+
+  const relayMatches = await Promise.all(
+    relayPairs.map(({ firstRoute, secondRoute, transferLat, transferLng }) =>
+      db.relayMatch.upsert({
+        where: {
+          rideRequestId_firstRouteId_secondRouteId: {
+            rideRequestId: rideRequest.id,
+            firstRouteId: firstRoute.id,
+            secondRouteId: secondRoute.id,
+          },
+        },
         create: {
           rideRequestId: rideRequest.id,
-          routeId: route.id,
-          detourDistanceKm,
-          priceEstimate: estimatePrice(route.vehicle.type, tripDistanceKm),
+          firstRouteId: firstRoute.id,
+          secondRouteId: secondRoute.id,
+          transferLat,
+          transferLng,
+          priceEstimate: estimatePrice(firstRoute.vehicle.type, tripDistanceKm),
         },
         update: {},
-        include: { route: { include: { vehicle: true } } },
+        include: {
+          firstRoute: { include: { vehicle: true } },
+          secondRoute: { include: { vehicle: true } },
+        },
       }),
     ),
   )
 
-  return successResponse(created)
+  return successResponse({ direct: [], relay: relayMatches })
 })

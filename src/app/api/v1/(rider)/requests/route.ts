@@ -52,7 +52,7 @@ export const POST = withErrorHandling(async (request) => {
   })
 
   if (duplicateRequest) {
-    throw new AppError("You already have an active request for this trip", 409)
+    throw new AppError("You already have an active request for The trip", 409)
   }
 
   const rideRequest = await db.rideRequest.create({ data: { ...data, riderId } })
