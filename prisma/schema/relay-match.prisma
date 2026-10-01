@@ -1,9 +1,34 @@
 model RelayMatch {
   id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   rideRequestId   String           @map("ride_request_id") @db.Uuid
+  firstRouteId    String           @map("first_route_id") @db.Uuid
+  secondRouteId   String           @map("second_route_id") @db.Uuid
+  transferLat     Float            @map("transfer_lat")
+  transferLng     Float            @map("transfer_lng")
+  priceEstimate   Int              @map("price_estimate")
+  firstLegStatus  RelayLegStatus   @default(PENDING) @map("first_leg_status")
+  secondLegStatus RelayLegStatus   @default(PENDING) @map("second_leg_status")
+  status          RelayMatchStatus @default(PENDING)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
   rideRequest RideRequest @relation(fields: [rideRequestId], references: [id])
+  firstRoute  Route       @relation("FirstLegRoutes", fields: [firstRouteId], references: [id])
+  secondRoute Route       @relation("SecondLegRoutes", fields: [secondRouteId], references: [id])
   trips       Trip[]
 
-  @@unique([rideRequestId])
+  @@unique([rideRequestId, firstRouteId, secondRouteId])
   @@map("relay_matches")
+}
+
+enum RelayLegStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum RelayMatchStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
 }
