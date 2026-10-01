@@ -1,0 +1,9 @@
+model RelayMatch {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rideRequestId   String           @map("ride_request_id") @db.Uuid
+  rideRequest RideRequest @relation(fields: [rideRequestId], references: [id])
+  trips       Trip[]
+
+  @@unique([rideRequestId])
+  @@map("relay_matches")
+}

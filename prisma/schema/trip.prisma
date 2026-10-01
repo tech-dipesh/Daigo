@@ -1,6 +1,8 @@
 model Trip {
   id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId       String     @unique @map("match_id") @db.Uuid
+  matchId       String?    @unique @map("match_id") @db.Uuid
+  relayMatchId  String?    @map("relay_match_id") @db.Uuid
+  relayLeg      RelayLeg?  @map("relay_leg")
   rideRequestId String     @map("ride_request_id") @db.Uuid
   routeId       String     @map("route_id") @db.Uuid
   riderId       String     @map("rider_id") @db.Uuid
@@ -16,7 +18,8 @@ model Trip {
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
-  match       Match       @relation(fields: [matchId], references: [id])
+  match       Match?      @relation(fields: [matchId], references: [id])
+  relayMatch  RelayMatch? @relation(fields: [relayMatchId], references: [id])
   rideRequest RideRequest @relation(fields: [rideRequestId], references: [id])
   route       Route       @relation(fields: [routeId], references: [id])
   rider       User        @relation("RiderTrips", fields: [riderId], references: [id])
@@ -37,4 +40,9 @@ enum TripStatus {
 enum TripParty {
   RIDER
   DRIVER
+}
+
+enum RelayLeg {
+  FIRST
+  SECOND
 }

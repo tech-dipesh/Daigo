@@ -22,6 +22,7 @@ model RideRequest {
   matches           Match[]
   rider             User              @relation(fields: [riderId], references: [id])
   trips             Trip[]
+  relayMatches      RelayMatch[]
 
   @@map("ride_requests")
 }
