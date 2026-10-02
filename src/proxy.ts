@@ -1,9 +1,16 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import { verifyAccessToken, rotateRefreshToken } from "@/lib/infra/auth"
 import { setAuthCookies } from "@/lib/infra/cookies"
 import { rateLimit } from "@/lib/infra/rate-limit"
 
-const publicPaths = ["/api/v1/signup", "/api/v1/login", "/api/v1/refresh"]
+const publicPaths = [
+  "/api/v1/signup",
+  "/api/v1/login",
+  "/api/v1/refresh",
+  "/api/v1/password-reset/request",
+  "/api/v1/password-reset/confirm",
+]
 
 function unauthenticated() {
   return NextResponse.json(
@@ -35,7 +42,7 @@ export async function proxy(request: NextRequest) {
     requestHeaders.set("x-user-id", accessPayload.userId)
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
-
+  // when acc tok is missing we make a sildent refresh
   const refreshTokenCookie = request.cookies.get("refresh_token")?.value
 
   if (!refreshTokenCookie) {

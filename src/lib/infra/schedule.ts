@@ -6,10 +6,13 @@ type ScheduleFields = {
 }
 
 const oneDayMs = 24 * 60 * 60 * 1000
-
-function combineDateAndTime(date: Date, time: Date) {
+/*
+ dept only have teh time portio
+ we make that timing sure that which data we're checking
+ for the regular driver we've the almost fixed schedule timing
+*/
+export function combineDateAndTime(date: Date, time: Date) {
   const combined = new Date(date)
-  // fix the timing of the hour minute
   combined.setUTCHours(time.getUTCHours(), time.getUTCMinutes(), 0, 0)
   return combined
 }

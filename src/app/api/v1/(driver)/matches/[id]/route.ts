@@ -6,6 +6,7 @@ import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { idFrom } from "@/lib/infra/route-params"
 import { parseJsonBody } from "@/lib/infra/request"
+import { sendEmailBestEffort } from "@/lib/infra/email"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -19,34 +20,34 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
 
   const match = await db.match.findFirst({
     where: { id, route: { driverId } },
-    include: { rideRequest: true },
+    include: { rideRequest: { include: { rider: true } } },
   })
 
   if (!match) throw new AppError("Match not found", 404)
-  if (match.status !== "PENDING") throw new AppError("The match has already been decided", 409)
+  if (match.status !== "PENDING") throw new AppError("This match has already been decided", 409)
 
   const body = await parseJsonBody(request)
   const { status } = matchDecisionSchema.parse(body)
-  const { riderId, groupSize } = match.rideRequest
+  const { riderId, groupSize, rider } = match.rideRequest
 
-  const updated = await db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     if (status === "ACCEPTED") {
-      // atomic operation no two driver won same request ad
+      // for atomic request can't win same request.
       const claimed = await tx.rideRequest.updateMany({
         where: { id: match.rideRequestId, status: "PENDING" },
         data: { status: "MATCHED" },
       })
 
-      if (!claimed.count) throw new AppError("The request is already matched", 409)
+      if (!claimed.count) throw new AppError("This request is already matched", 409)
 
       const seated = await tx.route.updateMany({
         where: { id: match.routeId, status: "ACTIVE", seatsAvailable: { gte: groupSize } },
         data: { seatsAvailable: { decrement: groupSize } },
       })
 
-      if (!seated.count) throw new AppError("The route is full or no longer active", 409)
+      if (!seated.count) throw new AppError("This route is full or no longer active", 409)
 
-      await tx.trip.create({
+      const trip = await tx.trip.create({
         data: {
           matchId: match.id,
           rideRequestId: match.rideRequestId,
@@ -57,10 +58,22 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
           pickupOtp: randomInt(100000, 999999).toString(),
         },
       })
+
+      const updatedMatch = await tx.match.update({ where: { id: match.id }, data: { status } })
+      return { updatedMatch, trip }
     }
 
-    return tx.match.update({ where: { id: match.id }, data: { status } })
+    const updatedMatch = await tx.match.update({ where: { id: match.id }, data: { status } })
+    return { updatedMatch, trip: null }
   })
 
-  return successResponse(updated)
+  if (result.trip) {
+    await sendEmailBestEffort({
+      to: rider.email,
+      subject: "Your DaiGo pickup code",
+      text: `Your driver has accepted your request. Share this code at pickup: ${result.trip.pickupOtp}`,
+    })
+  }
+
+  return successResponse(result.updatedMatch)
 })
