@@ -22,5 +22,46 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   const { status } = decisionSchema.parse(await parseJsonBody(request))
   const leg = relayMatch.firstRoute.driverId === driverId ? "first" : "second"
   
-  return successResponse(`The Leg is: ${leg} with active Status`)
+  const updated = await db.$transaction(async (tx) => {
+    const legField = leg === "first" ? "firstLegStatus" : "secondLegStatus"
+    const relay = await tx.relayMatch.update({
+      where: { id: relayMatch.id },
+      data: { [legField]: status },
+    })
+    if (status === "REJECTED") {
+      return tx.relayMatch.update({ where: { id: relay.id }, data: { status: "REJECTED" } })
+    }
+    const bothAccepted = relay.firstLegStatus === "ACCEPTED" && relay.secondLegStatus === "ACCEPTED"
+    if (!bothAccepted) return relay
+    const { groupSize, riderId } = relayMatch.rideRequest
+    const claimed = await tx.rideRequest.updateMany({
+      where: { id: relayMatch.rideRequestId, status: "PENDING" },
+      data: { status: "MATCHED" },
+    })
+    if (!claimed.count) throw new AppError("The request is already matched", 409)
+    for (const [routeId, routeDriverId] of [
+      [relayMatch.firstRouteId, relayMatch.firstRoute.driverId],
+      [relayMatch.secondRouteId, relayMatch.secondRoute.driverId],
+    ] as const) {
+      const seated = await tx.route.updateMany({
+        where: { id: routeId, status: "ACTIVE", seatsAvailable: { gte: groupSize } },
+        data: { seatsAvailable: { decrement: groupSize } },
+      })
+      if (!seated.count) throw new AppError("A leg of The relay is no longer available", 409)
+      await tx.trip.create({
+        data: {
+          relayMatchId: relay.id,
+          relayLeg: routeId === relayMatch.firstRouteId ? "FIRST" : "SECOND",
+          rideRequestId: relayMatch.rideRequestId,
+          routeId,
+          riderId,
+          driverId: routeDriverId,
+          priceEstimate: relay.priceEstimate,
+          pickupOtp: randomInt(100000, 999999).toString(),
+        },
+      })
+    }
+    return tx.relayMatch.update({ where: { id: relay.id }, data: { status: "CONFIRMED" } })
+  })
+  return successResponse(updated)
 })
