@@ -9,6 +9,7 @@ model User {
   updatedAt         DateTime           @updatedAt @map("updated_at")
   emergencyContacts EmergencyContact[]
   refreshTokens     RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
   vehicles          Vehicle[]
   driverDocuments   DriverDocument[]
   routes            Route[]
