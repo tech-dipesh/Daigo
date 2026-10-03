@@ -11,6 +11,8 @@ model User {
   emergencyContacts EmergencyContact[]
   refreshTokens     RefreshToken[]
   verificationTokens VerificationToken[]
+  permanentRequestsAsRider      PermanentRideRequest[] @relation("PermanentRequestsAsRider")
+  permanentRequestsAsPreferred  PermanentRideRequest[] @relation("PermanentRequestsPreferredDriver")
   vehicles          Vehicle[]
   driverDocuments   DriverDocument[]
   routes            Route[]
@@ -40,7 +42,7 @@ model RefreshToken {
   expiresAt DateTime  @map("expires_at")
   revokedAt DateTime? @map("revoked_at")
   createdAt DateTime  @default(now()) @map("created_at")
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
 }

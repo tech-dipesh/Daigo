@@ -1,0 +1,25 @@
+model PermanentRideRequest {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  riderId           String       @map("rider_id") @db.Uuid
+  fromLabel         String       @map("from_label")
+  fromLat           Float        @map("from_lat")
+  fromLng           Float        @map("from_lng")
+  toLabel           String       @map("to_label")
+  toLat             Float        @map("to_lat")
+  toLng             Float        @map("to_lng")
+  daysOfWeek        Int[]        @map("days_of_week")
+  windowStartTime   DateTime     @map("window_start_time") @db.Time()
+  windowEndTime     DateTime     @map("window_end_time") @db.Time()
+  groupSize         Int          @default(1) @map("group_size")
+  vehiclePreference VehicleType? @map("vehicle_preference")
+  preferredDriverId String?      @map("preferred_driver_id") @db.Uuid
+  isActive          Boolean      @default(true) @map("is_active")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  rider             User          @relation("PermanentRequestsAsRider", fields: [riderId], references: [id])
+  preferredDriver   User?         @relation("PermanentRequestsPreferredDriver", fields: [preferredDriverId], references: [id])
+  generatedRequests RideRequest[]
+
+  @@map("permanent_ride_requests")
+}
