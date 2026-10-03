@@ -3,13 +3,14 @@ model User {
   email             String             @unique
   passwordHash      String             @map("password_hash")
   activeRole        UserRole           @default(RIDER) @map("active_role")
+  emailVerifiedAt   DateTime?          @map("email_verified_at")
   trustScore        Int                @default(100) @map("trust_score")
   staffRole         StaffRole?         @map("staff_role")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
   emergencyContacts EmergencyContact[]
   refreshTokens     RefreshToken[]
-  passwordResetTokens PasswordResetToken[]
+  verificationTokens VerificationToken[]
   vehicles          Vehicle[]
   driverDocuments   DriverDocument[]
   routes            Route[]
