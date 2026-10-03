@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
+import { requireVerifiedEmail } from "@/lib/infra/require-verified"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
@@ -25,6 +26,7 @@ const rideRequestSchema = z.object({
 
 export const POST = withErrorHandling(async (request) => {
   const riderId = getUserId(request)
+  await requireVerifiedEmail(riderId)
   const user = await db.user.findUnique({ where: { id: riderId } })
 
   if (user?.activeRole !== "RIDER") {
@@ -52,7 +54,7 @@ export const POST = withErrorHandling(async (request) => {
   })
 
   if (duplicateRequest) {
-    throw new AppError("You already have an active request for The trip", 409)
+    throw new AppError("You already have an active request for this trip", 409)
   }
 
   const rideRequest = await db.rideRequest.create({ data: { ...data, riderId } })
