@@ -8,26 +8,20 @@ import { estimatePrice } from "@/lib/infra/pricing"
 import { routeDepartsInWindow } from "@/lib/infra/schedule"
 import { findGeoCandidates } from "@/lib/infra/postgis"
 import { findRelayCandidates } from "@/lib/infra/relay-matching"
-
 type RouteParams = { params: Promise<{ id: string }> }
-
 export const GET = withErrorHandling<RouteParams>(async (request, { params }) => {
   const riderId = getUserId(request)
   const id = await idFrom(params)
-
   const rideRequest = await db.rideRequest.findFirst({ where: { id, riderId } })
-
   if (!rideRequest) {
     throw new AppError("Ride request not found", 404)
   }
-
   const tripDistanceKm = distanceKm(
     rideRequest.fromLat,
     rideRequest.fromLng,
     rideRequest.toLat,
     rideRequest.toLng,
   )
-
   const geoCandidates = await findGeoCandidates({
     riderId,
     groupSize: rideRequest.groupSize,
@@ -36,9 +30,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
     toLat: rideRequest.toLat,
     toLng: rideRequest.toLng,
   })
-
   const distanceByRouteId = new Map(geoCandidates.map((c) => [c.id, c]))
-
   const directRoutes = geoCandidates.length
     ? await db.route.findMany({
         where: {
@@ -48,18 +40,15 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
         include: { vehicle: true },
       })
     : []
-
-  const directCandidates = directRoutes
-    .filter((route) => routeDepartsInWindow(route, rideRequest.windowStart, rideRequest.windowEnd))
-    .map((route) => {
-      const distances = distanceByRouteId.get(route.id)
-      return {
-        route,
-        detourDistanceKm: (distances?.pickup_distance_km ?? 0) + (distances?.dropoff_distance_km ?? 0),
-      }
-    })
-    .sort((a, b) => a.detourDistanceKm - b.detourDistanceKm)
-
+  const routesInWindow = directRoutes.filter((route) =>
+    routeDepartsInWindow(route, rideRequest.windowStart, rideRequest.windowEnd),
+  )
+  const withDetourDistance = routesInWindow.map((route) => {
+    const distances = distanceByRouteId.get(route.id)
+    const detourDistanceKm = (distances?.pickup_distance_km ?? 0) + (distances?.dropoff_distance_km ?? 0)
+    return { route, detourDistanceKm }
+  })
+  const directCandidates = withDetourDistance.sort((a, b) => a.detourDistanceKm - b.detourDistanceKm)
   if (directCandidates.length) {
     const matches = await Promise.all(
       directCandidates.map(({ route, detourDistanceKm }) =>
@@ -76,12 +65,10 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
         }),
       ),
     )
-
     return successResponse({ direct: matches, relay: [] })
   }
   // find all relay candiate if not find
   const relayPairs = await findRelayCandidates(rideRequest)
-
   const relayMatches = await Promise.all(
     relayPairs.map(({ firstRoute, secondRoute, transferLat, transferLng }) =>
       db.relayMatch.upsert({
@@ -108,6 +95,5 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
       }),
     ),
   )
-
   return successResponse({ direct: [], relay: relayMatches })
 })

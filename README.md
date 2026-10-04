@@ -35,7 +35,10 @@
 - every trip you're on, as rider or driver
 - either party, any time before completion; releases the seat back to the route and resets the ride request to PENDING so it can be matched again. Records who cancelled and an optional reason
 - Initiate a Redis instance with a Upstash where also token is provided, with set only auth user can access it.
-- 
+- Build a Full Auth System to the login/signup/email-verify/reset-password
+- With on the our ride i also have completed the permanent ride request which can be also deleted by the rider.
+- we've already done a geo tag that have already done with a postgis extension also have implemented i think pretty good.
+- postgis needs a external extension setup also i'm using a raw query on that postgis due to not supported prisma as of now. 
 
 ## Feature That I Will Build Earlier:
 ### Must Build:
@@ -75,3 +78,7 @@ Designed direct-to-storage file upload workflow using signed URLs to reduce back
 Implement a token Refresh
 Accont Lock
 use a Redis Stream for when the expired rides or running rides event, message queue and notification worker
+
+## Rules That i Always Reminder:
+- Always always must add if're working on the some external extension on the prisma/postgres always define first the extension i'lll help us to avoid a template default conflict.
+- Always handle our property to the optional property that is alsoo i keep focus on.
