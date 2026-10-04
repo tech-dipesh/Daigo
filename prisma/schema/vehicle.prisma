@@ -13,7 +13,7 @@ model Vehicle {
   reviewedAt         DateTime?          @map("reviewed_at")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
-  owner              User               @relation(fields: [ownerId], references: [id])
+  owner              User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   routes             Route[]
 
   @@map("vehicles")
