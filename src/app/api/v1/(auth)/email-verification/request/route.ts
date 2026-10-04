@@ -16,12 +16,11 @@ export const POST = withErrorHandling(async (request) => {
   }
 
   const token = await issueVerificationToken(userId, "EMAIL_VERIFICATION", tokenLifetimeMs)
-
   await sendEmailBestEffort({
     to: user.email,
     subject: "Verify your DaiGo email",
     text: `Use this code to verify your email: ${token}\n\nThis code expires in 24 hours.`,
   })
 
-  return successResponse({ message: "Verification code sent." })
+  return successResponse({ message: "Verification Code Have Been Sent to your Mail." })
 })
