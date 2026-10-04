@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
+import { requireVerifiedEmail } from "@/lib/infra/require-verified"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
@@ -23,6 +24,7 @@ const routeSchema = z.object({
 
 export const POST = withErrorHandling(async (request) => {
   const driverId = getUserId(request)
+  await requireVerifiedEmail(driverId)
   const user = await db.user.findUnique({ where: { id: driverId } })
 
   if (user?.activeRole !== "DRIVER") {
@@ -41,7 +43,7 @@ export const POST = withErrorHandling(async (request) => {
   }
 
   if (vehicle.verificationStatus !== "APPROVED") {
-    throw new AppError("The vehicle hasn't been approved yet", 403)
+    throw new AppError("This vehicle hasn't been approved yet", 403)
   }
 
   const licence = await db.driverDocument.findFirst({

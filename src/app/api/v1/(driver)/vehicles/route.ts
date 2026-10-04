@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/db"
 import { getUserId } from "@/lib/infra/auth"
+import { requireVerifiedEmail } from "@/lib/infra/require-verified"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
@@ -17,6 +18,7 @@ const vehicleSchema = z.object({
 
 export const POST = withErrorHandling(async (request) => {
   const ownerId = getUserId(request)
+  await requireVerifiedEmail(ownerId)
   const owner = await db.user.findUnique({ where: { id: ownerId } })
 
   if (owner?.activeRole !== "DRIVER") {
