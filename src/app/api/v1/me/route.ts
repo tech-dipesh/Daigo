@@ -4,10 +4,11 @@ import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
+import { requireVerifiedEmail } from "@/lib/infra/require-verified"
 
 export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)
-
+  await requireVerifiedEmail(userId)
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { id: true, email: true, activeRole: true, trustScore: true, createdAt: true },

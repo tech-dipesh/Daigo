@@ -12,6 +12,7 @@
     "validate": "prisma validate",
     "pull": "prisma db pull",
     "push": "prisma db push",
+    "format": "prisma format",
     "reset": "prisma migrate reset",
     "route": "pnx next-list",
     "type": "tsc --noEmit"
