@@ -10,6 +10,7 @@ const publicPaths = [
   "/api/v1/refresh",
   "/api/v1/password-reset/request",
   "/api/v1/password-reset/confirm",
+  "/api/v1/email-verification/confirm",
 ]
 
 function unauthenticated() {
@@ -30,7 +31,8 @@ export async function proxy(request: NextRequest) {
     )
   }
 
-  if (publicPaths.includes(request.nextUrl.pathname)) {
+  const isPublic = publicPaths.includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/api/v1/trips/shared/")
+  if (isPublic) {
     return NextResponse.next()
   }
 

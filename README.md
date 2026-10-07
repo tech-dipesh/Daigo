@@ -40,7 +40,28 @@
 - we've already done a geo tag that have already done with a postgis extension also have implemented i think pretty good.
 - postgis needs a external extension setup also i'm using a raw query on that postgis due to not supported prisma as of now. 
 
+## Feature That I Build In Flow:
+- Starting with the normal auth setup where account setup, onboarding value, with the multi roles auth from a super admin to the admin to the moderator to the rider to the driver, with also verification method there where the vehicle and the license verification must be there with also the admin shell is there.
+- Now the core features that i build is the new routes created by a rider with request goes to a relevent driver where the Postgres Prisma steup orm is done with also where the real time accepting system is initiate
+- The Countdown which i've not yet build but i'm looking to build of 75 second timer with a driver alert is already sent. 
+- The Dynamic Pricing Feature, where the otp goes to the rider with a complete trip lifecycle done from create to start routes to drop point but reveiw not done.
+- The review where i again starting a prisma with can customer give a review rating
+- The chat payment integration is not fully completed on the working stage with razorpay setup
+- The safety and emergecy is build with send a laert with also a multi hop realy solving it with a privacy gate.
+- The trust score where i'm trying to ubld myslef demo for giving a scoring a dynamic basis 
+- Build the Pemanet route automation where the driver prev we've work give a priority to it.
+- for vulnerbale peopel mean aged people sensitive and physical condiition or the baby give a vulnerable where give a top priority no matter what pricing to teh top rated driver.
+- I'll plan to build admin analytcs just for now simple anlyyis how many register and simple 
+- Need to build a dmeo console with a simulation to show to the recruiter with adding a i18n of benchmark run.
+
+
 ## Feature That I Will Build Earlier:
+## Already Build Features:
+- Auth Login/Signup/Reset Password/Email Confirmation System.
+- Driver Vehicle Registeration License rc upload format check with a admin review where the limited status for the pre verification of license/vehicle.
+- Regular route which are the auto posting automated with advance one of request mean one way two way with gap pre defined.
+- Regular routes (auto-posting) plus advance one-off requests
+- For hte ride reuqest it need a time people, luggae notes, vuln flag with prefences, and also can go a group request, it's done through a invite by email.
 ### Must Build:
 - Auth (bcrypt + JWT access/refresh, httpOnly cookies), forced emergency-contact form, rider/driver role switch, multi-device sessions, password reset via Brevo
 - Driver vehicle registration, licence/RC upload with format check, admin review, limited status pre-verification
