@@ -5,8 +5,8 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { idFrom } from "@/lib/infra/route-params"
 import { getTripForUser } from "@/lib/infra/trip-access"
 import { clampTrust, relayLatePenalty } from "@/lib/infra/trust"
+import { RouteParams } from "@/types/api"
 
-type RouteParams = { params: Promise<{ id: string }> }
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)

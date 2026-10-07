@@ -7,8 +7,8 @@ import { idFrom } from "@/lib/infra/route-params"
 import { parseJsonBody } from "@/lib/infra/request"
 import { getTripForUser } from "@/lib/infra/trip-access"
 import { clampTrust, ratingDelta } from "@/lib/infra/trust"
+import { RouteParams } from "@/types/api"
 
-type RouteParams = { params: Promise<{ id: string }> }
 
 const ratingSchema = z.object({
   score: z.number().int().min(1).max(5),

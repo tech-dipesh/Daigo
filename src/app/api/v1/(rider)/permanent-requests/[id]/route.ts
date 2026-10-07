@@ -3,8 +3,8 @@ import { getUserId } from "@/lib/infra/auth"
 import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { idFrom } from "@/lib/infra/route-params"
+import { RouteParams } from "@/types/api"
 
-type RouteParams = { params: Promise<{ id: string }> }
 
 export const DELETE = withErrorHandling<RouteParams>(async (request, { params }) => {
   const riderId = getUserId(request)

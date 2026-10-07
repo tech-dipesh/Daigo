@@ -7,8 +7,8 @@ import { idFrom } from "@/lib/infra/route-params"
 import { parseJsonBody } from "@/lib/infra/request"
 import { getTripForUser } from "@/lib/infra/trip-access"
 import { cancellationPenalty, clampTrust } from "@/lib/infra/trust"
+import { RouteParams } from "@/types/api"
 
-type RouteParams = { params: Promise<{ id: string }> }
 
 const cancelSchema = z.object({
   reason: z.string().max(300).optional(),

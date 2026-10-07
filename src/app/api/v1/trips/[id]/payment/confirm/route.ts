@@ -6,8 +6,8 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { idFrom } from "@/lib/infra/route-params"
 import { parseJsonBody } from "@/lib/infra/request"
 import { getTripForUser } from "@/lib/infra/trip-access"
+import { RouteParams } from "@/types/api"
 
-type RouteParams = { params: Promise<{ id: string }> }
 
 const confirmSchema = z.object({
   proofPhotoUrl: z.url(),

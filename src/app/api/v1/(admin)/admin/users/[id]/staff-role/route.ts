@@ -5,8 +5,8 @@ import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
 import { idFrom } from "@/lib/infra/route-params"
+import { RouteParams } from "@/types/api"
 
-type RouteParams = { params: Promise<{ id: string }> }
 
 const staffRoleSchema = z.object({
   staffRole: z.enum(["MODERATOR", "SUPER_ADMIN"]).nullable(),

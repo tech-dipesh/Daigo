@@ -6,8 +6,8 @@ import { idFrom } from "@/lib/infra/route-params"
 import { distanceKm } from "@/lib/infra/geo"
 import { estimatePrice } from "@/lib/infra/pricing"
 import { combineDateAndTime, routeDepartsInWindow } from "@/lib/infra/schedule"
+import { RouteParams } from "@/types/api"
 
-type RouteParams = { params: Promise<{ id: string }> }
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const riderId = getUserId(request)
