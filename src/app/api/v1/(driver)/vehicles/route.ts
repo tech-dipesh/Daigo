@@ -20,22 +20,17 @@ export const POST = withErrorHandling(async (request) => {
   const ownerId = getUserId(request)
   await requireVerifiedEmail(ownerId)
   const owner = await db.user.findUnique({ where: { id: ownerId } })
-
   if (owner?.activeRole !== "DRIVER") {
     throw new AppError("Switch to driver mode to add a vehicle", 403)
   }
-
   const body = await parseJsonBody(request)
   const data = vehicleSchema.parse(body)
-
   const vehicle = await db.vehicle.create({ data: { ...data, ownerId } })
-
   return successResponse(vehicle, 201)
 })
 
 export const GET = withErrorHandling(async (request) => {
   const ownerId = getUserId(request)
   const vehicles = await db.vehicle.findMany({ where: { ownerId } })
-
   return successResponse(vehicles)
 })

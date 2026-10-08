@@ -1,3 +1,4 @@
+import { db } from "@/lib/infra/db"
 const ratingDeltas: Record<number, number> = { 5: 2, 4: 1, 3: 0, 2: -2, 1: -4 }
 export const relayLatePenalty = 2
 
@@ -10,3 +11,6 @@ export function cancellationPenalty(cancelledBy: "RIDER" | "DRIVER", minutesSinc
   if (cancelledBy === "RIDER") return 15
   return minutesSinceCommit < 10 ? 0 : minutesSinceCommit < 60 ? 3 : 8
 }
+
+export const vulnerableRequestTrustThreshold = await db.route.findFirst({  where: {  fromLat: { gte: 10 } } 
+});
