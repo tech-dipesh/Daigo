@@ -4,6 +4,14 @@
 - With Key FEatures for the Affordable people with students and Working prffoffsional with a shareed people
 - With a mvp also include a that real life a map system
 - Where the Driver and the rider will connect and somethings unique features they cna make a multi driver for reach to the point, it's somethiing like blabla rather a Uber
+- It's not a crud somethign app it's somethign have to push beyond a limit with fixing a real constraitn wher ethe two sided marktplace is think on the mapping.
+- The Multi hop relay something that is a one of the intesrign feature with a path finding somethign i've look it.
+- Where cold start is also a major problem which try to solve through a circled and friends which are the hard problem.
+- The Pricing is a highly dynamic with baed on the diff rules.
+- the geospatical matching which i'm using a raw sql which prisma doestn' support the redis pub/sub publisher and subscrieber, sender and reciever are whhere i'm sending via a websocket .
+- The trust reputation sysstem with a gps spoofing, trust farming, cancellation game that i've look into it.
+- Where the emergency escalation distances gated with a reliable map is a critical that can't go mistake.
+- I've make sure for the verification both are acceptable the token method and the verification code method"
 
 ## Tech Stack As of Now:
 - Next.js
@@ -62,6 +70,16 @@
 - Regular route which are the auto posting automated with advance one of request mean one way two way with gap pre defined.
 - Regular routes (auto-posting) plus advance one-off requests
 - For hte ride reuqest it need a time people, luggae notes, vuln flag with prefences, and also can go a group request, it's done through a invite by email.
+-  For the matching engine we see a single driver route overlpat, detour limit, suggest meeting point, which we using a postgis for the point with a stadia map for the mapping.
+- I'm plan to make a real time integration system which are the coming features such as: Websocket events, big driver alert, 75 second timer for accept/reject, manual automatic accpetable, with a first accept wher the race condition is applied with verifiyng from a weebhook.
+- The Pricing integration system where the range is betwen a 7 to 40  with a different vehicle diff road diff time with a demand and the hard cap with group discount it decide a pricing.
+- The Otp is on the several way verification, reset, location emergency, chat and super admin.
+- right now for the razorpay i'm adding a mock razorpay with a cash photo confirmation and teh admin queue for resolution.
+- The emergency one time button with a admin hgih alert and the distance visible with a hidden number for resuce.
+- with  a trust make a two way rating but prefer a driver with a 5 level warning suspsention.j
+- The admin wil seprate a superadming and moderator as super admin everthing controlr while moderator also give a access of demo console.
+
+
 ### Must Build:
 - Auth (bcrypt + JWT access/refresh, httpOnly cookies), forced emergency-contact form, rider/driver role switch, multi-device sessions, password reset via Brevo
 - Driver vehicle registration, licence/RC upload with format check, admin review, limited status pre-verification
