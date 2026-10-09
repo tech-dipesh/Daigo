@@ -12,5 +12,4 @@ export function cancellationPenalty(cancelledBy: "RIDER" | "DRIVER", minutesSinc
   return minutesSinceCommit < 10 ? 0 : minutesSinceCommit < 60 ? 3 : 8
 }
 
-export const vulnerableRequestTrustThreshold = await db.route.findFirst({  where: {  fromLat: { gte: 10 } } 
-});
+export const vulnerableRequestTrustThreshold = 75;
