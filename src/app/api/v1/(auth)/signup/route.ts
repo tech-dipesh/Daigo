@@ -8,6 +8,8 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
 import { sendEmailBestEffort } from "@/lib/infra/email"
 import { issueVerificationToken } from "@/lib/infra/verification-token"
+import { env } from "@/lib/infra/env"
+
 const signupSchema = z.object({
   email: z.email(),
   password: z.string().min(8),
@@ -28,10 +30,11 @@ export const POST = withErrorHandling(async (request) => {
     "EMAIL_VERIFICATION",
     emailVerificationLifetimeMs,
   )
+  const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${verificationToken}`
   await sendEmailBestEffort({
     to: user.email,
     subject: "Verify your DaiGo email",
-    text: `Welcome to DaiGo. Use this code to verify your email: ${verificationToken}\n\nThis code expires in 24 hours.`,
+    text: `Welcome to DaiGo. Click here to verify: ${verifyLink}\n\nOr use this code: ${verificationToken}\n\nThis expires in 24 hours.`,
   })
   const response = successResponse({ userId: user.id, email: user.email }, 201)
   return setAuthCookies(response, accessToken, refreshToken)
