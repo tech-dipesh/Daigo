@@ -1,0 +1,16 @@
+model EmergencyEvent {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tripId    String   @unique @map("trip_id") @db.Uuid
+  lat       Float
+  status    OpenEvent @default(OPEN)
+  lng       Float
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation("EmergencyEvents", fields: [userId], references: [id], onDelete: Cascade)
+  @@map("emergency_events")
+}
+
+enum OpenEvent {
+  OPEN
+  RESOLVED
+}
