@@ -26,7 +26,8 @@ model Trip {
   driver      User        @relation("DriverTrips", fields: [driverId], references: [id])
   ratings     Rating[]
   payment     Payment?
-
+  
+  TripEmergencyEvents EmergencyEvent[]     @relation("TripEmergencyEvents")
   @@map("trips")
 }
 

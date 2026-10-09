@@ -1,16 +1,20 @@
 model EmergencyEvent {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  tripId    String   @unique @map("trip_id") @db.Uuid
-  lat       Float
-  status    OpenEvent @default(OPEN)
-  lng       Float
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String          @map("user_id") @db.Uuid
+  tripId     String?         @map("trip_id") @db.Uuid
+  lat        Float
+  lng        Float
+  status     EmergencyStatus @default(OPEN)
+  resolvedAt DateTime? @db.Timestamptz @map("resolved_at")
+  createdAt  DateTime @db.Timestamptz @default(now()) @map("created_at")
+
   user      User     @relation("EmergencyEvents", fields: [userId], references: [id], onDelete: Cascade)
+  trip Trip? @relation("TripEmergencyEvents", fields: [tripId], references: [id])
+
   @@map("emergency_events")
 }
 
-enum OpenEvent {
+enum EmergencyStatus {
   OPEN
   RESOLVED
 }
