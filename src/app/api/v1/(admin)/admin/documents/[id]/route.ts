@@ -6,8 +6,7 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
 import { idFrom } from "@/lib/infra/route-params"
 import { sendEmailBestEffort } from "@/lib/infra/email"
-import { RouteParams } from "@/types/api"
-
+import type { RouteParams } from "@/types/api"
 
 const reviewSchema = z.object({
   status: z.enum(["APPROVED", "REJECTED"]),
@@ -16,10 +15,8 @@ const reviewSchema = z.object({
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   await requireStaff(request)
-
   const id = await idFrom(params)
   const { status, reason } = reviewSchema.parse(await parseJsonBody(request))
-
   const document = await db.driverDocument.update({
     where: { id },
     data: {
@@ -29,7 +26,6 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
     },
     include: { user: true },
   })
-
   await sendEmailBestEffort({
     to: document.user.email,
     subject: status === "APPROVED" ? "Your licence has been approved" : "Your licence was not approved",
@@ -37,6 +33,5 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
         ? "Your licence is approved. You can now create routes."
         : `Your licence was rejected.${reason ? ` Reason: ${reason}` : ""}`,
   })
-
   return successResponse(document)
 })

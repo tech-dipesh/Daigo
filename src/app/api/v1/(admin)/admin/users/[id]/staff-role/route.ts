@@ -5,8 +5,7 @@ import { AppError, successResponse } from "@/lib/infra/response"
 import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
 import { idFrom } from "@/lib/infra/route-params"
-import { RouteParams } from "@/types/api"
-
+import type { RouteParams } from "@/types/api"
 
 const staffRoleSchema = z.object({
   staffRole: z.enum(["MODERATOR", "SUPER_ADMIN"]).nullable(),
@@ -15,16 +14,12 @@ const staffRoleSchema = z.object({
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const admin = await requireStaff(request, "SUPER_ADMIN")
   const id = await idFrom(params)
-
   if (id === admin.id) throw new AppError("You can't change your own staff role", 409)
-
   const { staffRole } = staffRoleSchema.parse(await parseJsonBody(request))
-
   const user = await db.user.update({
     where: { id },
     data: { staffRole },
     select: { id: true, email: true, staffRole: true },
   })
-
   return successResponse(user)
 })

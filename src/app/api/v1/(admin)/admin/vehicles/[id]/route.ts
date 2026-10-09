@@ -6,8 +6,7 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/request"
 import { idFrom } from "@/lib/infra/route-params"
 import { sendEmailBestEffort } from "@/lib/infra/email"
-import { RouteParams } from "@/types/api"
-
+import type { RouteParams } from "@/types/api"
 
 const reviewSchema = z.object({
   status: z.enum(["APPROVED", "REJECTED"]),
@@ -16,10 +15,8 @@ const reviewSchema = z.object({
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   await requireStaff(request)
-
   const id = await idFrom(params)
   const { status, reason } = reviewSchema.parse(await parseJsonBody(request))
-
   const vehicle = await db.vehicle.update({
     where: { id },
     data: {
@@ -29,7 +26,6 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
     },
     include: { owner: true },
   })
-
   await sendEmailBestEffort({
     to: vehicle.owner.email,
     subject: status === "APPROVED" ? "Your vehicle has been approved" : "Your vehicle was not approved",
@@ -38,6 +34,5 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
         ? `Your vehicle (${vehicle.plateNumber}) is approved. You can now create routes.`
         : `Your vehicle (${vehicle.plateNumber}) was rejected.${reason ? ` Reason: ${reason}` : ""}`,
   })
-
   return successResponse(vehicle)
 })

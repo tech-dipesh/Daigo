@@ -5,7 +5,6 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 
 export const GET = withErrorHandling(async (request) => {
   await requireStaff(request)
-
   const [users, tripsByStatus, paid, pendingVehicles, pendingDocuments] = await Promise.all([
     db.user.count(),
     db.trip.groupBy({ by: ["status"], _count: { _all: true } }),
@@ -13,7 +12,6 @@ export const GET = withErrorHandling(async (request) => {
     db.vehicle.count({ where: { verificationStatus: "PENDING" } }),
     db.driverDocument.count({ where: { verificationStatus: "PENDING" } }),
   ])
-
   return successResponse({
     users,
     trips: Object.fromEntries(tripsByStatus.map(({ status, _count }) => [status, _count._all])),

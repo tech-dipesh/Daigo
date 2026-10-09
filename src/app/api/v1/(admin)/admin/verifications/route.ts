@@ -10,12 +10,10 @@ const querySchema = z.object({
 
 export const GET = withErrorHandling(async (request) => {
   await requireStaff(request)
-
   const { status } = querySchema.parse({
     status: request.nextUrl.searchParams.get("status") ?? undefined,
   })
   const where = { verificationStatus: status }
-
   const [vehicles, documents] = await Promise.all([
     db.vehicle.findMany({
       where,
@@ -28,6 +26,5 @@ export const GET = withErrorHandling(async (request) => {
       orderBy: { createdAt: "asc" },
     }),
   ])
-
   return successResponse({ vehicles, documents })
 })
