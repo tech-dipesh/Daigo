@@ -1,6 +1,4 @@
-import { db } from "@/lib/infra/db"
 const ratingDeltas: Record<number, number> = { 5: 2, 4: 1, 3: 0, 2: -2, 1: -4 }
-export const relayLatePenalty = 2
 
 export const ratingDelta = (score: number) => ratingDeltas[score] ?? 0
 
@@ -12,4 +10,5 @@ export function cancellationPenalty(cancelledBy: "RIDER" | "DRIVER", minutesSinc
   return minutesSinceCommit < 10 ? 0 : minutesSinceCommit < 60 ? 3 : 8
 }
 
-export const vulnerableRequestTrustThreshold = 75;
+export const relayLatePenalty = 2
+export const vulnerableRequestTrustThreshold = 75

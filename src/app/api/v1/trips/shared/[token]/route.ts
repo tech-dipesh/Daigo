@@ -4,9 +4,9 @@ import { withErrorHandling } from "@/lib/infra/with-error-handling"
 import type { RouteParams } from "@/types/api"
 
 export const GET = withErrorHandling<RouteParams<{ token: string }>>(async (_request, { params }) => {
-  const { token: shareToken } = await params
+  const { token } = await params
   const trip = await db.trip.findUnique({
-    where: { shareToken  },
+    where: { shareToken: token },
     include: { route: { include: { vehicle: true } } },
   })
   if (!trip) {

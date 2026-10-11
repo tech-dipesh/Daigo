@@ -22,9 +22,9 @@ function unauthenticated() {
 
 export async function proxy(request: NextRequest) {
   const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-  const { success: withinLimit } = await rateLimit.limit(clientIp)
+  const { success } = await rateLimit.limit(clientIp)
 
-  if (!withinLimit) {
+  if (!success) {
     return NextResponse.json(
       { success: false, data: null, error: { message: "Too many requests. Please slow down." } },
       { status: 429 },
