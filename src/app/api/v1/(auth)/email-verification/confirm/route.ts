@@ -1,11 +1,11 @@
 import { z } from "zod"
 import { NextResponse } from "next/server"
-import { db } from "@/lib/infra/db"
-import { getUserId } from "@/lib/infra/auth"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { parseJsonBody } from "@/lib/infra/request"
-import { consumeVerificationToken } from "@/lib/infra/verification-token"
+import { db } from "@/lib/infra/clients/db"
+import { getUserId } from "@/lib/infra/auth/auth"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/http/request"
+import { consumeVerificationToken } from "@/lib/infra/auth/verification-token"
 
 const confirmSchema = z.object({
   token: z.string().min(1),

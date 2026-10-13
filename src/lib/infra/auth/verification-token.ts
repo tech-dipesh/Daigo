@@ -1,5 +1,5 @@
 import { randomBytes, createHash } from "node:crypto"
-import { db } from "@/lib/infra/db"
+import { db } from "@/lib/infra/clients/db"
 
 type Purpose = "PASSWORD_RESET" | "EMAIL_VERIFICATION"
 
@@ -28,7 +28,7 @@ export async function consumeVerificationToken(token: string, purpose: Purpose) 
 }
 
 /*
-  Plain sha with no bcrypt 
+  Plain sha with no bcrypt
   also i've implement a direct hash lookup
   for stateful store on the db
 */

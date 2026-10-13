@@ -1,6 +1,6 @@
-import { db } from "@/lib/infra/db"
-import { distanceKm } from "@/lib/infra/geo"
-import { routeDepartsInWindow } from "@/lib/infra/schedule"
+import { db } from "@/lib/infra/clients/db"
+import { distanceKm } from "@/lib/infra/matching/geo"
+import { routeDepartsInWindow } from "@/lib/infra/matching/schedule"
 
 const transferRadiusKm = 3
 
@@ -16,7 +16,7 @@ type RideRequestForRelay = {
 }
 
 export async function findRelayCandidates(rideRequest: RideRequestForRelay) {
-  // relay must have the car no 
+  // relay must have the car no
   const needsCar = rideRequest.groupSize > 1
 
   const activeRoutes = await db.route.findMany({

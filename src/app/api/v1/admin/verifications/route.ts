@@ -1,8 +1,8 @@
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
-import { requireStaff } from "@/lib/infra/admin-access"
-import { successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { db } from "@/lib/infra/clients/db"
+import { requireStaff } from "@/lib/infra/auth/admin-access"
+import { successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 
 const querySchema = z.object({
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]).default("PENDING"),

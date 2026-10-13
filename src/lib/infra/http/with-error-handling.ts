@@ -1,5 +1,5 @@
 import type { NextRequest, NextResponse } from "next/server"
-import { errorResponse } from "@/lib/infra/response"
+import { errorResponse } from "@/lib/infra/http/response"
 
 type RouteHandler<Context> = (request: NextRequest, context: Context) => Promise<NextResponse>
 

@@ -1,14 +1,14 @@
 import { hash } from "bcrypt"
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
-import { issueTokenPair } from "@/lib/infra/auth"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { setAuthCookies } from "@/lib/infra/cookies"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { parseJsonBody } from "@/lib/infra/request"
-import { sendEmailBestEffort } from "@/lib/infra/email"
-import { issueVerificationToken } from "@/lib/infra/verification-token"
-import { env } from "@/lib/infra/env"
+import { db } from "@/lib/infra/clients/db"
+import { issueTokenPair } from "@/lib/infra/auth/auth"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { setAuthCookies } from "@/lib/infra/auth/cookies"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/http/request"
+import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
+import { env } from "@/lib/infra/clients/env"
 
 const signupSchema = z.object({
   email: z.email(),

@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server"
-import { AppError } from "@/lib/infra/response"
+import { AppError } from "@/lib/infra/http/response"
 
 export async function parseJsonBody(request: NextRequest): Promise<unknown> {
   try {

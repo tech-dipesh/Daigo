@@ -1,4 +1,4 @@
-import { distanceKm } from "@/lib/infra/geo"
+import { distanceKm } from "@/lib/infra/matching/geo"
 
 export const deviationThresholdKm = 2
 /*

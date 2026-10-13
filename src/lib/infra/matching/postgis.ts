@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
+import { db } from "@/lib/infra/clients/db"
 
 const candidateRowSchema = z.object({
   id: z.string(),

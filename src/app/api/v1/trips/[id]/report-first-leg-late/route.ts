@@ -1,10 +1,10 @@
-import { db } from "@/lib/infra/db"
-import { getUserId } from "@/lib/infra/auth"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { idFrom } from "@/lib/infra/route-params"
-import { getTripForUser } from "@/lib/infra/trip-access"
-import { clampTrust, relayLatePenalty } from "@/lib/infra/trust"
+import { db } from "@/lib/infra/clients/db"
+import { getUserId } from "@/lib/infra/auth/auth"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { idFrom } from "@/lib/infra/http/route-params"
+import { getTripForUser } from "@/lib/infra/auth/trip-access"
+import { clampTrust, relayLatePenalty } from "@/lib/infra/economy/trust"
 import type { RouteParams } from "@/types/api"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {

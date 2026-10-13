@@ -1,10 +1,10 @@
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
-import { getUserId } from "@/lib/infra/auth"
-import { successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { parseJsonBody } from "@/lib/infra/request"
-import { sendEmailBestEffort } from "@/lib/infra/email"
+import { db } from "@/lib/infra/clients/db"
+import { getUserId } from "@/lib/infra/auth/auth"
+import { successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/http/request"
+import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 
 const emergencySchema = z.object({
   tripId: z.string().optional(),

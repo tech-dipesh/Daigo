@@ -1,9 +1,9 @@
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
-import { getUserId } from "@/lib/infra/auth"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { parseJsonBody } from "@/lib/infra/request"
+import { db } from "@/lib/infra/clients/db"
+import { getUserId } from "@/lib/infra/auth/auth"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/http/request"
 
 export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)

@@ -1,5 +1,5 @@
-import { db } from "@/lib/infra/db"
-import { AppError } from "@/lib/infra/response"
+import { db } from "@/lib/infra/clients/db"
+import { AppError } from "@/lib/infra/http/response"
 
 export async function getTripForUser(tripId: string, userId: string) {
   const trip = await db.trip.findFirst({

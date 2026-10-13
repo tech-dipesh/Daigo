@@ -2,8 +2,8 @@ import { SignJWT, jwtVerify } from "jose"
 import { hash, compare } from "bcrypt"
 import type { NextRequest } from "next/server"
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
-import { AppError } from "@/lib/infra/response"
+import { db } from "@/lib/infra/clients/db"
+import { AppError } from "@/lib/infra/http/response"
 
 const tokenPayloadSchema = z.object({
   userId: z.string(),

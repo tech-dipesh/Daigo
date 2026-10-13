@@ -1,10 +1,10 @@
-import { db } from "@/lib/infra/db"
-import { getUserId } from "@/lib/infra/auth"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { sendEmailBestEffort } from "@/lib/infra/email"
-import { issueVerificationToken } from "@/lib/infra/verification-token"
-import { env } from "@/lib/infra/env"
+import { db } from "@/lib/infra/clients/db"
+import { getUserId } from "@/lib/infra/auth/auth"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
+import { env } from "@/lib/infra/clients/env"
 
 const tokenLifetimeMs = 1000 * 60 * 60 * 24
 

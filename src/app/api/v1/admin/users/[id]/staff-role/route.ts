@@ -1,10 +1,10 @@
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
-import { requireStaff } from "@/lib/infra/admin-access"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { parseJsonBody } from "@/lib/infra/request"
-import { idFrom } from "@/lib/infra/route-params"
+import { db } from "@/lib/infra/clients/db"
+import { requireStaff } from "@/lib/infra/auth/admin-access"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/http/request"
+import { idFrom } from "@/lib/infra/http/route-params"
 import type { RouteParams } from "@/types/api"
 
 const staffRoleSchema = z.object({

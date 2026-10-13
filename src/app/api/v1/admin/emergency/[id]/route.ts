@@ -1,8 +1,8 @@
-import { db } from "@/lib/infra/db"
-import { requireStaff } from "@/lib/infra/admin-access"
-import { successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { idFrom } from "@/lib/infra/route-params"
+import { db } from "@/lib/infra/clients/db"
+import { requireStaff } from "@/lib/infra/auth/admin-access"
+import { successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { idFrom } from "@/lib/infra/http/route-params"
 import type { RouteParams } from "@/types/api"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server"
-import { db } from "@/lib/infra/db"
-import { getUserId } from "@/lib/infra/auth"
-import { AppError } from "@/lib/infra/response"
+import { db } from "@/lib/infra/clients/db"
+import { getUserId } from "@/lib/infra/auth/auth"
+import { AppError } from "@/lib/infra/http/response"
 
 export async function requireStaff(request: NextRequest, only?: "SUPER_ADMIN") {
   const user = await db.user.findUnique({

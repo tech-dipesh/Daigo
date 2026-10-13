@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { verifyAccessToken, rotateRefreshToken } from "@/lib/infra/auth"
-import { setAuthCookies } from "@/lib/infra/cookies"
-import { rateLimit } from "@/lib/infra/rate-limit"
+import { verifyAccessToken, rotateRefreshToken } from "@/lib/infra/auth/auth"
+import { setAuthCookies } from "@/lib/infra/auth/cookies"
+import { rateLimit } from "@/lib/infra/clients/rate-limit"
 
 const publicPaths = [
   "/api/v1/signup",

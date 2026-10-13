@@ -1,8 +1,8 @@
-import { db } from "@/lib/infra/db"
-import { getUserId } from "@/lib/infra/auth"
-import { successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { coinsRequiredToRedeem, redemptionDiscountRupees } from "@/lib/infra/coins"
+import { db } from "@/lib/infra/clients/db"
+import { getUserId } from "@/lib/infra/auth/auth"
+import { successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { coinsRequiredToRedeem, redemptionDiscountRupees } from "@/lib/infra/economy/coins"
 
 export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)

@@ -1,4 +1,4 @@
-import { db } from "@/lib/infra/db"
+import { db } from "@/lib/infra/clients/db"
 
 type TransactionClient = Parameters<Parameters<typeof db.$transaction>[0]>[0]
 

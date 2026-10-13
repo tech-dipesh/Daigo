@@ -1,6 +1,6 @@
-import { db } from "@/lib/infra/db"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
+import { db } from "@/lib/infra/clients/db"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import type { RouteParams } from "@/types/api"
 
 export const GET = withErrorHandling<RouteParams<{ token: string }>>(async (_request, { params }) => {

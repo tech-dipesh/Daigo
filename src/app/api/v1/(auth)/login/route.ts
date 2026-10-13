@@ -1,11 +1,11 @@
 import { compare } from "bcrypt"
 import { z } from "zod"
-import { db } from "@/lib/infra/db"
-import { issueTokenPair } from "@/lib/infra/auth"
-import { AppError, successResponse } from "@/lib/infra/response"
-import { setAuthCookies } from "@/lib/infra/cookies"
-import { withErrorHandling } from "@/lib/infra/with-error-handling"
-import { parseJsonBody } from "@/lib/infra/request"
+import { db } from "@/lib/infra/clients/db"
+import { issueTokenPair } from "@/lib/infra/auth/auth"
+import { AppError, successResponse } from "@/lib/infra/http/response"
+import { setAuthCookies } from "@/lib/infra/auth/cookies"
+import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import { parseJsonBody } from "@/lib/infra/http/request"
 
 const loginSchema = z.object({
   email: z.email(),
