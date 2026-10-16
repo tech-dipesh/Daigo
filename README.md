@@ -148,10 +148,36 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 - Group requests (max 5, car capacity); can request on behalf of another person, invited by email (not phone)
 - Saved routes for one-tap requests; permanent routes auto-post daily (not manual)
 - Unaccompanied minors (under ~14): a parent/guardian books on their behalf; mandatory live tracking overrides the normal manual-location rule for this case; only high-trust drivers eligible
+### 3. Drivers
+- Full vehicle detail registration; licence & RC photo upload with digit/format-rule checks (demo-level verification, not real government ID/Aadhaar verification )
+- Driver can act as a rider while their driver verification is pending; they're notified it's still pending
+- Regular routes (days, time, seats, detour flexibility they set) or advance one-off trips
+- Can pause a route temporarily or permanently
+- Can take multiple riders per trip (up to vehicle capacity)
+- "Online now" mode
+- Fatigue cap: max 15 hours/day (acknowledged as unenforceable in practice, kept anyway as a personal-project design choice)
+- A suspended driver's already-committed regular-route trips for that day still complete; suspension takes effect from the next day, not mid-day
 
-## Future Feature That I'm Plan to Build:
-- Route-deviation alert if the driver's live location drifts far off the expected route 
-- Dashboard: graphs of everything in the database (trips over time, money saved, active drivers, emergency triggers, coin redemptions, stats)
-### This is Just For My Recruiter Purpose:
-- Demo console: I'm plan to can trigger every major feature on demand (a concurrent-accept race, an emergency, a demand spike, a relay with its full data flow, a cancellation penalty, etc.) For Showing to the Other People admin can also manually force a stuck scenario forward (e.g. force-assign a driver)
-- Simulated-data seeding for the benchmark: ~100 seeded entities, with an option to reset the seed data
+### 4. Matching
+- Single-driver route overlap within a detour limit, suggested meeting point (Postgres + Stadia Maps)
+- Relay matching as a fallback (see 1.1); booking is automatic, no manual rider approval step; the two relay drivers can chat with each other to coordinate the handoff
+- Relay edge case: if the first driver runs late, the second-leg driver is notified and can choose to continue waiting or cancel; the late first driver takes a small trust-score penalty
+- Relay pricing: same cost as a direct single-driver match, no transfer premium
+- First-accept-wins among matched drivers
+- Driver privacy: driver sees only the rider's first name and reviews until within a 10 km radius (masked before that); rider sees the driver's full public profile, photo and vehicle; driver's photo is revealed to the rider only within 3 km; phone numbers stay hidden until close
+- 75-second accept window, countdown shown per second on the client (75, 74, 73…); driver gets a sound-based big-UI alert
+- Manual or auto-accept option for drivers
+- If unmatched: rider can retry, raise the price, or accept a flexible meeting point
+- Return-trip auto-suggestion after a completed trip, prioritizing the same driver before opening to others
+- Vehicle capacity is enforced (max 5/car); if no match fits the full group, the rider can reduce the requested party size to find a match
+
+### 5. Pricing
+- Base rate ₹7–40/km, varies by vehicle type
+- Per-zone multiplier: ~100 simple lat/long grid zones across the 4-state pilot region, each zone storing its own multiplier directly (folds in village/city and terrain together,  hill-terrain zones start at 1.5x, plains zones at 1.0x, both manually adjustable later)
+- Time-of-day bands: office hours and night priced a little higher
+- Weather input via OpenWeatherMap feeding into the dynamic price
+- Demand multiplier: open requests vs. online drivers in the area, using a high/low threshold system (not a simple fixed ratio)
+- Two hard caps (a per-km ceiling and an absolute ceiling); calculations use raw float precision internally but the final price is rounded to a whole rupee — caps must be checked against the rounded value, not the raw float, so a rounded price can never land just over the cap
+- Group rides: one person pays by default; optional split if other members have accounts; non-account members can be invited and pay later (mock Razorpay only)
+- Price estimate shown to the rider at request-creation time, before the 75s wait
+- Full breakdown always visible; drivers who try to charge over the caps get warnings
