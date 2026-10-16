@@ -33,7 +33,6 @@ async function canViewTripLocation(
   }
   return false
 }
-
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)
   const id = await idFrom(params)
@@ -70,7 +69,6 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     isDeviated: updated.isDeviated,
   })
 })
-
 export const GET = withErrorHandling<RouteParams>(async (request, { params }) => {
   const userId = getUserId(request)
   const id = await idFrom(params)

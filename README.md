@@ -121,3 +121,14 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 ## Rules That i Always Reminder:
 - Always always must add if're working on the some external extension on the prisma/postgres always define first the extension i'lll help us to avoid a template default conflict.
 - Always handle our property to the optional property that is alsoo i keep focus on.
+
+
+
+## Something Is Here:
+- Goal is to build a Tangible, non-CRDUD, Productionize a solution where it can be scalable in the coming days.
+- Flow:   A commute-sharing app with we can call a carpooling. A rider posts a request from A to B; the app pushes it to people who already travel that route, by bike, car, auto or cab. Price is agreed before the trip starts. If no single driver covers the route, DaiGo can chain two drivers through a relay with one transfer.
+- Core things: 
+-  Request is pushed to people already traveling that route (not wait-and-hope)
+- Price agreed in chat before the trip starts (addresses hidden-charge complaints)
+- Partial route overlap gets a suggested meeting point
+- Multi-hop relay matching (two drivers, one transfer) as a fallback when no single driver covers the full route — works for solo riders (bike or car) and for groups, as long as the vehicle on each relay leg is a car that fits the whole group

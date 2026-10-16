@@ -7,6 +7,7 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { cancellationPenalty, clampTrust } from "@/lib/infra/economy/trust"
+import {cancellationGamingThreshold, cancellationWindowHours } from "@/lib/infra/economy/abuse"
 import type { RouteParams } from "@/types/api"
 
 const cancelSchema = z.object({
@@ -23,7 +24,16 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const body = await parseJsonBody(request)
   const { reason } = cancelSchema.parse(body)
   const cancelledBy = trip.riderId === userId ? "RIDER" : "DRIVER"
-  const minutesSinceCommit = (Date.now() - trip.createdAt.getTime()) / 60000
+  const windowStart = new Date(Date.now() - cancellationWindowHours * 60 * 60 * 1000)
+  const recentCancellations = await db.trip.count({
+    where: { cancelledBy, status: "CANCELLED", cancelledAt: { gte: windowStart }, OR: [{ riderId: userId }, { driverId: userId }] },
+  })
+  /*
+    repeated rapid cancelling 
+    with period only make a sense.
+  */
+  const isGaming = recentCancellations >= cancellationGamingThreshold
+  const minutesSinceCommit = isGaming ? Number.POSITIVE_INFINITY : (Date.now() - trip.createdAt.getTime()) / 60000
   const updated = await db.$transaction(async (tx) => {
     const cancelledTrip = await tx.trip.update({
       where: { id: trip.id },
