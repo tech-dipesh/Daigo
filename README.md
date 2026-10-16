@@ -121,7 +121,7 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 ## Rules That i Always Reminder:
 - Always always must add if're working on the some external extension on the prisma/postgres always define first the extension i'lll help us to avoid a template default conflict.
 - Always handle our property to the optional property that is alsoo i keep focus on.
-
+- The Code is something that i must write on the separation of concern method.
 
 
 ## Something Is Here:
@@ -132,3 +132,26 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 - Price agreed in chat before the trip starts (addresses hidden-charge complaints)
 - Partial route overlap gets a suggested meeting point
 - Multi-hop relay matching (two drivers, one transfer) as a fallback when no single driver covers the full route — works for solo riders (bike or car) and for groups, as long as the vehicle on each relay leg is a car that fits the whole group
+
+## Project Features:
+
+### 1 Users & roles
+- One account, rider or driver role, switchable but not simultaneous
+- Cold-start bootstrap: "circles"— college/office email domains get matched to each other first, before opening to the general public
+- Referral system tied to the coin economy
+- "Notify me when a match appears" waitlist for expired/unmatched requests
+
+### 2. Ride requests
+- Fields: from, to, time window, number of people, luggage, notes, vulnerable-person flag
+- Preferences: women-only, AC-only, vulnerable-rider categories (elderly, unaccompanied children, Physical Disablity) — self-declared toggle with an explainer the user can read
+- Optional vehicle-type preference
+- Group requests (max 5, car capacity); can request on behalf of another person, invited by email (not phone)
+- Saved routes for one-tap requests; permanent routes auto-post daily (not manual)
+- Unaccompanied minors (under ~14): a parent/guardian books on their behalf; mandatory live tracking overrides the normal manual-location rule for this case; only high-trust drivers eligible
+
+## Future Feature That I'm Plan to Build:
+- Route-deviation alert if the driver's live location drifts far off the expected route 
+- Dashboard: graphs of everything in the database (trips over time, money saved, active drivers, emergency triggers, coin redemptions, stats)
+### This is Just For My Recruiter Purpose:
+- Demo console: I'm plan to can trigger every major feature on demand (a concurrent-accept race, an emergency, a demand spike, a relay with its full data flow, a cancellation penalty, etc.) For Showing to the Other People admin can also manually force a stuck scenario forward (e.g. force-assign a driver)
+- Simulated-data seeding for the benchmark: ~100 seeded entities, with an option to reset the seed data
