@@ -181,3 +181,15 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 - Group rides: one person pays by default; optional split if other members have accounts; non-account members can be invited and pay later (mock Razorpay only)
 - Price estimate shown to the rider at request-creation time, before the 75s wait
 - Full breakdown always visible; drivers who try to charge over the caps get warnings
+
+### 6. Trip lifecycle
+- Dedicated "confirmed trip" screen after a match, showing driver details
+- Pickup OTP sent by email and also shown in-app (quick access at pickup)
+- Location sharing is manual (not automatic pings every few minutes — decided against as impractical)
+- In-trip chat lives in Redis, cleared after the trip finishes but kept until the rating/review for that trip is submitted; chat closes (with a clear confirmation) after the trip
+- Payments: online (Mock as of now but later on done from razorpay) auto-marks paid; cash requires the driver to upload a completion/delivery photo to mark it paid; a payment mismatch goes to an admin complaint queue
+
+### 7. Cancellations & no-shows
+- Driver cancellation: graduated penalty — canceling early causes little/no damage, canceling late causes more damage but capped (not severe)
+- Rider cancellation after a confirmed match (not a no-show): a real, high penalty like the driver's, not penalty-free — but the rider can appeal
+- No-show (rider never appears, never explicitly cancels): trust-neutral for the rider; an honest no-show with an explicit reason can slightly increase their score

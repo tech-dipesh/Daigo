@@ -1,22 +1,21 @@
-import { z } from 'zod';
-const envSchema = z.object({
-  DATABASE_URL: z.url(),
-  DIRECT_URL: z.string(),
+import { z } from "zod"
+const schema = z.object({
+  DB_URL: z.url(),
+  DIRECT_URL: z.string().min(1),
   ACCESS_TOKEN_SECRET: z.string().min(32),
   REFRESH_TOKEN_SECRET: z.string().min(32),
-  REDIS_REST_URL: z.url(),
-  REDIS_URL: z.url(),
-  REDIS_TOKEN: z.string().min(1),
-  BREVO_FROM_EMAIL: z.email(),
+  REDIS_URL: z.string().default("redis://localhost:6379"),
+  UPSTASH_REDIS_REST_URL: z.url(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
   BREVO_API_KEY: z.string().min(1),
+  BREVO_FROM_EMAIL: z.email(),
   APP_URL: z.url(),
-});
-
-const parsedValue = envSchema.safeParse(process.env);
-if (!parsedValue.success) {
-  const envKey = parsedValue.error.issues[0]?.path[0];
-  console.error(`Please Enter ${String(envKey)} Key in .env File`)
+})
+const parsed = schema.safeParse(process.env)
+if (!parsed.success) {
+  const keys = Object.keys(z.flattenError(parsed.error).fieldErrors)
+  console.error(`missing or invalid env keys, server wont work: ${keys.join(", ")}`)
   // console.error("Please Enter all the env keys", envKey);
-  process.exit(1);
+  process.exit(1)
 }
-export const env = parsedValue.data;
+export const env = parsed.data
