@@ -193,3 +193,28 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 - Driver cancellation: graduated penalty — canceling early causes little/no damage, canceling late causes more damage but capped (not severe)
 - Rider cancellation after a confirmed match (not a no-show): a real, high penalty like the driver's, not penalty-free — but the rider can appeal
 - No-show (rider never appears, never explicitly cancels): trust-neutral for the rider; an honest no-show with an explicit reason can slightly increase their score
+
+### 8. Safety
+- One mandatory emergency contact required via a forced form right after signup (name + primary number); user has the option to add more
+- Emergency button: automatically grabs a one-time location, sends a high-alert email (Brevo) plus a live WebSocket push to the admin dashboard, and emails the user's emergency contact
+- Ad-hoc one-tap "share my live trip" link, separate from the mandatory emergency contact, scoped to that one trip only
+- Distance-gated visibility as in 1.5
+
+### 9. Trust & ratings
+- Trust score is a cached number on the user's row, recalculated asynchronously
+- Unjustified rider reports of a driver arriving late are treated as a major risk signal and lower that driver's score, which feeds future match priority
+- Two-way star rating plus written review, plus a one-click "highly recommend this driver" tag by reason (e.g. conversation, driving skill)
+- 5 warnings → suspension; users can appeal through an internal support system that includes an AI assistant answering queries from DaiGo's own data
+- New users are very limited until they complete a few trips
+- Abuse countermeasures: GPS-spoofing and cancellation-gaming get dedicated countermeasures; trust-farming (reciprocal fake-trip score inflation) gets only a rate cap on trust-score gain, treated as an acknowledged, documented limitation rather than a built countermeasure
+
+### 10. Coins & referral
+- Coins earned through activity, redeemable for a discount on a future ride
+- Redemption: 500 coins required, discount capped at ₹50; user is notified what % they currently qualify for
+- Referral system tied to the coin economy
+
+### 11. Admin
+- Super admin (full privileges, extra email verification required on every login) and moderator (limited access) roles
+- Emergencies show up live via WebSocket in addition to the Brevo email alert
+- Complaint records carry a visible status flow: open → in review → resolved / rejected (resolution itself is manual "contact support" for now, not automated)
+- CSV export: 30-day window by default, with a custom date range option; heavy/custom exports run through a background job (see Infrastructure) rather than blocking a request
