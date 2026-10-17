@@ -17,7 +17,6 @@ export async function issueVerificationToken(userId: string, purpose: Purpose, l
 
 export async function consumeVerificationToken(token: string, purpose: Purpose) {
   const record = await db.verificationToken.findUnique({ where: { tokenHash: hashToken(token) } })
-
   if (!record || record.purpose !== purpose || record.usedAt || record.expiresAt < new Date()) {
     return null
   }
