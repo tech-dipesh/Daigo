@@ -5,6 +5,7 @@ import { requireVerifiedEmail } from "@/lib/infra/auth/require-verified"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
+import { expiryFromNow } from "@/lib/infra/matching/expiry"
 
 const rideRequestSchema = z.object({
   fromLabel: z.string().min(1),
@@ -50,6 +51,7 @@ export const POST = withErrorHandling(async (request) => {
       toLng: data.toLng,
       windowStart: { lt: data.windowEnd },
       windowEnd: { gt: data.windowStart },
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
   })
 
@@ -57,7 +59,7 @@ export const POST = withErrorHandling(async (request) => {
     throw new AppError("You already have an active request for this trip", 409)
   }
 
-  const rideRequest = await db.rideRequest.create({ data: { ...data, riderId } })
+  const rideRequest = await db.rideRequest.create({ data: { ...data, riderId, expiresAt: expiryFromNow() } })
 
   return successResponse(rideRequest, 201)
 })

@@ -1,7 +1,6 @@
 import { z } from "zod"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/infra/clients/db"
-import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
@@ -26,12 +25,9 @@ export const GET = withErrorHandling(async (request) => {
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const userId = getUserId(request)
   const { token } = confirmSchema.parse(await parseJsonBody(request))
-  const verifiedUserId = await consumeVerificationToken(token, "EMAIL_VERIFICATION")
-  if (!verifiedUserId || verifiedUserId !== userId) {
-    throw new AppError("This verification code is invalid or has expired", 400)
-  }
+  const userId = await consumeVerificationToken(token, "EMAIL_VERIFICATION")
+  if (!userId) throw new AppError("This verification code is invalid or has expired", 400)
   const user = await db.user.update({
     where: { id: userId },
     data: { emailVerifiedAt: new Date() },
