@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "vdev": "vercel dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -22,6 +23,7 @@
     "@prisma/client": "7.10.0",
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.39.0",
+    "@vercel/functions": "^3.10.0",
     "bcrypt": "^6.0.0",
     "ioredis": "^6.0.0",
     "jose": "^6.0.0",
@@ -29,6 +31,7 @@
     "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "ws": "^8.18.0",
     "zod": "4.6.5"
   },
   "devDependencies": {
@@ -38,13 +41,15 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.5.0",
     "dotenv": "^18.0.1",
     "eslint": "^10.11.0",
     "eslint-config-next": "16.3.5",
     "next-list": "2.0.0",
     "prisma": "7.10.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vercel": "^64.3.1"
   },
   "packageManager": "pnpm@12.3.4"
 }
