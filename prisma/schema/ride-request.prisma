@@ -9,6 +9,7 @@ model RideRequest {
   toLng             Float             @map("to_lng")
   windowStart       DateTime          @map("window_start")
   windowEnd         DateTime          @map("window_end")
+  expiresAt         DateTime?         @map("expires_at")
   groupSize         Int               @default(1) @map("group_size")
   hasLuggage        Boolean           @default(false) @map("has_luggage")
   notes             String?

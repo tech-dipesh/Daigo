@@ -1,10 +1,13 @@
 model User {
   id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email             String             @unique
+  name              String?
+  profilePhotoUrl   String?            @map("profile_photo_url")
   passwordHash      String             @map("password_hash")
   activeRole        UserRole           @default(RIDER) @map("active_role")
   emailVerifiedAt   DateTime?          @map("email_verified_at")
   trustScore        Int                @default(100) @map("trust_score")
+  coinBalance       Int                @default(0) @map("coin_balance")
   staffRole         StaffRole?         @map("staff_role")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
@@ -22,6 +25,7 @@ model User {
   ratingsGiven      Rating[]           @relation("RatingsGiven")
   ratingsReceived   Rating[]           @relation("RatingsReceived")
   emergencyEvents EmergencyEvent[]     @relation("EmergencyEvents")
+  coinTransactions  CoinTransaction[]
 
   @@map("users")
 }
