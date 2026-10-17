@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { z } from "zod"
 const schema = z.object({
   DB_URL: z.url(),

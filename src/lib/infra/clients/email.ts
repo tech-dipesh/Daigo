@@ -1,3 +1,4 @@
+import "dotenv/config"
 const brevoApiUrl = "https://api.brevo.com/v3/smtp/email"
 const fromEmail = process.env.BREVO_FROM_EMAIL ?? "no-reply@daigo.app"
 
