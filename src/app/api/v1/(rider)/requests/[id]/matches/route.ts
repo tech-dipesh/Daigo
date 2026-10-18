@@ -10,6 +10,8 @@ import { findGeoCandidates } from "@/lib/infra/matching/postgis"
 import { findRelayCandidates } from "@/lib/infra/matching/relay-matching"
 import { vulnerableRequestTrustThreshold } from "@/lib/infra/economy/trust"
 import { sameCircle } from "@/lib/infra/matching/circles"
+import { isExpired } from "@/lib/infra/matching/expiry"
+import { publishOnce } from "@/lib/infra/realtime/publish"
 import type { RouteParams } from "@/types/api"
 
 export const GET = withErrorHandling<RouteParams>(async (request, { params }) => {
@@ -19,6 +21,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
   if (!rideRequest) {
     throw new AppError("Ride request not found", 404)
   }
+  if (isExpired(rideRequest.expiresAt)) throw new AppError("This request expired, retry it to search again", 410)
   const rider = await db.user.findUniqueOrThrow({ where: { id: riderId } })
   const tripDistanceKm = distanceKm(
     rideRequest.fromLat,
@@ -78,6 +81,9 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
         }),
       ),
     )
+    const pending = matches.filter((m) => m.status === "PENDING")
+    const alerts = pending.map((m) => publishOnce(`alert:${m.id}`, m.route.driverId, "request.new", { matchId: m.id, requestId: rideRequest.id, from: rideRequest.fromLabel, to: rideRequest.toLabel, groupSize: rideRequest.groupSize, price: m.priceEstimate, expiresAt: rideRequest.expiresAt }))
+    await Promise.all(alerts)
     return successResponse({ direct: matches, relay: [] })
   }
   // nothing covers the whole trip on its own - see if two routes can hand the rider off
