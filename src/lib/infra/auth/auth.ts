@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { SignJWT, jwtVerify } from "jose"
 import { hash, compare } from "bcrypt"
 import type { NextRequest } from "next/server"
