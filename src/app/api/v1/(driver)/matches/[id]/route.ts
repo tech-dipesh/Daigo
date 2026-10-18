@@ -9,6 +9,7 @@ import { parseJsonBody } from "@/lib/infra/http/request"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { isExpired } from "@/lib/infra/matching/expiry"
 import { publishEvent } from "@/lib/infra/realtime/publish"
+import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
 
 const matchDecisionSchema = z.object({
@@ -60,6 +61,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   })
   if (result.trip) {
     await publishEvent(riderId, "match.accepted", { tripId: result.trip.id, matchId: match.id })
+    await notify(riderId, "MATCH_ACCEPTED", "Driver accepted", "A driver accepted your ride request", { tripId: result.trip.id })
     await sendEmailBestEffort({
       to: rider.email,
       subject: "Your DaiGo pickup code",

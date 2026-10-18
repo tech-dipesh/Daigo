@@ -6,6 +6,7 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
 
 const reviewSchema = z.object({
@@ -33,5 +34,6 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
         ? "Your licence is approved. You can now create routes."
         : `Your licence was rejected.${reason ? ` Reason: ${reason}` : ""}`,
   })
+  await notify(document.user.id, "VERIFICATION", status === "APPROVED" ? "Licence approved" : "Licence rejected", `Your licence was ${status.toLowerCase()}`, { documentId: document.id })
   return successResponse(document)
 })
