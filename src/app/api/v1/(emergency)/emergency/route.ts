@@ -5,6 +5,7 @@ import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { publishAdmin } from "@/lib/infra/realtime/publish"
 
 const emergencySchema = z.object({
   tripId: z.string().optional(),
@@ -22,6 +23,7 @@ export const POST = withErrorHandling(async (request) => {
   const event = await db.emergencyEvent.create({
     data: { userId, tripId, lat, lng },
   })
+  await publishAdmin("emergency.new", { eventId: event.id, userId, tripId, lat, lng })
   /*
   two sep people get a alert with a admin and the emregency contact
 */

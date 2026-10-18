@@ -9,6 +9,9 @@ import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { distanceKm } from "@/lib/infra/matching/geo"
 import { distanceFromPathKm, deviationThresholdKm } from "@/lib/infra/matching/deviation"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { looksSpoofed, spoofPenalty } from "@/lib/infra/economy/abuse"
+import { clampTrust } from "@/lib/infra/economy/trust"
+import { publishEvent } from "@/lib/infra/realtime/publish"
 import type { RouteParams } from "@/types/api"
 
 const locationSchema = z.object({
@@ -42,6 +45,12 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     throw new AppError("This trip isn't active", 409)
   }
   const { lat, lng } = locationSchema.parse(await parseJsonBody(request))
+  const { lastLat, lastLng, lastLocationAt } = trip
+  if (lastLat != null && lastLng != null && lastLocationAt && looksSpoofed(lastLat, lastLng, lastLocationAt, lat, lng, new Date())) {
+    const { trustScore } = await db.user.findUniqueOrThrow({ where: { id: driverId }, select: { trustScore: true } })
+    await db.user.update({ where: { id: driverId }, data: { trustScore: clampTrust(trustScore - spoofPenalty) } })
+    throw new AppError("That location jump looks fake, update rejected", 422)
+  }
   let isDeviated = false
   if (trip.status === "IN_PROGRESS") {
     const route = await db.route.findUniqueOrThrow({ where: { id: trip.routeId } })
@@ -52,6 +61,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     where: { id: trip.id },
     data: { lastLat: lat, lastLng: lng, lastLocationAt: new Date(), isDeviated },
   })
+  await publishEvent(trip.riderId, "trip.location", { tripId: trip.id, lat, lng, isDeviated })
   if (isDeviated && !trip.isDeviated) {
     const superAdmins = await db.user.findMany({ where: { staffRole: "SUPER_ADMIN" } })
     for (const admin of superAdmins) {

@@ -7,6 +7,8 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { isExpired } from "@/lib/infra/matching/expiry"
+import { publishEvent } from "@/lib/infra/realtime/publish"
 import type { RouteParams } from "@/types/api"
 
 const matchDecisionSchema = z.object({
@@ -24,6 +26,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   if (match.status !== "PENDING") throw new AppError("This match has already been decided", 409)
   const body = await parseJsonBody(request)
   const { status } = matchDecisionSchema.parse(body)
+  if (status === "ACCEPTED" && isExpired(match.rideRequest.expiresAt)) throw new AppError("This request has expired", 410)
   const { riderId, groupSize, rider } = match.rideRequest
   const result = await db.$transaction(async (tx) => {
     if (status === "ACCEPTED") {
@@ -56,6 +59,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
     return { updatedMatch, trip: null }
   })
   if (result.trip) {
+    await publishEvent(riderId, "match.accepted", { tripId: result.trip.id, matchId: match.id })
     await sendEmailBestEffort({
       to: rider.email,
       subject: "Your DaiGo pickup code",

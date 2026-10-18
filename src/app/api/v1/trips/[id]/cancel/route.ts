@@ -8,6 +8,7 @@ import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { cancellationPenalty, clampTrust } from "@/lib/infra/economy/trust"
 import {cancellationGamingThreshold, cancellationWindowHours } from "@/lib/infra/economy/abuse"
+import { publishEvent } from "@/lib/infra/realtime/publish"
 import type { RouteParams } from "@/types/api"
 
 const cancelSchema = z.object({
@@ -29,8 +30,8 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     where: { cancelledBy, status: "CANCELLED", cancelledAt: { gte: windowStart }, OR: [{ riderId: userId }, { driverId: userId }] },
   })
   /*
-    repeated rapid cancelling 
-    with period only make a sense.
+    repeat rapid canceel is the suspicions
+    with they can't just repeated cancel
   */
   const isGaming = recentCancellations >= cancellationGamingThreshold
   const minutesSinceCommit = isGaming ? Number.POSITIVE_INFINITY : (Date.now() - trip.createdAt.getTime()) / 60000
@@ -60,5 +61,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     })
     return cancelledTrip
   })
+  const other = cancelledBy === "RIDER" ? trip.driverId : trip.riderId
+  await publishEvent(other, "trip.status", { tripId: trip.id, status: updated.status })
   return successResponse(updated)
 })

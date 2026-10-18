@@ -6,6 +6,7 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
+import { publishEvent } from "@/lib/infra/realtime/publish"
 import type { RouteParams } from "@/types/api"
 
 const verifyPickupSchema = z.object({
@@ -31,5 +32,6 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     where: { id: trip.id },
     data: { status: "IN_PROGRESS", otpVerifiedAt: new Date() },
   })
+  await publishEvent(trip.riderId, "trip.status", { tripId: trip.id, status: updated.status })
   return successResponse(updated)
 })
