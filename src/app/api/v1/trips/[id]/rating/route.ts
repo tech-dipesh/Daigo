@@ -7,6 +7,7 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { clampTrust, ratingDelta } from "@/lib/infra/economy/trust"
+import { clearChat } from "@/lib/infra/realtime/chat"
 import type { RouteParams } from "@/types/api"
 
 const ratingSchema = z.object({
@@ -45,5 +46,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     })
     return created
   })
+  const ratingCount = await db.rating.count({ where: { tripId: trip.id } })
+  if (ratingCount >= 2) await clearChat(trip.id)
   return successResponse(rating, 201)
 })

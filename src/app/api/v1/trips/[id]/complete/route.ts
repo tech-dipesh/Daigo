@@ -6,6 +6,7 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { awardCoins, tripCompletionCoins } from "@/lib/infra/economy/coins"
 import { publishEvent } from "@/lib/infra/realtime/publish"
+import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
@@ -28,5 +29,6 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     return completed
   })
   await publishEvent(trip.riderId, "trip.status", { tripId: trip.id, status: updated.status })
+  await notify(trip.riderId, "TRIP_STATUS", "Trip completed", "Your trip is complete, please rate your driver", { tripId: trip.id })
   return successResponse(updated)
 })

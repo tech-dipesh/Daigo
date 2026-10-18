@@ -7,6 +7,7 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { publishEvent } from "@/lib/infra/realtime/publish"
+import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
 
 const verifyPickupSchema = z.object({
@@ -33,5 +34,6 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     data: { status: "IN_PROGRESS", otpVerifiedAt: new Date() },
   })
   await publishEvent(trip.riderId, "trip.status", { tripId: trip.id, status: updated.status })
+  await notify(trip.riderId, "TRIP_STATUS", "Trip started", "Your pickup was verified and the trip has started", { tripId: trip.id })
   return successResponse(updated)
 })

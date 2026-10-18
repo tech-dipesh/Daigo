@@ -9,6 +9,7 @@ import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { cancellationPenalty, clampTrust } from "@/lib/infra/economy/trust"
 import {cancellationGamingThreshold, cancellationWindowHours } from "@/lib/infra/economy/abuse"
 import { publishEvent } from "@/lib/infra/realtime/publish"
+import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
 
 const cancelSchema = z.object({
@@ -29,10 +30,8 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const recentCancellations = await db.trip.count({
     where: { cancelledBy, status: "CANCELLED", cancelledAt: { gte: windowStart }, OR: [{ riderId: userId }, { driverId: userId }] },
   })
-  /*
-    repeat rapid canceel is the suspicions
-    with they can't just repeated cancel
-  */
+  // repeated rapid cancelling is suspicious on its own - the early-cancel grace
+  // period only makes sense for someone cancelling occasionally, not gaming it
   const isGaming = recentCancellations >= cancellationGamingThreshold
   const minutesSinceCommit = isGaming ? Number.POSITIVE_INFINITY : (Date.now() - trip.createdAt.getTime()) / 60000
   const updated = await db.$transaction(async (tx) => {
@@ -63,5 +62,6 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   })
   const other = cancelledBy === "RIDER" ? trip.driverId : trip.riderId
   await publishEvent(other, "trip.status", { tripId: trip.id, status: updated.status })
+  await notify(other, "TRIP_STATUS", "Trip cancelled", "The other person cancelled this trip", { tripId: trip.id })
   return successResponse(updated)
 })
