@@ -1,0 +1,8 @@
+model FareRate {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  vehicleType VehicleType @unique @map("vehicle_type")
+  perKm       Float       @map("per_km")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("fare_rates")
+}

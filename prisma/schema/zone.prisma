@@ -1,0 +1,12 @@
+model Zone {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @unique
+  minLat     Float    @map("min_lat")
+  maxLat     Float    @map("max_lat")
+  minLng     Float    @map("min_lng")
+  maxLng     Float    @map("max_lng")
+  multiplier Float    @default(1)
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("zones")
+}
