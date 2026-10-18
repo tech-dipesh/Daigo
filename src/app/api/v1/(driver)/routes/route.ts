@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
-import { requireVerifiedEmail } from "@/lib/infra/auth/require-verified"
+import { requireMember } from "@/lib/infra/auth/require-verified"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
@@ -24,7 +24,7 @@ const routeSchema = z.object({
 
 export const POST = withErrorHandling(async (request) => {
   const driverId = getUserId(request)
-  await requireVerifiedEmail(driverId)
+  await requireMember(driverId)
   const user = await db.user.findUnique({ where: { id: driverId } })
   if (user?.activeRole !== "DRIVER") {
     throw new AppError("Switch to driver mode to create a route", 403)

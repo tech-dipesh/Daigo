@@ -35,6 +35,7 @@ export const PATCH = withErrorHandling(async (request) => {
   const body = await parseJsonBody(request)
   const { role, name, email, currentPassword } = patchSchema.parse(body)
   const current = await db.user.findUniqueOrThrow({ where: { id: userId } })
+  if (role && current.staffRole) throw new AppError("Staff accounts cannot switch rider or driver mode", 403)
   const newEmail = email && email !== current.email ? email : undefined
   if (newEmail) {
     const ok = currentPassword ? await compare(currentPassword, current.passwordHash) : false
