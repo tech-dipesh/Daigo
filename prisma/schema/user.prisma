@@ -26,6 +26,7 @@ model User {
   ratingsReceived   Rating[]           @relation("RatingsReceived")
   emergencyEvents EmergencyEvent[]     @relation("EmergencyEvents")
   coinTransactions  CoinTransaction[]
+  notifications     Notification[]
 
   @@map("users")
 }
