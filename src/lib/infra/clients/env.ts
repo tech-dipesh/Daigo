@@ -11,6 +11,8 @@ const schema = z.object({
   BREVO_API_KEY: z.string().min(1),
   BREVO_FROM_EMAIL: z.email(),
   APP_URL: z.url(),
+  STADIA_API: z.string().min(1),
+  OWM_KEY: z.string().optional(),
 })
 const parsed = schema.safeParse(process.env)
 if (!parsed.success) {
