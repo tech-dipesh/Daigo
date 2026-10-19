@@ -22,6 +22,7 @@ const rideRequestSchema = z.object({
   isVulnerable: z.boolean().default(false),
   womenOnly: z.boolean().default(false),
   acOnly: z.boolean().default(false),
+  allowShared: z.boolean().default(false),
   vehiclePreference: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]).optional(),
 })
 

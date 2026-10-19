@@ -7,6 +7,7 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { requireMember } from "@/lib/infra/auth/require-verified"
 import type { RouteParams } from "@/types/api"
 
 const decisionSchema = z.object({
@@ -15,6 +16,7 @@ const decisionSchema = z.object({
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)
+  await requireMember(driverId)
   const id = await idFrom(params)
   const relayMatch = await db.relayMatch.findFirst({
     where: { id, OR: [{ firstRoute: { driverId } }, { secondRoute: { driverId } }] },

@@ -8,6 +8,8 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { isExpired } from "@/lib/infra/matching/expiry"
+import { assertCanAccept } from "@/lib/infra/matching/booking-guard"
+import { requireMember } from "@/lib/infra/auth/require-verified"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
@@ -18,6 +20,7 @@ const matchDecisionSchema = z.object({
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)
+  await requireMember(driverId)
   const id = await idFrom(params)
   const match = await db.match.findFirst({
     where: { id, route: { driverId } },
@@ -31,6 +34,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   const { riderId, groupSize, rider } = match.rideRequest
   const result = await db.$transaction(async (tx) => {
     if (status === "ACCEPTED") {
+      await assertCanAccept(tx, driverId, match.routeId, match.rideRequest)
       // for atomic request can't win same request.
       const claimed = await tx.rideRequest.updateMany({
         where: { id: match.rideRequestId, status: "PENDING" },

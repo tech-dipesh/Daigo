@@ -3,11 +3,13 @@ import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
+import { requireMember } from "@/lib/infra/auth/require-verified"
 import { expiryFromNow, isExpired } from "@/lib/infra/matching/expiry"
 import type { RouteParams } from "@/types/api"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const riderId = getUserId(request)
+  await requireMember(riderId)
   const id = await idFrom(params)
   const old = await db.rideRequest.findFirst({ where: { id, riderId } })
   if (!old) throw new AppError("Ride request not found", 404)
@@ -35,6 +37,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
         isVulnerable: old.isVulnerable,
         womenOnly: old.womenOnly,
         acOnly: old.acOnly,
+        allowShared: old.allowShared,
         vehiclePreference: old.vehiclePreference,
         expiresAt: expiryFromNow(),
       },
