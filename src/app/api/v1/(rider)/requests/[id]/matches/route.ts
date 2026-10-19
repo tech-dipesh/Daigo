@@ -3,8 +3,7 @@ import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
-import { distanceKm } from "@/lib/infra/matching/geo"
-import { estimatePrice } from "@/lib/infra/economy/pricing"
+import { buildPricing } from "@/lib/infra/economy/pricing"
 import { routeDepartsInWindow } from "@/lib/infra/matching/schedule"
 import { findGeoCandidates } from "@/lib/infra/matching/postgis"
 import { findRelayCandidates } from "@/lib/infra/matching/relay-matching"
@@ -23,12 +22,8 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
   }
   if (isExpired(rideRequest.expiresAt)) throw new AppError("This request expired, retry it to search again", 410)
   const rider = await db.user.findUniqueOrThrow({ where: { id: riderId } })
-  const tripDistanceKm = distanceKm(
-    rideRequest.fromLat,
-    rideRequest.fromLng,
-    rideRequest.toLat,
-    rideRequest.toLng,
-  )
+  const { fromLat, fromLng, toLat, toLng, groupSize, windowStart } = rideRequest
+  const pricing = await buildPricing({ fromLat, fromLng, toLat, toLng, groupSize, when: windowStart })
   const geoCandidates = await findGeoCandidates({
     riderId,
     groupSize: rideRequest.groupSize,
@@ -74,7 +69,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
             rideRequestId: rideRequest.id,
             routeId: route.id,
             detourDistanceKm,
-            priceEstimate: estimatePrice(route.vehicle.type, tripDistanceKm),
+            priceEstimate: pricing.quote(route.vehicle.type).price,
           },
           update: {},
           include: { route: { include: { vehicle: true } } },
@@ -104,7 +99,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
           secondRouteId: secondRoute.id,
           transferLat,
           transferLng,
-          priceEstimate: estimatePrice(firstRoute.vehicle.type, tripDistanceKm),
+          priceEstimate: pricing.quote(firstRoute.vehicle.type).price,
         },
         update: {},
         include: {

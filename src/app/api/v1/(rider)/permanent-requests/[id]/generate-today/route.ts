@@ -4,7 +4,7 @@ import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { distanceKm } from "@/lib/infra/matching/geo"
-import { estimatePrice } from "@/lib/infra/economy/pricing"
+import { buildPricing } from "@/lib/infra/economy/pricing"
 import { combineDateAndTime, routeDepartsInWindow } from "@/lib/infra/matching/schedule"
 import type { RouteParams } from "@/types/api"
 
@@ -56,13 +56,14 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     distanceKm(template.toLat, template.toLng, preferredRoute.toLat, preferredRoute.toLng) <=
       preferredRoute.detourLimitKm
   if (preferredRouteWorks && preferredRoute) {
-    const tripDistanceKm = distanceKm(template.fromLat, template.fromLng, template.toLat, template.toLng)
+    const { fromLat, fromLng, toLat, toLng, groupSize } = template
+    const pricing = await buildPricing({ fromLat, fromLng, toLat, toLng, groupSize, when: windowStart })
     await db.match.create({
       data: {
         rideRequestId: rideRequest.id,
         routeId: preferredRoute.id,
         detourDistanceKm: 0,
-        priceEstimate: estimatePrice(preferredRoute.vehicle.type, tripDistanceKm),
+        priceEstimate: pricing.quote(preferredRoute.vehicle.type).price,
       },
     })
   }
