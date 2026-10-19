@@ -16,7 +16,8 @@
     "format": "prisma format",
     "reset": "prisma migrate reset",
     "route": "pnx next-list",
-    "type": "tsc --noEmit"
+    "type": "tsc --noEmit",
+    "seed": "pnx tsx seed/index.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -24,7 +25,7 @@
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.39.0",
     "@vercel/functions": "^3.10.0",
-    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "ioredis": "^6.0.0",
     "jose": "^6.0.0",
     "next": "16.3.5",
@@ -35,9 +36,8 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/bcrypt": "^5.0.0",
-    "@types/node": "^20",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.5",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -51,5 +51,5 @@
     "typescript": "^5",
     "vercel": "^64.3.1"
   },
-  "packageManager": "pnpm@12.3.4"
+  "packageManager": "pnpm@12.14.0"
 }
