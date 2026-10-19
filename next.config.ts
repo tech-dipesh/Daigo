@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import "@/lib/infra/clients/env"
 
 const nextConfig: NextConfig = {
   /* config options here */

@@ -13,8 +13,14 @@ const schema = z.object({
   APP_URL: z.url(),
   STADIA_API: z.string().min(1),
   OWM_KEY: z.string().optional(),
+  SUPA_KEY:z.string(),
+  SUPA_URL: z.url(),
+  QSTASH_TOKEN: z.string(),
+  QSTASH_CURRENT: z.string(),
+  QSTASH_NEXT: z.string()
 })
 const parsed = schema.safeParse(process.env)
+console.log('Parsed', parsed.error);
 if (!parsed.success) {
   const keys = Object.keys(z.flattenError(parsed.error).fieldErrors)
   console.error(`missing or invalid env keys, server wont work: ${keys.join(", ")}`)
