@@ -19,4 +19,7 @@ enum NotificationType {
   TRIP_STATUS
   PAYMENT
   VERIFICATION
+  WARNING
+  SUSPENSION
+  APPEAL
 }

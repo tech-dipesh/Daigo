@@ -1,0 +1,29 @@
+model Appeal {
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  kind         AppealKind
+  warningId    String?      @map("warning_id") @db.Uuid
+  text         String
+  status       AppealStatus @default(OPEN)
+  decidedById  String?      @map("decided_by_id") @db.Uuid
+  decisionNote String?      @map("decision_note")
+  decidedAt    DateTime?    @map("decided_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  user         User         @relation(fields: [userId], references: [id])
+  warning      Warning?     @relation(fields: [warningId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@map("appeals")
+}
+
+enum AppealKind {
+  WARNING
+  ACCOUNT
+}
+
+enum AppealStatus {
+  OPEN
+  APPROVED
+  REJECTED
+}

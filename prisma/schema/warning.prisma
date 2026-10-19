@@ -1,0 +1,21 @@
+model Warning {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  reason    WarningReason
+  note      String?
+  tripId    String?       @map("trip_id") @db.Uuid
+  revokedAt DateTime?     @map("revoked_at")
+  createdAt DateTime      @default(now()) @map("created_at")
+  user      User          @relation(fields: [userId], references: [id])
+  appeals   Appeal[]
+
+  @@index([userId, createdAt])
+  @@map("warnings")
+}
+
+enum WarningReason {
+  GPS_SPOOF
+  CANCEL_GAMING
+  LATE_ARRIVAL
+  PRICE_OVER_CAP
+}

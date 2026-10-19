@@ -20,6 +20,9 @@ model Trip {
   lastLocationAt DateTime? @map("last_location_at")
   shareToken     String?   @unique @map("share_token")
   isDeviated     Boolean   @default(false) @map("is_deviated")
+  arrivedAt      DateTime? @map("arrived_at")
+  noShowReason   String?   @map("no_show_reason")
+  lateReportedAt DateTime? @map("late_reported_at")
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
@@ -41,6 +44,7 @@ enum TripStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+  NO_SHOW
 }
 
 enum TripParty {
