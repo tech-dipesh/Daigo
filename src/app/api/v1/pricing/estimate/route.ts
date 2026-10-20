@@ -10,11 +10,12 @@ const querySchema = z.object({
   toLng: z.coerce.number().min(-180).max(180),
   groupSize: z.coerce.number().int().min(1).max(5).default(1),
   when: z.coerce.date().optional(),
+  minor: z.enum(["true", "false"]).default("false"),
 })
 
 export const GET = withErrorHandling(async (request) => {
-  const { when, groupSize, ...points } = querySchema.parse(Object.fromEntries(request.nextUrl.searchParams))
-  const pricing = await buildPricing({ ...points, groupSize, when: when ?? new Date() })
+  const { when, groupSize, minor, ...points } = querySchema.parse(Object.fromEntries(request.nextUrl.searchParams))
+  const pricing = await buildPricing({ ...points, groupSize, minor: minor === "true", when: when ?? new Date() })
   const types = groupSize > 1 ? ["AUTO", "CAR", "CAB"] : ["BIKE", "SCOOTER", "AUTO", "CAR", "CAB"]
   const quotes = types.map((type) => pricing.quote(type))
   return successResponse({ distanceKm: pricing.distanceKm, minutes: pricing.minutes, zones: pricing.zones, quotes })

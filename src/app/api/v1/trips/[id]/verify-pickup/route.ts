@@ -8,6 +8,7 @@ import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
+import { pingIsFresh } from "@/lib/infra/economy/minor"
 import type { RouteParams } from "@/types/api"
 
 const verifyPickupSchema = z.object({
@@ -29,6 +30,8 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   if (otp !== trip.pickupOtp) {
     throw new AppError("Incorrect pickup code", 400)
   }
+  const { minorAge } = await db.rideRequest.findUniqueOrThrow({ where: { id: trip.rideRequestId }, select: { minorAge: true } })
+  if (minorAge !== null && !pingIsFresh(trip.lastLocationAt)) throw new AppError("Share your live location before picking up a child", 409)
   const updated = await db.trip.update({
     where: { id: trip.id },
     data: { status: "IN_PROGRESS", otpVerifiedAt: new Date() },

@@ -3,8 +3,9 @@ import { routeInfo } from "@/lib/infra/clients/stadia"
 import { heavyRain, weatherMultiplier } from "@/lib/infra/clients/weather"
 import { busyMultiplier, demandMultiplier } from "@/lib/infra/economy/demand"
 import { zoneMultiplier } from "@/lib/infra/economy/zones"
+import { minorPremium } from "@/lib/infra/economy/minor"
 
-export type PriceInput = { fromLat: number; fromLng: number; toLat: number; toLng: number; when: Date; groupSize: number }
+export type PriceInput = { fromLat: number; fromLng: number; toLat: number; toLng: number; when: Date; groupSize: number; minor?: boolean }
 
 const maxPerKm = 40
 const absoluteCap = 2000
@@ -26,7 +27,7 @@ export function timeMultiplier(when: Date) {
   else rounding can push it over the cap, ill recheck later
 */
 export async function buildPricing(input: PriceInput) {
-  const { fromLat, fromLng, toLat, toLng, when, groupSize } = input
+  const { fromLat, fromLng, toLat, toLng, when, groupSize, minor } = input
   const [route, pickup, drop, weather, demand, rateRows] = await Promise.all([
     routeInfo({ lat: fromLat, lng: fromLng }, { lat: toLat, lng: toLng }),
     zoneMultiplier(fromLat, fromLng),
@@ -38,7 +39,7 @@ export async function buildPricing(input: PriceInput) {
   const rates = new Map<string, number>(rateRows.map((r): [string, number] => [r.vehicleType, r.perKm]))
   const zone = (pickup.multiplier + drop.multiplier) / 2
   const time = timeMultiplier(when)
-  const group = groupSize > 1 ? groupDiscount : 1
+  const group = (groupSize > 1 ? groupDiscount : 1) * (minor ? minorPremium : 1)
   const stack = Math.min(time * weather * demand, stackCap)
   const worst = Math.min(time * heavyRain * busyMultiplier, stackCap)
   const priceAt = (baseRate: number, factor: number) => Math.min(Math.round(Math.min(baseRate * zone * factor * group, maxPerKm) * route.km), absoluteCap)

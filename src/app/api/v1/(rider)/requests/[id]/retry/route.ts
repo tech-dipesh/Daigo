@@ -38,6 +38,8 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
         womenOnly: old.womenOnly,
         acOnly: old.acOnly,
         allowShared: old.allowShared,
+        minorName: old.minorName,
+        minorAge: old.minorAge,
         vehiclePreference: old.vehiclePreference,
         expiresAt: expiryFromNow(),
       },

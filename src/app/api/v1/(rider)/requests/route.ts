@@ -23,6 +23,7 @@ const rideRequestSchema = z.object({
   womenOnly: z.boolean().default(false),
   acOnly: z.boolean().default(false),
   allowShared: z.boolean().default(false),
+  passenger: z.object({ name: z.string().min(3).max(15), age: z.number().int().min(1).max(13) }).optional(),
   vehiclePreference: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]).optional(),
 })
 
@@ -36,7 +37,7 @@ export const POST = withErrorHandling(async (request) => {
   }
 
   const body = await parseJsonBody(request)
-  const data = rideRequestSchema.parse(body)
+  const { passenger, ...data } = rideRequestSchema.parse(body)
 
   if (data.windowEnd <= data.windowStart) {
     throw new AppError("The time window end must be after the start", 400)
@@ -60,7 +61,8 @@ export const POST = withErrorHandling(async (request) => {
     throw new AppError("You already have an active request for this trip", 409)
   }
 
-  const rideRequest = await db.rideRequest.create({ data: { ...data, riderId, expiresAt: expiryFromNow() } })
+  const minor = passenger ? { minorName: passenger.name, minorAge: passenger.age, isVulnerable: true } : {}
+  const rideRequest = await db.rideRequest.create({ data: { ...data, ...minor, riderId, expiresAt: expiryFromNow() } })
 
   return successResponse(rideRequest, 201)
 })

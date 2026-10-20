@@ -4,6 +4,7 @@ import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { buildPricing } from "@/lib/infra/economy/pricing"
+import { minorSafeRoutes } from "@/lib/infra/economy/minor"
 import { routeDepartsInWindow } from "@/lib/infra/matching/schedule"
 import { findGeoCandidates } from "@/lib/infra/matching/postgis"
 import { findRelayCandidates } from "@/lib/infra/matching/relay-matching"
@@ -23,7 +24,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
   if (isExpired(rideRequest.expiresAt)) throw new AppError("This request expired, retry it to search again", 410)
   const rider = await db.user.findUniqueOrThrow({ where: { id: riderId } })
   const { fromLat, fromLng, toLat, toLng, groupSize, windowStart } = rideRequest
-  const pricing = await buildPricing({ fromLat, fromLng, toLat, toLng, groupSize, when: windowStart })
+  const pricing = await buildPricing({ fromLat, fromLng, toLat, toLng, groupSize, when: windowStart, minor: rideRequest.minorAge !== null })
   const geoCandidates = await findGeoCandidates({
     riderId,
     groupSize: rideRequest.groupSize,
@@ -49,7 +50,8 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
   const routesTrustOk = rideRequest.isVulnerable
     ? routesInWindow.filter((route) => route.driver.trustScore >= vulnerableRequestTrustThreshold)
     : routesInWindow
-  const scored = routesTrustOk.map((route) => {
+  const routesSafe = rideRequest.minorAge === null ? routesTrustOk : await minorSafeRoutes(routesTrustOk)
+  const scored = routesSafe.map((route) => {
     const distances = distanceByRouteId.get(route.id)
     const detourDistanceKm = (distances?.pickup_distance_km ?? 0) + (distances?.dropoff_distance_km ?? 0)
     const inCircle = sameCircle(rider.email, route.driver.email)
@@ -77,10 +79,12 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
       ),
     )
     const pending = matches.filter((m) => m.status === "PENDING")
-    const alerts = pending.map((m) => publishOnce(`alert:${m.id}`, m.route.driverId, "request.new", { matchId: m.id, requestId: rideRequest.id, from: rideRequest.fromLabel, to: rideRequest.toLabel, groupSize: rideRequest.groupSize, price: m.priceEstimate, expiresAt: rideRequest.expiresAt }))
+    const alerts = pending.map((m) => publishOnce(`alert:${m.id}`, m.route.driverId, "request.new", { matchId: m.id, requestId: rideRequest.id, from: rideRequest.fromLabel, to: rideRequest.toLabel, groupSize: rideRequest.groupSize, minorAge: rideRequest.minorAge, price: m.priceEstimate, expiresAt: rideRequest.expiresAt }))
     await Promise.all(alerts)
     return successResponse({ direct: matches, relay: [] })
   }
+  /* no relay for kids, one driver the whole way */
+  if (rideRequest.minorAge !== null) return successResponse({ direct: [], relay: [] })
   // nothing covers the whole trip on its own - see if two routes can hand the rider off
   const relayPairs = await findRelayCandidates(rideRequest)
   const relayMatches = await Promise.all(
