@@ -26,7 +26,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
       await tx.warning.update({ where: { id: appeal.warningId }, data: { revokedAt: new Date() } })
     }
     if (status === "APPROVED" && appeal.kind === "ACCOUNT") {
-      await tx.user.update({ where: { id: appeal.userId }, data: { isBanned: false, suspendedFrom: null, suspendedUntil: null, warningsResetAt: new Date() } })
+      await tx.user.update({ where: { id: appeal.userId }, data: { isBanned: false, warningCycleStart: new Date() } })
     }
     return tx.appeal.update({ where: { id }, data: { status, decisionNote: note, decidedById: staff.id, decidedAt: new Date() } })
   })

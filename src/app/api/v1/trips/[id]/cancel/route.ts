@@ -37,8 +37,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   */
   const isGaming = recentCancellations >= cancellationGamingThreshold
   const minutesSinceCommit = isGaming ? Number.POSITIVE_INFINITY : (Date.now() - trip.createdAt.getTime()) / 60000
-  const lateRider = cancelledBy === "RIDER" && trip.lateReportedAt !== null
-  const penalty = lateRider ? 0 : cancellationPenalty(cancelledBy, minutesSinceCommit)
+  const penalty = cancellationPenalty(cancelledBy, minutesSinceCommit)
   const updated = await db.$transaction(async (tx) => {
     const cancelledTrip = await tx.trip.update({
       where: { id: trip.id },

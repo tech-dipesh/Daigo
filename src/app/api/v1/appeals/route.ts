@@ -4,12 +4,11 @@ import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import { isSuspended } from "@/lib/infra/economy/warnings"
 
 const appealSchema = z.object({
   kind: z.enum(["WARNING", "ACCOUNT"]),
   warningId: z.uuid().optional(),
-  text: z.string().trim().min(10).max(500),
+  text: z.string().trim().min(20).max(500),
 })
 
 export const GET = withErrorHandling(async (request) => {
@@ -26,8 +25,8 @@ export const POST = withErrorHandling(async (request) => {
     const warning = await db.warning.findFirst({ where: { id: warningId, userId, revokedAt: null } })
     if (!warning) throw new AppError("Warning not found", 404)
   } else {
-    const user = await db.user.findUniqueOrThrow({ where: { id: userId }, select: { isBanned: true, suspendedFrom: true, suspendedUntil: true } })
-    if (!isSuspended(user)) throw new AppError("Your account is not suspended", 409)
+    const { isBanned } = await db.user.findUniqueOrThrow({ where: { id: userId }, select: { isBanned: true } })
+    if (!isBanned) throw new AppError("Your account is not banned", 409)
   }
   const target = kind === "WARNING" ? warningId : null
   const open = await db.appeal.findFirst({ where: { userId, kind, status: "OPEN", warningId: target } })

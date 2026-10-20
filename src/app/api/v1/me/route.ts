@@ -8,17 +8,19 @@ import { parseJsonBody } from "@/lib/infra/http/request"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import { env } from "@/lib/infra/clients/env"
+import { getWarningSummary } from "@/lib/infra/economy/warnings"
 
 export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, name: true, emailVerifiedAt: true, activeRole: true, trustScore: true, createdAt: true },
+    select: { id: true, email: true, name: true, emailVerifiedAt: true, activeRole: true, trustScore: true, isBanned: true, createdAt: true },
   })
   if (!user) {
     throw new AppError("User not found", 404)
   }
-  return successResponse(user)
+  const warnings = await getWarningSummary(userId)
+  return successResponse({ ...user, warnings })
 })
 const emailLifetimeMs = 1000 * 60 * 60 * 24
 const patchSchema = z
