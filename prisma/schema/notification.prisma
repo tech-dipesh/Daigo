@@ -20,6 +20,6 @@ enum NotificationType {
   PAYMENT
   VERIFICATION
   WARNING
-  SUSPENSION
+  BAN
   APPEAL
 }
