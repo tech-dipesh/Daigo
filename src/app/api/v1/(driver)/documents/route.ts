@@ -5,10 +5,11 @@ import { requireMember } from "@/lib/infra/auth/require-verified"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
+import { assertOwnUpload } from "@/lib/infra/storage/uploads"
 
 const driverDocumentSchema = z.object({
   licenseNumber: z.string().regex(/^[A-Za-z0-9-]{8,20}$/),
-  licensePhotoUrl: z.url(),
+  licenseUploadId: z.uuid(),
 })
 
 export const POST = withErrorHandling(async (request) => {
@@ -20,6 +21,7 @@ export const POST = withErrorHandling(async (request) => {
   }
   const body = await parseJsonBody(request)
   const data = driverDocumentSchema.parse(body)
+  await assertOwnUpload(data.licenseUploadId, userId, "LICENCE")
   const document = await db.driverDocument.create({ data: { ...data, userId } })
   return successResponse(document, 201)
 })

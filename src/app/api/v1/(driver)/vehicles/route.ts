@@ -5,6 +5,7 @@ import { requireMember } from "@/lib/infra/auth/require-verified"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
+import { assertOwnUpload } from "@/lib/infra/storage/uploads"
 
 const vehicleSchema = z.object({
   type: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]),
@@ -13,7 +14,7 @@ const vehicleSchema = z.object({
   plateNumber: z.string().min(4).max(15),
   seatCapacity: z.number().int().min(1).max(5),
   rcNumber: z.string().min(6).max(20),
-  rcPhotoUrl: z.url(),
+  rcUploadId: z.uuid(),
 })
 
 export const POST = withErrorHandling(async (request) => {
@@ -25,6 +26,7 @@ export const POST = withErrorHandling(async (request) => {
   }
   const body = await parseJsonBody(request)
   const data = vehicleSchema.parse(body)
+  await assertOwnUpload(data.rcUploadId, ownerId, "RC")
   const vehicle = await db.vehicle.create({ data: { ...data, ownerId } })
   return successResponse(vehicle, 201)
 })

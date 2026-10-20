@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto"
+import { randomBytes, randomInt } from "node:crypto"
 import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
@@ -7,6 +7,7 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
+import { env } from "@/lib/infra/clients/env"
 import { isExpired } from "@/lib/infra/matching/expiry"
 import { assertCanAccept } from "@/lib/infra/matching/booking-guard"
 import { requireMember } from "@/lib/infra/auth/require-verified"
@@ -55,6 +56,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
           driverId,
           priceEstimate: match.priceEstimate,
           pickupOtp: randomInt(100000, 999999).toString(),
+          shareToken: match.rideRequest.minorAge === null ? undefined : randomBytes(16).toString("hex"),
         },
       })
       const updatedMatch = await tx.match.update({ where: { id: match.id }, data: { status } })
@@ -66,10 +68,11 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   if (result.trip) {
     await publishEvent(riderId, "match.accepted", { tripId: result.trip.id, matchId: match.id })
     await notify(riderId, "MATCH_ACCEPTED", "Driver accepted", "A driver accepted your ride request", { tripId: result.trip.id })
+    const shareNote = result.trip.shareToken ? `\n\nFollow the trip live: ${env.APP_URL}/api/v1/trips/shared/${result.trip.shareToken}` : ""
     await sendEmailBestEffort({
       to: rider.email,
       subject: "Your DaiGo pickup code",
-      text: `Your driver has accepted your request. Share this code at pickup: ${result.trip.pickupOtp}`,
+      text: `Your driver has accepted your request. Share this code at pickup: ${result.trip.pickupOtp}${shareNote}`,
     })
   }
   return successResponse(result.updatedMatch)
