@@ -1,7 +1,7 @@
 import { db } from "@/lib/infra/clients/db"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 
-type NotificationType = "MATCH_ACCEPTED" | "TRIP_STATUS" | "PAYMENT" | "VERIFICATION" | "WARNING" | "SUSPENSION" | "APPEAL"
+type NotificationType = "MATCH_ACCEPTED" | "TRIP_STATUS" | "PAYMENT" | "VERIFICATION" | "WARNING" | "BAN" | "APPEAL"
 type NotificationData = Record<string, string | number | boolean | null>
 
 export async function notify(userId: string, type: NotificationType, title: string, body: string, data: NotificationData = {}) {
