@@ -10,6 +10,7 @@ import { cancellationPenalty, clampTrust } from "@/lib/infra/economy/trust"
 import {cancellationGamingThreshold, cancellationWindowHours } from "@/lib/infra/economy/abuse"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
+import { issueWarning } from "@/lib/infra/economy/warnings"
 import type { RouteParams } from "@/types/api"
 
 const cancelSchema = z.object({
@@ -20,7 +21,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const userId = getUserId(request)
   const id = await idFrom(params)
   const trip = await getTripForUser(id, userId)
-  if (trip.status === "COMPLETED" || trip.status === "CANCELLED") {
+  if (trip.status === "COMPLETED" || trip.status === "CANCELLED" || trip.status === "NO_SHOW") {
     throw new AppError("This trip can no longer be cancelled", 409)
   }
   const body = await parseJsonBody(request)
@@ -30,10 +31,14 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const recentCancellations = await db.trip.count({
     where: { cancelledBy, status: "CANCELLED", cancelledAt: { gte: windowStart }, OR: [{ riderId: userId }, { driverId: userId }] },
   })
-  // repeated rapid cancelling is suspicious on its own - the early-cancel grace
-  // period only makes sense for someone cancelling occasionally, not gaming it
+  /*
+    The rapid canclesion is on the very suspicious list with the ealy cancel grace
+    So we give a negative pointing
+  */
   const isGaming = recentCancellations >= cancellationGamingThreshold
   const minutesSinceCommit = isGaming ? Number.POSITIVE_INFINITY : (Date.now() - trip.createdAt.getTime()) / 60000
+  const lateRider = cancelledBy === "RIDER" && trip.lateReportedAt !== null
+  const penalty = lateRider ? 0 : cancellationPenalty(cancelledBy, minutesSinceCommit)
   const updated = await db.$transaction(async (tx) => {
     const cancelledTrip = await tx.trip.update({
       where: { id: trip.id },
@@ -56,10 +61,11 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     })
     await tx.user.update({
       where: { id: userId },
-      data: { trustScore: clampTrust(trustScore - cancellationPenalty(cancelledBy, minutesSinceCommit)) },
+      data: { trustScore: clampTrust(trustScore - penalty) },
     })
     return cancelledTrip
   })
+  if (isGaming) await issueWarning(userId, "CANCEL_GAMING", "Too many cancellations in a short time", trip.id)
   const other = cancelledBy === "RIDER" ? trip.driverId : trip.riderId
   await publishEvent(other, "trip.status", { tripId: trip.id, status: updated.status })
   await notify(other, "TRIP_STATUS", "Trip cancelled", "The other person cancelled this trip", { tripId: trip.id })

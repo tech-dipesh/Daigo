@@ -12,6 +12,7 @@ import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { looksSpoofed, spoofPenalty } from "@/lib/infra/economy/abuse"
 import { clampTrust } from "@/lib/infra/economy/trust"
 import { publishEvent } from "@/lib/infra/realtime/publish"
+import { issueWarning } from "@/lib/infra/economy/warnings"
 import type { RouteParams } from "@/types/api"
 
 const locationSchema = z.object({
@@ -49,6 +50,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   if (lastLat != null && lastLng != null && lastLocationAt && looksSpoofed(lastLat, lastLng, lastLocationAt, lat, lng, new Date())) {
     const { trustScore } = await db.user.findUniqueOrThrow({ where: { id: driverId }, select: { trustScore: true } })
     await db.user.update({ where: { id: driverId }, data: { trustScore: clampTrust(trustScore - spoofPenalty) } })
+    await issueWarning(driverId, "GPS_SPOOF", "Your location jumped faster than a vehicle can travel", trip.id)
     throw new AppError("That location jump looks fake, update rejected", 422)
   }
   let isDeviated = false
