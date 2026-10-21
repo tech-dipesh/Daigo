@@ -14,6 +14,8 @@ const groupDiscount = 0.85
 const istOffsetMs = 5.5 * 60 * 60 * 1000
 const fallbackRates: Record<string, number> = { BIKE: 7, SCOOTER: 8, AUTO: 12, CAR: 15, CAB: 18 }
 
+export const hardCapFor = (km: number) => Math.min(Math.round(maxPerKm * km), absoluteCap)
+
 export function timeMultiplier(when: Date) {
   const hour = new Date(when.getTime() + istOffsetMs).getUTCHours()
   if (hour >= 22 || hour < 5) return 1.2
