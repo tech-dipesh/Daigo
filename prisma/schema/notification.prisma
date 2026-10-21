@@ -23,4 +23,5 @@ enum NotificationType {
   BAN
   APPEAL
   COMPLAINT
+  OFFER
 }

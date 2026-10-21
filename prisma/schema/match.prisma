@@ -10,6 +10,7 @@ model Match {
   rideRequest      RideRequest @relation(fields: [rideRequestId], references: [id])
   route            Route       @relation(fields: [routeId], references: [id])
   trip             Trip?
+  offers           Offer[]
 
   @@unique([rideRequestId, routeId])
   @@map("matches")

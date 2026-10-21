@@ -1,0 +1,18 @@
+model Offer {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId   String     @map("match_id") @db.Uuid
+  round     Int
+  by        OfferParty
+  price     Int
+  expiresAt DateTime   @map("expires_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+  match     Match      @relation(fields: [matchId], references: [id])
+
+  @@unique([matchId, round])
+  @@map("offers")
+}
+
+enum OfferParty {
+  RIDER
+  DRIVER
+}
