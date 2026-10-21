@@ -7,7 +7,7 @@ model Vehicle {
   plateNumber        String             @unique @map("plate_number")
   seatCapacity       Int                @map("seat_capacity")
   rcNumber           String             @map("rc_number")
-  rcPhotoUrl         String             @map("rc_photo_url")
+  rcUploadId         String?            @map("rc_upload_id") @db.Uuid
   verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
   rejectionReason    String?            @map("rejection_reason")
   reviewedAt         DateTime?          @map("reviewed_at")

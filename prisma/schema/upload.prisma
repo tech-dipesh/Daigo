@@ -1,0 +1,28 @@
+model Upload {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String       @map("user_id") @db.Uuid
+  kind        UploadKind
+  key         String       @unique
+  contentType String       @map("content_type")
+  sizeBytes   Int          @map("size_bytes")
+  status      UploadStatus @default(PENDING)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  deletedAt   DateTime?    @map("deleted_at")
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("uploads")
+}
+
+enum UploadKind {
+  LICENCE
+  RC
+  PAYMENT_PROOF
+  PROFILE_PHOTO
+}
+
+enum UploadStatus {
+  PENDING
+  UPLOADED
+  DELETED
+}

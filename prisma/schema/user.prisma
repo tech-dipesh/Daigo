@@ -31,6 +31,8 @@ model User {
   notifications     Notification[]
   warnings          Warning[]
   appeals           Appeal[]
+  uploads           Upload[]
+  complaints        Complaint[]
 
   @@map("users")
 }

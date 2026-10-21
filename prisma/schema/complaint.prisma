@@ -1,0 +1,33 @@
+model Complaint {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId      String          @map("trip_id") @db.Uuid
+  filedById   String          @map("filed_by_id") @db.Uuid
+  againstId   String          @map("against_id") @db.Uuid
+  type        ComplaintType
+  text        String
+  status      ComplaintStatus @default(OPEN)
+  adminNote   String?         @map("admin_note")
+  handledById String?         @map("handled_by_id") @db.Uuid
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  filedBy     User            @relation(fields: [filedById], references: [id])
+
+  @@index([status, createdAt])
+  @@index([tripId])
+  @@map("complaints")
+}
+
+enum ComplaintType {
+  PAYMENT
+  ROUTE
+  RATING
+  CONDUCT
+  OTHER
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
