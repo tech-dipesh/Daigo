@@ -5,6 +5,7 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { buildPricing } from "@/lib/infra/economy/pricing"
 import { minorSafeRoutes } from "@/lib/infra/economy/minor"
+import { tryAutoAccept } from "@/lib/infra/matching/auto-accept"
 import { routeDepartsInWindow } from "@/lib/infra/matching/schedule"
 import { findGeoCandidates } from "@/lib/infra/matching/postgis"
 import { findRelayCandidates } from "@/lib/infra/matching/relay-matching"
@@ -79,6 +80,8 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
       ),
     )
     const pending = matches.filter((m) => m.status === "PENDING")
+    const auto = await tryAutoAccept(pending, rider.trustScore, pricing.distanceKm)
+    if (auto) return successResponse({ direct: matches, relay: [], autoAccepted: { tripId: auto.trip.id } })
     const alerts = pending.map((m) => publishOnce(`alert:${m.id}`, m.route.driverId, "request.new", { matchId: m.id, requestId: rideRequest.id, from: rideRequest.fromLabel, to: rideRequest.toLabel, groupSize: rideRequest.groupSize, minorAge: rideRequest.minorAge, price: m.priceEstimate, expiresAt: rideRequest.expiresAt }))
     await Promise.all(alerts)
     return successResponse({ direct: matches, relay: [] })
