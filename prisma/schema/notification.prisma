@@ -24,4 +24,6 @@ enum NotificationType {
   APPEAL
   COMPLAINT
   OFFER
+  WAITLIST
+  SAVINGS
 }

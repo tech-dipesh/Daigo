@@ -7,6 +7,7 @@ model Match {
   updatedAt        DateTime    @updatedAt @map("updated_at")
   detourDistanceKm Float       @map("detour_distance_km")
   priceEstimate    Int         @map("price_estimate")
+  distanceKm       Float?      @map("distance_km")
   rideRequest      RideRequest @relation(fields: [rideRequestId], references: [id])
   route            Route       @relation(fields: [routeId], references: [id])
   trip             Trip?

@@ -8,6 +8,7 @@ model Trip {
   riderId       String     @map("rider_id") @db.Uuid
   driverId      String     @map("driver_id") @db.Uuid
   priceEstimate Int        @map("price_estimate")
+  distanceKm    Float?     @map("distance_km")
   pickupOtp     String     @map("pickup_otp")
   otpVerifiedAt DateTime?  @map("otp_verified_at")
   status        TripStatus @default(PENDING_PICKUP)
