@@ -42,6 +42,7 @@ export async function acceptMatch(matchId: string, price?: number) {
         riderId,
         driverId,
         priceEstimate: price ?? match.priceEstimate,
+        distanceKm: match.distanceKm,
         pickupOtp: randomInt(100000, 999999).toString(),
         shareToken: match.rideRequest.minorAge === null ? undefined : randomBytes(16).toString("hex"),
       },
