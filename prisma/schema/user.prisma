@@ -9,6 +9,7 @@ model User {
   trustScore        Int                @default(100) @map("trust_score")
   coinBalance       Int                @default(0) @map("coin_balance")
   isBanned          Boolean            @default(false) @map("is_banned")
+  language          Language           @default(EN)
   warningCycleStart DateTime?          @map("warning_cycle_start")
   staffRole         StaffRole?         @map("staff_role")
   createdAt         DateTime           @default(now()) @map("created_at")

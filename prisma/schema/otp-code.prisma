@@ -1,0 +1,18 @@
+model OtpCode {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String     @map("user_id") @db.Uuid
+  purpose   OtpPurpose
+  codeHash  String     @map("code_hash")
+  attempts  Int        @default(0)
+  expiresAt DateTime   @map("expires_at")
+  usedAt    DateTime?  @map("used_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  @@index([userId, purpose])
+  @@map("otp_codes")
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFY
+  ADMIN_LOGIN
+}
