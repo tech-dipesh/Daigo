@@ -73,6 +73,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
             routeId: route.id,
             detourDistanceKm,
             priceEstimate: pricing.quote(route.vehicle.type).price,
+            distanceKm: pricing.distanceKm,
           },
           update: {},
           include: { route: { include: { vehicle: true } } },

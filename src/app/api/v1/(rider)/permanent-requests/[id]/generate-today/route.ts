@@ -64,6 +64,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
         routeId: preferredRoute.id,
         detourDistanceKm: 0,
         priceEstimate: pricing.quote(preferredRoute.vehicle.type).price,
+        distanceKm: pricing.distanceKm,
       },
     })
   }

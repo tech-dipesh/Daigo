@@ -5,6 +5,7 @@ import { requireMember } from "@/lib/infra/auth/require-verified"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
+import { notifyWaitlist } from "@/lib/infra/matching/waitlist"
 
 const routeSchema = z.object({
   vehicleId: z.string(),
@@ -53,6 +54,7 @@ export const POST = withErrorHandling(async (request) => {
       driverId,
     },
   })
+  await notifyWaitlist(route)
   return successResponse(route, 201)
 })
 

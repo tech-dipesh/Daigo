@@ -7,6 +7,7 @@ import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { awardCoins, tripCompletionCoins } from "@/lib/infra/economy/coins"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
+import { cabRate, moneySaved } from "@/lib/infra/economy/savings"
 import type { RouteParams } from "@/types/api"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
@@ -30,5 +31,8 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   })
   await publishEvent(trip.riderId, "trip.status", { tripId: trip.id, status: updated.status })
   await notify(trip.riderId, "TRIP_STATUS", "Trip completed", "Your trip is complete, please rate your driver", { tripId: trip.id })
+  const cab = await cabRate()
+  const saved = moneySaved(trip.distanceKm, trip.priceEstimate, cab)
+  if (saved > 0) await notify(trip.riderId, "SAVINGS", "You saved money", `You saved ${saved} rupees compared to a solo cab`, { tripId: trip.id, saved })
   return successResponse(updated)
 })
