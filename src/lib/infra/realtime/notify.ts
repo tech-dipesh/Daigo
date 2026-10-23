@@ -1,12 +1,15 @@
-import { db } from "@/lib/infra/clients/db"
 import { publishEvent } from "@/lib/infra/realtime/publish"
+import { enqueue } from "@/lib/infra/queue/queue"
+import type { NotificationType } from "@/lib/infra/queue/types"
 
-type NotificationType = "MATCH_ACCEPTED" | "TRIP_STATUS" | "PAYMENT" | "VERIFICATION" | "WARNING" | "BAN" | "APPEAL" | "COMPLAINT" | "OFFER" | "WAITLIST" | "SAVINGS"
 type NotificationData = Record<string, string | number | boolean | null>
 
+/*
+  event goes out live from redis first
+  the db row is saved later by the queue job
+*/
 export async function notify(userId: string, type: NotificationType, title: string, body: string, data: NotificationData = {}) {
-  try {
-    const row = await db.notification.create({ data: { userId, type, title, body, data } })
-    await publishEvent(userId, "notification", { id: row.id, type, title, body, data })
-  } catch (error) { console.error("notify failed", error) }
+  const id = crypto.randomUUID()
+  await publishEvent(userId, "notification", { id, type, title, body, data })
+  await enqueue({ name: "notification.save", payload: { id, userId, type, title, body, data } })
 }

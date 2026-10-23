@@ -18,6 +18,9 @@ const schema = z.object({
   S3_SECRET: z.string().min(1),
   S3_BUCKET: z.string().min(1),
   S3_REGION: z.string().default("ap-northeast-1"),
+  QTASH_TOKEN: z.string().optional(),
+  QTASH_CURRENT: z.string().optional(),
+  QTASH_NEXT: z.string().optional(),
 })
 const parsed = schema.safeParse(process.env)
 if (!parsed.success) {
