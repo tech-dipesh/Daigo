@@ -24,6 +24,7 @@
     "@aws-sdk/s3-request-presigner": "^3.700.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7.10.0",
+    "@upstash/qstash": "^2.12.1",
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.39.0",
     "@vercel/functions": "^3.10.0",
