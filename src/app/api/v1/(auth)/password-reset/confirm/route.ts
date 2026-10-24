@@ -1,21 +1,17 @@
-import { hash } from "bcrypt"
-import { z } from "zod"
+import { hashPassword } from "@/lib/infra/auth/password"
 import { db } from "@/lib/infra/clients/db"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { consumeVerificationToken } from "@/lib/infra/auth/verification-token"
-const confirmSchema = z.object({
-  token: z.string().min(1),
-  newPassword: z.string().min(8),
-})
+import { passwordResetConfirmSchema } from "@/lib/validation/auth-schema"
 export const POST = withErrorHandling(async (request) => {
-  const { token, newPassword } = confirmSchema.parse(await parseJsonBody(request))
+  const { token, newPassword } = passwordResetConfirmSchema.parse(await parseJsonBody(request))
   const userId = await consumeVerificationToken(token, "PASSWORD_RESET")
   if (!userId) {
     throw new AppError("This reset code is invalid or has expired", 400)
   }
-  const passwordHash = await hash(newPassword, 12)
+  const passwordHash = await hashPassword(newPassword)
   await db.$transaction(async (tx) => {
     await tx.user.update({ where: { id: userId }, data: { passwordHash } })
     await tx.refreshToken.updateMany({

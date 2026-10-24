@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { successResponse } from "@/lib/infra/http/response"
@@ -9,16 +8,12 @@ import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { notify } from "@/lib/infra/realtime/notify"
 import { deleteUpload } from "@/lib/infra/storage/uploads"
 import type { RouteParams } from "@/types/api"
-
-const reviewSchema = z.object({
-  status: z.enum(["APPROVED", "REJECTED"]),
-  reason: z.string().max(300).optional(),
-})
+import { documentReviewSchema } from "@/lib/validation/admin-schema"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   await requireStaff(request)
   const id = await idFrom(params)
-  const { status, reason } = reviewSchema.parse(await parseJsonBody(request))
+  const { status, reason } = documentReviewSchema.parse(await parseJsonBody(request))
   const document = await db.driverDocument.update({
     where: { id },
     data: {

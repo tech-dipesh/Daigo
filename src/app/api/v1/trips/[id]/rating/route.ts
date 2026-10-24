@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -6,15 +5,11 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
-import { clampTrust, ratingDelta } from "@/lib/infra/economy/trust"
+import { ratingDelta } from "@/lib/infra/economy/trust"
+import * as userRepo from "@/lib/repository/user-repo"
 import { clearChat } from "@/lib/infra/realtime/chat"
 import type { RouteParams } from "@/types/api"
-
-const ratingSchema = z.object({
-  score: z.number().int().min(1).max(5),
-  review: z.string().max(300).optional(),
-  recommendTag: z.enum(["GOOD_CONVERSATION", "DRIVING_SKILL", "PUNCTUAL", "CLEAN_VEHICLE"]).optional(),
-})
+import { ratingSchema } from "@/lib/validation/trip-schema"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const raterId = getUserId(request)
@@ -36,14 +31,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     const created = await tx.rating.create({
       data: { ...data, tripId: trip.id, raterId, ratedUserId },
     })
-    const { trustScore } = await tx.user.findUniqueOrThrow({
-      where: { id: ratedUserId },
-      select: { trustScore: true },
-    })
-    await tx.user.update({
-      where: { id: ratedUserId },
-      data: { trustScore: clampTrust(trustScore + ratingDelta(data.score)) },
-    })
+    await userRepo.adjustTrust(tx, ratedUserId, ratingDelta(data.score))
     return created
   })
   const ratingCount = await db.rating.count({ where: { tripId: trip.id } })

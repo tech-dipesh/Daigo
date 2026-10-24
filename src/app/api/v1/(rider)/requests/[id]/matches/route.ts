@@ -14,6 +14,7 @@ import { sameCircle } from "@/lib/infra/matching/circles"
 import { isExpired } from "@/lib/infra/matching/expiry"
 import { publishOnce } from "@/lib/infra/realtime/publish"
 import type { RouteParams } from "@/types/api"
+import * as userRepo from "@/lib/repository/user-repo"
 
 export const GET = withErrorHandling<RouteParams>(async (request, { params }) => {
   const riderId = getUserId(request)
@@ -23,7 +24,7 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
     throw new AppError("Ride request not found", 404)
   }
   if (isExpired(rideRequest.expiresAt)) throw new AppError("This request expired, retry it to search again", 410)
-  const rider = await db.user.findUniqueOrThrow({ where: { id: riderId } })
+  const rider = await userRepo.getById(riderId)
   const { fromLat, fromLng, toLat, toLng, groupSize, windowStart } = rideRequest
   const pricing = await buildPricing({ fromLat, fromLng, toLat, toLng, groupSize, when: windowStart, minor: rideRequest.minorAge !== null })
   const geoCandidates = await findGeoCandidates({

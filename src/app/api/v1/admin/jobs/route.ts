@@ -1,19 +1,17 @@
-import { z } from "zod"
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { enqueue, jobUrl, queueClient, queueEnabled } from "@/lib/infra/queue/queue"
-
-const jobSchema = z.object({ action: z.enum(["schedule-autopost", "run-autopost"]) })
+import { adminJobSchema } from "@/lib/validation/admin-schema"
 
 /*
-  I'm making a scheudle use of the running twice on the updates it.
-  with it make a 6 am for now let's see.
+  schedule uses scheduleId so running it twice just updates it
+  cron_tz keeps it 6am ist, not utc. not 100 percent sure on scheduleId, check once
 */
 export const POST = withErrorHandling(async (request) => {
   await requireStaff(request, "SUPER_ADMIN")
-  const { action } = jobSchema.parse(await parseJsonBody(request))
+  const { action } = adminJobSchema.parse(await parseJsonBody(request))
   if (action === "run-autopost") {
     await enqueue({ name: "permanent.autopost", payload: {} })
     return successResponse({ queued: true })

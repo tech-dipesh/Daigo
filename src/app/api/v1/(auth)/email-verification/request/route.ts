@@ -1,4 +1,3 @@
-import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
@@ -6,12 +5,13 @@ import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import { env } from "@/lib/infra/clients/env"
 import { issueOtp, otpMinutes } from "@/lib/infra/auth/otp"
+import * as userRepo from "@/lib/repository/user-repo"
 
 const tokenLifetimeMs = 1000 * 60 * 60 * 24
 
 export const POST = withErrorHandling(async (request) => {
   const userId = getUserId(request)
-  const user = await db.user.findUniqueOrThrow({ where: { id: userId } })
+  const user = await userRepo.getById(userId)
   if (user.emailVerifiedAt) {
     throw new AppError("This email is already verified", 409)
   }

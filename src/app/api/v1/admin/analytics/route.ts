@@ -1,16 +1,14 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { countByDay } from "@/lib/infra/economy/analytics"
 import { cabRate, moneySaved } from "@/lib/infra/economy/savings"
-
-const querySchema = z.object({ days: z.coerce.number().int().min(1).max(90).default(30) })
+import { analyticsQuerySchema } from "@/lib/validation/admin-schema"
 
 export const GET = withErrorHandling(async (request) => {
   await requireStaff(request)
-  const { days } = querySchema.parse(Object.fromEntries(request.nextUrl.searchParams))
+  const { days } = analyticsQuerySchema.parse(Object.fromEntries(request.nextUrl.searchParams))
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
   const [trips, emergencies, completed, drivers, redemptions, cab] = await Promise.all([
     db.trip.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true, status: true } }),

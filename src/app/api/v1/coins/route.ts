@@ -1,12 +1,12 @@
-import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { coinsRequiredToRedeem, redemptionDiscountRupees } from "@/lib/infra/economy/coins"
+import * as userRepo from "@/lib/repository/user-repo"
 
 export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)
-  const user = await db.user.findUniqueOrThrow({ where: { id: userId } })
+  const user = await userRepo.getById(userId)
   const eligible = user.coinBalance >= coinsRequiredToRedeem
   return successResponse({
     coinBalance: user.coinBalance,

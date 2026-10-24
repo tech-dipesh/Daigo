@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -7,10 +6,7 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import type { RouteParams } from "@/types/api"
-
-const confirmSchema = z.object({
-  proofPhotoUrl: z.url(),
-})
+import { paymentSchema } from "@/lib/validation/trip-schema"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const userId = getUserId(request)
@@ -22,7 +18,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   if (payment.method !== "CASH") throw new AppError("Only cash payments need confirmation", 409)
   if (payment.status !== "PENDING") throw new AppError("This payment is already settled", 409)
   const body = await parseJsonBody(request)
-  const { proofPhotoUrl } = confirmSchema.parse(body)
+  const { proofPhotoUrl } = paymentSchema.parse(body)
   const paid = await db.payment.update({
     where: { id: payment.id },
     data: { status: "PAID", proofPhotoUrl, paidAt: new Date() },

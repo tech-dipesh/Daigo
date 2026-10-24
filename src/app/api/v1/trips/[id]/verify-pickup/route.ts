@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -10,10 +9,7 @@ import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
 import { pingIsFresh } from "@/lib/infra/economy/minor"
 import type { RouteParams } from "@/types/api"
-
-const verifyPickupSchema = z.object({
-  otp: z.string().regex(/^\d{6}$/),
-})
+import { verifyPickupSchema } from "@/lib/validation/trip-schema"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)

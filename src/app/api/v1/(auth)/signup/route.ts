@@ -1,7 +1,5 @@
-import { hash } from "bcrypt"
-import { z } from "zod"
-import { db } from "@/lib/infra/clients/db"
-import { issueTokenPair } from "@/lib/infra/auth/auth"
+import { hashPassword } from "@/lib/infra/auth/password"
+import { issueTokenPair } from "@/lib/infra/auth/token"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { setAuthCookies } from "@/lib/infra/auth/cookies"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
@@ -10,21 +8,19 @@ import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import { env } from "@/lib/infra/clients/env"
 import { issueOtp, otpMinutes } from "@/lib/infra/auth/otp"
+import { signupSchema } from "@/lib/validation/auth-schema"
+import * as userRepo from "@/lib/repository/user-repo"
 
-const signupSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8),
-})
 const emailVerificationLifetimeMs = 1000 * 60 * 60 * 24
 export const POST = withErrorHandling(async (request) => {
   const body = await parseJsonBody(request)
   const { email, password } = signupSchema.parse(body)
-  const existingUser = await db.user.findUnique({ where: { email } })
+  const existingUser = await userRepo.findByEmail(email)
   if (existingUser) {
     throw new AppError("An account with this email already exists", 409)
   }
-  const passwordHash = await hash(password, 12)
-  const user = await db.user.create({ data: { email, passwordHash } })
+  const passwordHash = await hashPassword(password)
+  const user = await userRepo.createUser(email, passwordHash)
   const { accessToken, refreshToken } = await issueTokenPair(user.id)
   const verificationToken = await issueVerificationToken(
     user.id,

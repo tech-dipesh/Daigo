@@ -1,16 +1,12 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
-
-const querySchema = z.object({
-  status: z.enum(["PENDING", "APPROVED", "REJECTED"]).default("PENDING"),
-})
+import { verificationQuerySchema } from "@/lib/validation/admin-schema"
 
 export const GET = withErrorHandling(async (request) => {
   await requireStaff(request)
-  const { status } = querySchema.parse({
+  const { status } = verificationQuerySchema.parse({
     status: request.nextUrl.searchParams.get("status") ?? undefined,
   })
   const where = { verificationStatus: status }

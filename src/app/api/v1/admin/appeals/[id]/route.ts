@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -7,16 +6,12 @@ import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
-
-const decisionSchema = z.object({
-  status: z.enum(["APPROVED", "REJECTED"]),
-  note: z.string().max(300).optional(),
-})
+import { appealDecisionSchema } from "@/lib/validation/admin-schema"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const staff = await requireStaff(request)
   const id = await idFrom(params)
-  const { status, note } = decisionSchema.parse(await parseJsonBody(request))
+  const { status, note } = appealDecisionSchema.parse(await parseJsonBody(request))
   const appeal = await db.appeal.findUnique({ where: { id } })
   if (!appeal) throw new AppError("Appeal not found", 404)
   if (appeal.status !== "OPEN") throw new AppError("This appeal was already decided", 409)

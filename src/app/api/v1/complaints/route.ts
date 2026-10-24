@@ -1,16 +1,10 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-
-const complaintSchema = z.object({
-  tripId: z.uuid(),
-  type: z.enum(["PAYMENT", "ROUTE", "RATING", "CONDUCT", "OTHER"]),
-  text: z.string().trim().min(10).max(500),
-})
+import { complaintSchema } from "@/lib/validation/support-schema"
 
 export const POST = withErrorHandling(async (request) => {
   const userId = getUserId(request)

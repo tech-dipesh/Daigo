@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { requireMember } from "@/lib/infra/auth/require-verified"
@@ -6,31 +5,13 @@ import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { expiryFromNow } from "@/lib/infra/matching/expiry"
-
-const rideRequestSchema = z.object({
-  fromLabel: z.string().min(1),
-  fromLat: z.number(),
-  fromLng: z.number(),
-  toLabel: z.string().min(1),
-  toLat: z.number(),
-  toLng: z.number(),
-  windowStart: z.coerce.date(),
-  windowEnd: z.coerce.date(),
-  groupSize: z.number().int().min(1).max(5).default(1),
-  hasLuggage: z.boolean().default(false),
-  notes: z.string().max(300).optional(),
-  isVulnerable: z.boolean().default(false),
-  womenOnly: z.boolean().default(false),
-  acOnly: z.boolean().default(false),
-  allowShared: z.boolean().default(false),
-  passenger: z.object({ name: z.string().min(3).max(15), age: z.number().int().min(1).max(13) }).optional(),
-  vehiclePreference: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]).optional(),
-})
+import { rideRequestSchema } from "@/lib/validation/request-schema"
+import * as userRepo from "@/lib/repository/user-repo"
 
 export const POST = withErrorHandling(async (request) => {
   const riderId = getUserId(request)
   await requireMember(riderId)
-  const user = await db.user.findUnique({ where: { id: riderId } })
+  const user = await userRepo.findById(riderId)
 
   if (user?.activeRole !== "RIDER") {
     throw new AppError("Switch to rider mode to post a request", 403)

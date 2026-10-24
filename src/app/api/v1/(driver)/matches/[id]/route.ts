@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -7,10 +6,7 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { acceptMatch } from "@/lib/infra/matching/accept-match"
 import type { RouteParams } from "@/types/api"
-
-const matchDecisionSchema = z.object({
-  status: z.enum(["ACCEPTED", "REJECTED"]),
-})
+import { matchDecisionSchema } from "@/lib/validation/match-schema"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)

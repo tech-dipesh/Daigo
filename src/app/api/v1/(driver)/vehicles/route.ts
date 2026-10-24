@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { requireMember } from "@/lib/infra/auth/require-verified"
@@ -6,21 +5,13 @@ import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { assertOwnUpload } from "@/lib/infra/storage/uploads"
-
-const vehicleSchema = z.object({
-  type: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]),
-  make: z.string().min(1),
-  model: z.string().min(1),
-  plateNumber: z.string().min(4).max(15),
-  seatCapacity: z.number().int().min(1).max(5),
-  rcNumber: z.string().min(6).max(20),
-  rcUploadId: z.uuid(),
-})
+import { vehicleSchema } from "@/lib/validation/driver-schema"
+import * as userRepo from "@/lib/repository/user-repo"
 
 export const POST = withErrorHandling(async (request) => {
   const ownerId = getUserId(request)
   await requireMember(ownerId)
-  const owner = await db.user.findUnique({ where: { id: ownerId } })
+  const owner = await userRepo.findById(ownerId)
   if (owner?.activeRole !== "DRIVER") {
     throw new AppError("Switch to driver mode to add a vehicle", 403)
   }

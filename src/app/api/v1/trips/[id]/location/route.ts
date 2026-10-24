@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -10,15 +9,13 @@ import { distanceKm } from "@/lib/infra/matching/geo"
 import { distanceFromPathKm, deviationThresholdKm } from "@/lib/infra/matching/deviation"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { looksSpoofed, spoofPenalty } from "@/lib/infra/economy/abuse"
-import { clampTrust } from "@/lib/infra/economy/trust"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { issueWarning } from "@/lib/infra/economy/warnings"
+import * as tripRepo from "@/lib/repository/trip-repo"
+import * as userRepo from "@/lib/repository/user-repo"
 import type { RouteParams } from "@/types/api"
+import { locationSchema } from "@/lib/validation/trip-schema"
 
-const locationSchema = z.object({
-  lat: z.number(),
-  lng: z.number(),
-})
 /*
   the real routing is not yet build
   with the assumption with the placeholder on this i've used
@@ -30,9 +27,7 @@ async function canViewTripLocation(
 ) {
   if (trip.riderId === userId || trip.driverId === userId) return true
   if (trip.relayMatchId && trip.relayLeg === "FIRST") {
-    const siblingLeg = await db.trip.findFirst({
-      where: { relayMatchId: trip.relayMatchId, relayLeg: "SECOND" },
-    })
+    const siblingLeg = await tripRepo.findRelayLeg(trip.relayMatchId, "SECOND")
     if (siblingLeg?.driverId === userId) return true
   }
   return false
@@ -48,8 +43,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const { lat, lng } = locationSchema.parse(await parseJsonBody(request))
   const { lastLat, lastLng, lastLocationAt } = trip
   if (lastLat != null && lastLng != null && lastLocationAt && looksSpoofed(lastLat, lastLng, lastLocationAt, lat, lng, new Date())) {
-    const { trustScore } = await db.user.findUniqueOrThrow({ where: { id: driverId }, select: { trustScore: true } })
-    await db.user.update({ where: { id: driverId }, data: { trustScore: clampTrust(trustScore - spoofPenalty) } })
+    await userRepo.adjustTrust(db, driverId, -spoofPenalty)
     await issueWarning(driverId, "GPS_SPOOF", "Your location jumped faster than a vehicle can travel", trip.id)
     throw new AppError("That location jump looks fake, update rejected", 422)
   }
@@ -65,7 +59,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   })
   await publishEvent(trip.riderId, "trip.location", { tripId: trip.id, lat, lng, isDeviated })
   if (isDeviated && !trip.isDeviated) {
-    const superAdmins = await db.user.findMany({ where: { staffRole: "SUPER_ADMIN" } })
+    const superAdmins = await userRepo.superAdmins()
     for (const admin of superAdmins) {
       await sendEmailBestEffort({
         to: admin.email,

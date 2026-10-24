@@ -1,5 +1,4 @@
-import { compare } from "bcrypt"
-import { z } from "zod"
+import { verifyPassword } from "@/lib/infra/auth/password"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -9,6 +8,8 @@ import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import { env } from "@/lib/infra/clients/env"
 import { getWarningSummary } from "@/lib/infra/economy/warnings"
+import { mePatchSchema } from "@/lib/validation/user-schema"
+import * as userRepo from "@/lib/repository/user-repo"
 
 export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)
@@ -23,25 +24,16 @@ export const GET = withErrorHandling(async (request) => {
   return successResponse({ ...user, warnings })
 })
 const emailLifetimeMs = 1000 * 60 * 60 * 24
-const patchSchema = z
-  .object({
-    role: z.enum(["RIDER", "DRIVER"]).optional(),
-    name: z.string().min(3).max(15).optional(),
-    email: z.email().optional(),
-    language: z.enum(["EN", "NE", "HI"]).optional(),
-    currentPassword: z.string().optional(),
-  })
-  .refine((b) => b.role || b.name || b.email || b.language, { message: "Send at least one field to update" })
 
 export const PATCH = withErrorHandling(async (request) => {
   const userId = getUserId(request)
   const body = await parseJsonBody(request)
-  const { role, name, email, language, currentPassword } = patchSchema.parse(body)
-  const current = await db.user.findUniqueOrThrow({ where: { id: userId } })
+  const { role, name, email, language, currentPassword } = mePatchSchema.parse(body)
+  const current = await userRepo.getById(userId)
   if (role && current.staffRole) throw new AppError("Staff accounts cannot switch rider or driver mode", 403)
   const newEmail = email && email !== current.email ? email : undefined
   if (newEmail) {
-    const ok = currentPassword ? await compare(currentPassword, current.passwordHash) : false
+    const ok = currentPassword ? await verifyPassword(currentPassword, current.passwordHash) : false
     if (!ok) throw new AppError("Enter your current password to change email", 403)
   }
   const user = await db.user.update({

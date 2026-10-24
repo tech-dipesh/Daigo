@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { upgradeWebSocket } from "@vercel/functions"
 import type { WebSocketData } from "@vercel/functions"
 import type { NextRequest } from "next/server"
@@ -9,6 +8,7 @@ import { AppError, errorResponse } from "@/lib/infra/http/response"
 import { adminChannel, userChannel } from "@/lib/infra/realtime/events"
 import type { RealtimeEvent } from "@/lib/infra/realtime/events"
 import { setOffline, setOnline } from "@/lib/infra/realtime/presence"
+import { wsMessageSchema } from "@/lib/validation/realtime-schema"
 
 /*
   conn dies at max duration, client must reconnect
@@ -16,14 +16,8 @@ import { setOffline, setOnline } from "@/lib/infra/realtime/presence"
 */
 export const maxDuration = 300
 
-const messageSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("ping") }),
-  z.object({ type: z.literal("online") }),
-  z.object({ type: z.literal("offline") }),
-])
-
 function parseMessage(raw: WebSocketData) {
-  try { return messageSchema.safeParse(JSON.parse(raw.toString())) } catch { return null }
+  try { return wsMessageSchema.safeParse(JSON.parse(raw.toString())) } catch { return null }
 }
 
 export async function GET(request: NextRequest) {

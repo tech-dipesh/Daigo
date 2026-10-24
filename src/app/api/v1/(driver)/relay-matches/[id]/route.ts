@@ -1,5 +1,4 @@
 import { randomInt } from "node:crypto"
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -9,10 +8,7 @@ import { idFrom } from "@/lib/infra/http/route-params"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { requireMember } from "@/lib/infra/auth/require-verified"
 import type { RouteParams } from "@/types/api"
-
-const decisionSchema = z.object({
-  status: z.enum(["ACCEPTED", "REJECTED"]),
-})
+import { relayDecisionSchema } from "@/lib/validation/match-schema"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const driverId = getUserId(request)
@@ -24,7 +20,7 @@ export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) 
   })
   if (!relayMatch) throw new AppError("Relay match not found", 404)
   if (relayMatch.status !== "PENDING") throw new AppError("This relay has already been decided", 409)
-  const { status } = decisionSchema.parse(await parseJsonBody(request))
+  const { status } = relayDecisionSchema.parse(await parseJsonBody(request))
   const leg = relayMatch.firstRoute.driverId === driverId ? "first" : "second"
   const result = await db.$transaction(async (tx) => {
     const legField = leg === "first" ? "firstLegStatus" : "secondLegStatus"

@@ -1,14 +1,11 @@
-import { z } from "zod"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/infra/clients/db"
 import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { consumeVerificationToken } from "@/lib/infra/auth/verification-token"
+import { emailConfirmSchema } from "@/lib/validation/auth-schema"
 
-const confirmSchema = z.object({
-  token: z.string().min(1),
-})
 const htmlPage = (message: string) =>
   new NextResponse(`<!doctype html><body style="font-family: sans-serif; padding: 40px;">${message}</body>`, {
     headers: { "content-type": "text/html" },
@@ -25,7 +22,7 @@ export const GET = withErrorHandling(async (request) => {
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const { token } = confirmSchema.parse(await parseJsonBody(request))
+  const { token } = emailConfirmSchema.parse(await parseJsonBody(request))
   const userId = await consumeVerificationToken(token, "EMAIL_VERIFICATION")
   if (!userId) throw new AppError("This verification code is invalid or has expired", 400)
   const user = await db.user.update({

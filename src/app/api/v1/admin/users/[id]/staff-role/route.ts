@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -6,10 +5,7 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
 import type { RouteParams } from "@/types/api"
-
-const staffRoleSchema = z.object({
-  staffRole: z.enum(["MODERATOR", "SUPER_ADMIN"]).nullable(),
-})
+import { staffRoleSchema } from "@/lib/validation/admin-schema"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   const admin = await requireStaff(request, "SUPER_ADMIN")

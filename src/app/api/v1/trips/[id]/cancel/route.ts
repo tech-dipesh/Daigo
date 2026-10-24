@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, successResponse } from "@/lib/infra/http/response"
@@ -6,16 +5,15 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
-import { cancellationPenalty, clampTrust } from "@/lib/infra/economy/trust"
-import {cancellationGamingThreshold, cancellationWindowHours } from "@/lib/infra/economy/abuse"
+import { cancellationPenalty } from "@/lib/infra/economy/trust"
+import * as tripRepo from "@/lib/repository/trip-repo"
+import * as userRepo from "@/lib/repository/user-repo"
+import { cancellationGamingThreshold, cancellationWindowHours } from "@/lib/infra/economy/abuse"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
 import { issueWarning } from "@/lib/infra/economy/warnings"
 import type { RouteParams } from "@/types/api"
-
-const cancelSchema = z.object({
-  reason: z.string().max(300).optional(),
-})
+import { cancelSchema } from "@/lib/validation/trip-schema"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const userId = getUserId(request)
@@ -28,13 +26,9 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
   const { reason } = cancelSchema.parse(body)
   const cancelledBy = trip.riderId === userId ? "RIDER" : "DRIVER"
   const windowStart = new Date(Date.now() - cancellationWindowHours * 60 * 60 * 1000)
-  const recentCancellations = await db.trip.count({
-    where: { cancelledBy, status: "CANCELLED", cancelledAt: { gte: windowStart }, OR: [{ riderId: userId }, { driverId: userId }] },
-  })
-  /*
-    The rapid canclesion is on the very suspicious list with the ealy cancel grace
-    So we give a negative pointing
-  */
+  const recentCancellations = await tripRepo.countRecentCancellations(userId, cancelledBy, windowStart)
+  // repeated rapid cancelling is suspicious on its own - the early-cancel grace
+  // period only makes sense for someone cancelling occasionally, not gaming it
   const isGaming = recentCancellations >= cancellationGamingThreshold
   const minutesSinceCommit = isGaming ? Number.POSITIVE_INFINITY : (Date.now() - trip.createdAt.getTime()) / 60000
   const penalty = cancellationPenalty(cancelledBy, minutesSinceCommit)
@@ -54,14 +48,7 @@ export const POST = withErrorHandling<RouteParams>(async (request, { params }) =
     if (trip.matchId) {
       await tx.match.update({ where: { id: trip.matchId }, data: { status: "EXPIRED" } })
     }
-    const { trustScore } = await tx.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: { trustScore: true },
-    })
-    await tx.user.update({
-      where: { id: userId },
-      data: { trustScore: clampTrust(trustScore - penalty) },
-    })
+    await userRepo.adjustTrust(tx, userId, -penalty)
     return cancelledTrip
   })
   if (isGaming) await issueWarning(userId, "CANCEL_GAMING", "Too many cancellations in a short time", trip.id)

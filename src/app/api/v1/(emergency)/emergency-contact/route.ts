@@ -1,17 +1,9 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-
-const emergencyContactSchema = z.object({
-  name: z.string().min(3).max(15),
-  phone: z.string().regex(/^\d{10}$/),
-  email: z.email().optional(),
-  isPrimary: z.boolean().default(false),
-  yourName: z.string().min(3).max(15).optional(),
-})
+import { emergencyContactSchema } from "@/lib/validation/emergency-schema"
 
 export const POST = withErrorHandling(async (request) => {
   const userId = getUserId(request)

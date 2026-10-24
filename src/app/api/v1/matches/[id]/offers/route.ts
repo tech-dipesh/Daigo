@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { requireMember } from "@/lib/infra/auth/require-verified"
@@ -12,12 +11,11 @@ import { maxRounds, offerBounds, offerWindowSeconds } from "@/lib/infra/matching
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
 import type { RouteParams } from "@/types/api"
-
-const offerSchema = z.object({ price: z.number().int().min(1) })
+import { offerSchema } from "@/lib/validation/match-schema"
 
 async function loadMatch(id: string, userId: string) {
   const match = await db.match.findUnique({ where: { id }, include: { rideRequest: true, route: true, offers: { orderBy: { round: "desc" }, take: 1 } } })
-  const party = match?.route.driverId === userId ? "DRIVER" : match?.rideRequest.riderId === userId ? "RIDER" : null
+  const party: "DRIVER" | "RIDER" | null = match?.route.driverId === userId ? "DRIVER" : match?.rideRequest.riderId === userId ? "RIDER" : null
   if (!match || !party) throw new AppError("Match not found", 404)
   return { match, party, last: match.offers[0] ?? null }
 }
