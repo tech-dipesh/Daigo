@@ -9,6 +9,7 @@ import { parseJsonBody } from "@/lib/infra/http/request"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import { env } from "@/lib/infra/clients/env"
+import { issueOtp, otpMinutes } from "@/lib/infra/auth/otp"
 
 const signupSchema = z.object({
   email: z.email(),
@@ -30,11 +31,12 @@ export const POST = withErrorHandling(async (request) => {
     "EMAIL_VERIFICATION",
     emailVerificationLifetimeMs,
   )
+  const { code } = await issueOtp(user.id, "EMAIL_VERIFY")
   const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${verificationToken}`
   await sendEmailBestEffort({
     to: user.email,
     subject: "Verify your DaiGo email",
-    text: `Welcome to DaiGo. Click here to verify: ${verifyLink}\n\nOr use this code: ${verificationToken}\n\nThis expires in 24 hours.`,
+    text: `Welcome to DaiGo. Click here to verify: ${verifyLink}\n\nOr use this 6 digit code within ${otpMinutes} minutes: ${code}\n\nThe link expires in 24 hours.`,
   })
   const response = successResponse({ userId: user.id, email: user.email }, 201)
   return setAuthCookies(response, accessToken, refreshToken)

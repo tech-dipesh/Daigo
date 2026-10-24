@@ -14,7 +14,7 @@ export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, name: true, emailVerifiedAt: true, activeRole: true, trustScore: true, isBanned: true, createdAt: true },
+    select: { id: true, email: true, name: true, language: true, emailVerifiedAt: true, activeRole: true, trustScore: true, isBanned: true, createdAt: true },
   })
   if (!user) {
     throw new AppError("User not found", 404)
@@ -28,14 +28,15 @@ const patchSchema = z
     role: z.enum(["RIDER", "DRIVER"]).optional(),
     name: z.string().min(3).max(15).optional(),
     email: z.email().optional(),
+    language: z.enum(["EN", "NE", "HI"]).optional(),
     currentPassword: z.string().optional(),
   })
-  .refine((b) => b.role || b.name || b.email, { message: "Send at least one field to update" })
+  .refine((b) => b.role || b.name || b.email || b.language, { message: "Send at least one field to update" })
 
 export const PATCH = withErrorHandling(async (request) => {
   const userId = getUserId(request)
   const body = await parseJsonBody(request)
-  const { role, name, email, currentPassword } = patchSchema.parse(body)
+  const { role, name, email, language, currentPassword } = patchSchema.parse(body)
   const current = await db.user.findUniqueOrThrow({ where: { id: userId } })
   if (role && current.staffRole) throw new AppError("Staff accounts cannot switch rider or driver mode", 403)
   const newEmail = email && email !== current.email ? email : undefined
@@ -45,8 +46,8 @@ export const PATCH = withErrorHandling(async (request) => {
   }
   const user = await db.user.update({
     where: { id: userId },
-    data: { activeRole: role, name, email: newEmail, emailVerifiedAt: newEmail ? null : undefined },
-    select: { id: true, email: true, name: true, activeRole: true },
+    data: { activeRole: role, name, language, email: newEmail, emailVerifiedAt: newEmail ? null : undefined },
+    select: { id: true, email: true, name: true, language: true, activeRole: true },
   })
   if (newEmail) {
     const token = await issueVerificationToken(userId, "EMAIL_VERIFICATION", emailLifetimeMs)
