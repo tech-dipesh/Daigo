@@ -12,7 +12,8 @@ const s3 = new S3Client({
 })
 
 export const signUpload = (key: string, contentType: string, size: number) => getSignedUrl(s3, new PutObjectCommand({ Bucket, Key: key, ContentType: contentType, ContentLength: size }), { expiresIn })
-export const signRead = (key: string) => getSignedUrl(s3, new GetObjectCommand({ Bucket, Key: key }), { expiresIn })
+export const signRead = (key: string, seconds = expiresIn) => getSignedUrl(s3, new GetObjectCommand({ Bucket, Key: key }), { expiresIn: seconds })
+export const putObject = (key: string, body: string, contentType: string) => s3.send(new PutObjectCommand({ Bucket, Key: key, Body: body, ContentType: contentType }))
 export const removeObject = (key: string) => s3.send(new DeleteObjectCommand({ Bucket, Key: key }))
 
 export async function objectSize(key: string) {

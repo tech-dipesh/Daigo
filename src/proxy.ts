@@ -7,6 +7,8 @@ import { rateLimit } from "@/lib/infra/clients/rate-limit"
 const publicPaths = [
   "/api/v1/signup",
   "/api/v1/login",
+  "/api/v1/login/verify",
+  "/api/v1/jobs/run",
   "/api/v1/refresh",
   "/api/v1/password-reset/request",
   "/api/v1/password-reset/confirm",
