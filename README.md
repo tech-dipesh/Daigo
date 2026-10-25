@@ -1,4 +1,5 @@
 # Daigo:
+- Daigo is a full stack platform built around the Next.js ecosystem, TypeScript, PostgreSQL, PostGIS, and Redis. The backend focuses on location based matching, distance calculations, dynamic pricing, and reliable request processing. PostGIS handles geospatial queries, while Redis supports caching, temporary data, and queue mechanisms for asynchronous tasks. The architecture also incorporates JWT refresh token rotation, OTP verification, real time communication through WebSockets, and payment integration with Razorpay. I’m designing the backend around clear service boundaries, efficient database queries, and dependable workflows, with attention to concurrency, request validation, and failure handling across interconnected services.
 -  A carpooling app for students and office-goers. rider can post a request from to destination with App Push from that travel on that route from a different vehicle with price aggreed, and also if no single driver cover the route it can chain two driver through a relay with one transfer.
 - Carpooling System for the Somethings that is shared but with key mvp features user can request their timing for the future timings
 - With Key FEatures for the Affordable people with students and Working prffoffsional with a shareed people
@@ -221,7 +222,7 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 - Complaint records carry a visible status flow: open → in review → resolved / rejected (resolution itself is manual "contact support" for now, not automated)
 - CSV export: 30-day window by default, with a custom date range option; heavy/custom exports run through a background job (see Infrastructure) rather than blocking a request
 
-## Pretty Impressive FEatures That i Build Over Time:
+## Pretty Impressive FEatures That i Build Over Time: (Build All this Featuree at 20 October)
 ### Relay Matching: 
   - Two drivers are chained through a walkable transfer point, and the trip only commits when both drivers accept, in one transaction. with the like a flight search for multiple stop points.
 ### Concurrency-safe live accept:

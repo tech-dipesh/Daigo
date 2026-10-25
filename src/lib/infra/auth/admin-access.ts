@@ -1,16 +1,13 @@
 import type { NextRequest } from "next/server"
-import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError } from "@/lib/infra/http/response"
+import * as userRepo from "@/lib/repository/user-repo"
 
-export async function requireStaff(request: NextRequest, only?: "SUPER_ADMIN") {
-  const user = await db.user.findUnique({
-    where: { id: getUserId(request) },
-    select: { id: true, staffRole: true },
-  })
+export type Staff = { id: string; staffRole: "MODERATOR" | "SUPER_ADMIN" }
 
+export async function requireStaff(request: NextRequest, only?: "SUPER_ADMIN"): Promise<Staff> {
+  const user = await userRepo.staffInfo(getUserId(request))
   if (!user?.staffRole) throw new AppError("Staff access only", 403)
   if (only && user.staffRole !== only) throw new AppError("Super admin access only", 403)
-
-  return user
+  return { id: user.id, staffRole: user.staffRole }
 }
