@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { verifyAccessToken, rotateRefreshToken } from "@/lib/infra/auth/auth"
+import { verifyAccessToken, rotateRefreshToken } from "@/lib/infra/auth/token"
 import { setAuthCookies } from "@/lib/infra/auth/cookies"
 import { rateLimit } from "@/lib/infra/clients/rate-limit"
 

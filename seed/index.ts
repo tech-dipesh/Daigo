@@ -20,8 +20,7 @@ const zones: [string, number, number, number, number, number][] = [
   ["Gurugram", 28.38, 28.52, 76.93, 77.12, 1.0],
 ]
 
-  ;(async () => {
-  console.log("reach here let's see");
+;(async () => {
   const rateJobs = rates.map(([vehicleType, perKm]) => db.fareRate.upsert({ where: { vehicleType }, create: { vehicleType, perKm }, update: {} }))
   const zoneJobs = zones.map(([name, minLat, maxLat, minLng, maxLng, multiplier]) =>
     db.zone.upsert({ where: { name }, create: { name, minLat, maxLat, minLng, maxLng, multiplier }, update: {} }),
