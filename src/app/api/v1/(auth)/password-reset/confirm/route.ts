@@ -1,28 +1,11 @@
-import { hashPassword } from "@/lib/infra/auth/password"
-import { db } from "@/lib/infra/clients/db"
-import { AppError, successResponse } from "@/lib/infra/http/response"
+import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import { consumeVerificationToken } from "@/lib/infra/auth/verification-token"
+import * as passwordResetService from "@/lib/services/password-reset-service"
 import { passwordResetConfirmSchema } from "@/lib/validation/auth-schema"
+
 export const POST = withErrorHandling(async (request) => {
-  const { token, newPassword } = passwordResetConfirmSchema.parse(await parseJsonBody(request))
-  const userId = await consumeVerificationToken(token, "PASSWORD_RESET")
-  if (!userId) {
-    throw new AppError("This reset code is invalid or has expired", 400)
-  }
-  const passwordHash = await hashPassword(newPassword)
-  await db.$transaction(async (tx) => {
-    await tx.user.update({ where: { id: userId }, data: { passwordHash } })
-    await tx.refreshToken.updateMany({
-      where: { userId, revokedAt: null },
-      data: { revokedAt: new Date() },
-    })
-  })
-  return successResponse({ message: "Password updated. Please log in again." })
+  const input = passwordResetConfirmSchema.parse(await parseJsonBody(request))
+  const result = await passwordResetService.confirmPasswordReset(input)
+  return successResponse(result)
 })
-/*
-  reset will always kill a existing session
-  with also drop our prev old
-*/
-// a reset should kill every existing session, not just stop future logins with the old password

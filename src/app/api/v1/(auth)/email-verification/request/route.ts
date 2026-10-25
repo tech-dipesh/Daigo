@@ -1,27 +1,9 @@
 import { getUserId } from "@/lib/infra/auth/auth"
-import { AppError, successResponse } from "@/lib/infra/http/response"
+import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
-import { sendEmailBestEffort } from "@/lib/infra/clients/email"
-import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
-import { env } from "@/lib/infra/clients/env"
-import { issueOtp, otpMinutes } from "@/lib/infra/auth/otp"
-import * as userRepo from "@/lib/repository/user-repo"
-
-const tokenLifetimeMs = 1000 * 60 * 60 * 24
+import * as emailVerificationService from "@/lib/services/email-verification-service"
 
 export const POST = withErrorHandling(async (request) => {
-  const userId = getUserId(request)
-  const user = await userRepo.getById(userId)
-  if (user.emailVerifiedAt) {
-    throw new AppError("This email is already verified", 409)
-  }
-  const token = await issueVerificationToken(userId, "EMAIL_VERIFICATION", tokenLifetimeMs)
-  const { code } = await issueOtp(userId, "EMAIL_VERIFY")
-  const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${token}`
-  await sendEmailBestEffort({
-    to: user.email,
-    subject: "Verify your DaiGo email",
-    text: `Click here to verify: ${verifyLink}\n\nOr use this 6 digit code within ${otpMinutes} minutes: ${code}\n\nThe link expires in 24 hours.`,
-  })
-  return successResponse({ message: "Verification code sent." })
+  const result = await emailVerificationService.requestEmailVerification(getUserId(request))
+  return successResponse(result)
 })

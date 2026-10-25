@@ -1,36 +1,16 @@
-import { db } from "@/lib/infra/clients/db"
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
-import { sendEmailBestEffort } from "@/lib/infra/clients/email"
-import { notify } from "@/lib/infra/realtime/notify"
-import { deleteUpload } from "@/lib/infra/storage/uploads"
 import type { RouteParams } from "@/types/api"
+import * as adminService from "@/lib/services/admin-service"
 import { documentReviewSchema } from "@/lib/validation/admin-schema"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {
   await requireStaff(request)
   const id = await idFrom(params)
-  const { status, reason } = documentReviewSchema.parse(await parseJsonBody(request))
-  const document = await db.driverDocument.update({
-    where: { id },
-    data: {
-      verificationStatus: status,
-      rejectionReason: status === "REJECTED" ? reason : null,
-      reviewedAt: new Date(),
-    },
-    include: { user: true },
-  })
-  await sendEmailBestEffort({
-    to: document.user.email,
-    subject: status === "APPROVED" ? "Your licence has been approved" : "Your licence was not approved",
-    text: status === "APPROVED"
-        ? "Your licence is approved. You can now create routes."
-        : `Your licence was rejected.${reason ? ` Reason: ${reason}` : ""}`,
-  })
-  await deleteUpload(document.licenseUploadId)
-  await notify(document.user.id, "VERIFICATION", status === "APPROVED" ? "Licence approved" : "Licence rejected", `Your licence was ${status.toLowerCase()}`, { documentId: document.id })
+  const input = documentReviewSchema.parse(await parseJsonBody(request))
+  const document = await adminService.reviewDocument(id, input)
   return successResponse(document)
 })

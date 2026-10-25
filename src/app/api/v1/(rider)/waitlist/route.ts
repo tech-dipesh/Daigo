@@ -1,10 +1,9 @@
-import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
+import * as requestService from "@/lib/services/request-service"
 
 export const GET = withErrorHandling(async (request) => {
-  const riderId = getUserId(request)
-  const entries = await db.waitlist.findMany({ where: { riderId, status: "WAITING", expiresAt: { gt: new Date() } }, orderBy: { createdAt: "desc" } })
+  const entries = await requestService.listWaitlist(getUserId(request))
   return successResponse(entries)
 })

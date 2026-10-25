@@ -16,3 +16,8 @@ export const autoAcceptSchema = z.object({
 })
 
 export const offerSchema = z.object({ price: z.number().int().min(1) })
+
+export type MatchDecisionInput = z.infer<typeof matchDecisionSchema>
+export type RelayDecisionInput = z.infer<typeof relayDecisionSchema>
+export type AutoAcceptInput = z.infer<typeof autoAcceptSchema>
+export type OfferInput = z.infer<typeof offerSchema>

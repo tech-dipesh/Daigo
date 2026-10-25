@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/infra/clients/db"
-import { AppError, successResponse } from "@/lib/infra/http/response"
+import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import { consumeVerificationToken } from "@/lib/infra/auth/verification-token"
+import * as emailVerificationService from "@/lib/services/email-verification-service"
 import { emailConfirmSchema } from "@/lib/validation/auth-schema"
 
 const htmlPage = (message: string) =>
@@ -13,22 +12,12 @@ const htmlPage = (message: string) =>
 
 export const GET = withErrorHandling(async (request) => {
   const token = request.nextUrl.searchParams.get("token") ?? ""
-  const userId = await consumeVerificationToken(token, "EMAIL_VERIFICATION")
-  if (!userId) {
-    return htmlPage("This verification link is invalid or has expired.")
-  }
-  await db.user.update({ where: { id: userId }, data: { emailVerifiedAt: new Date() } })
-  return htmlPage("Your email is verified. You can close this tab.")
+  const verified = await emailVerificationService.verifyEmailLink(token)
+  return htmlPage(verified ? "Your email is verified. You can close this tab." : "This verification link is invalid or has expired.")
 })
 
 export const POST = withErrorHandling(async (request) => {
-  const { token } = emailConfirmSchema.parse(await parseJsonBody(request))
-  const userId = await consumeVerificationToken(token, "EMAIL_VERIFICATION")
-  if (!userId) throw new AppError("This verification code is invalid or has expired", 400)
-  const user = await db.user.update({
-    where: { id: userId },
-    data: { emailVerifiedAt: new Date() },
-    select: { id: true, email: true, emailVerifiedAt: true },
-  })
+  const input = emailConfirmSchema.parse(await parseJsonBody(request))
+  const user = await emailVerificationService.verifyEmailToken(input)
   return successResponse(user)
 })

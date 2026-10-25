@@ -17,3 +17,7 @@ export const notificationQuerySchema = z.object({
 })
 
 export const warningQuerySchema = z.object({ scope: z.enum(["current", "all"]).default("current") })
+
+export type MePatchInput = z.infer<typeof mePatchSchema>
+export type NotificationQueryInput = z.infer<typeof notificationQuerySchema>
+export type WarningQueryInput = z.infer<typeof warningQuerySchema>

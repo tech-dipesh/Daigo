@@ -1,43 +1,12 @@
-import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import { sendEmailBestEffort } from "@/lib/infra/clients/email"
-import { publishAdmin } from "@/lib/infra/realtime/publish"
+import * as safetyService from "@/lib/services/safety-service"
 import { emergencySchema } from "@/lib/validation/emergency-schema"
-import * as userRepo from "@/lib/repository/user-repo"
 
 export const POST = withErrorHandling(async (request) => {
-  const userId = getUserId(request)
-  const { tripId, lat, lng } = emergencySchema.parse(await parseJsonBody(request))
-  const user = await db.user.findUniqueOrThrow({
-    where: { id: userId },
-    include: { emergencyContacts: { where: { isPrimary: true }, take: 1 } },
-  })
-  const event = await db.emergencyEvent.create({
-    data: { userId, tripId, lat, lng },
-  })
-  await publishAdmin("emergency.new", { eventId: event.id, userId, tripId, lat, lng })
-  /*
-  two sep people get a alert with a admin and the emregency contact
-*/
-  const superAdmins = await userRepo.superAdmins()
-  const mapsLink = `https://maps.google.com/?q=${lat},${lng}`
-  for (const admin of superAdmins) {
-    await sendEmailBestEffort({
-      to: admin.email,
-      subject: "HIGH ALERT: DaiGo emergency triggered",
-      text: `${user.email} triggered an emergency. Location: ${mapsLink}`,
-    })
-  }
-  const contactEmail = user.emergencyContacts[0]?.email
-  if (contactEmail) {
-    await sendEmailBestEffort({
-      to: contactEmail,
-      subject: "DaiGo emergency alert",
-      text: `${user.name ?? user.email} may need help. Last known location: ${mapsLink}`,
-    })
-  }
+  const input = emergencySchema.parse(await parseJsonBody(request))
+  const event = await safetyService.triggerEmergency(getUserId(request), input)
   return successResponse(event, 201)
 })

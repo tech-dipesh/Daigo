@@ -56,3 +56,18 @@ export const zonePatchSchema = z
     multiplier: z.number().min(0.5).max(3).optional(),
   })
   .refine((b) => b.name || b.multiplier, { message: "Send a name or multiplier to update" })
+
+export type AnalyticsQueryInput = z.infer<typeof analyticsQuerySchema>
+export type AppealDecisionInput = z.infer<typeof appealDecisionSchema>
+export type AppealListQueryInput = z.infer<typeof appealListQuerySchema>
+export type ComplaintDecisionInput = z.infer<typeof complaintDecisionSchema>
+export type ComplaintListQueryInput = z.infer<typeof complaintListQuerySchema>
+export type DocumentReviewInput = z.infer<typeof documentReviewSchema>
+export type ExportInput = z.infer<typeof exportSchema>
+export type FareRatePatchInput = z.infer<typeof fareRatePatchSchema>
+export type FareRateTypeInput = z.infer<typeof fareRateTypeSchema>
+export type AdminJobInput = z.infer<typeof adminJobSchema>
+export type StaffRoleInput = z.infer<typeof staffRoleSchema>
+export type VehicleReviewInput = z.infer<typeof vehicleReviewSchema>
+export type VerificationQueryInput = z.infer<typeof verificationQuerySchema>
+export type ZonePatchInput = z.infer<typeof zonePatchSchema>

@@ -1,30 +1,21 @@
 import { getUserId } from "@/lib/infra/auth/auth"
-import { getTripForUser } from "@/lib/infra/auth/trip-access"
-import { AppError, successResponse } from "@/lib/infra/http/response"
+import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
-import { publishEvent } from "@/lib/infra/realtime/publish"
-import { pushMessage, readMessages } from "@/lib/infra/realtime/chat"
 import type { RouteParams } from "@/types/api"
+import * as chatService from "@/lib/services/chat-service"
 import { tripMessageSchema } from "@/lib/validation/trip-schema"
 
 export const GET = withErrorHandling<RouteParams>(async (request, { params }) => {
-  const userId = getUserId(request)
   const id = await idFrom(params)
-  const trip = await getTripForUser(id, userId)
-  const messages = await readMessages(trip.id)
+  const messages = await chatService.listMessages(getUserId(request), id)
   return successResponse(messages)
 })
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
-  const userId = getUserId(request)
   const id = await idFrom(params)
-  const trip = await getTripForUser(id, userId)
-  if (trip.status !== "PENDING_PICKUP" && trip.status !== "IN_PROGRESS") throw new AppError("Chat is closed for this trip", 409)
-  const { text } = tripMessageSchema.parse(await parseJsonBody(request))
-  const message = await pushMessage(trip.id, userId, text)
-  const other = trip.riderId === userId ? trip.driverId : trip.riderId
-  await publishEvent(other, "chat.message", { tripId: trip.id, message })
+  const input = tripMessageSchema.parse(await parseJsonBody(request))
+  const message = await chatService.sendMessage(getUserId(request), id, input)
   return successResponse(message, 201)
 })

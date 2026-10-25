@@ -1,7 +1,7 @@
 import { upgradeWebSocket } from "@vercel/functions"
 import type { WebSocketData } from "@vercel/functions"
 import type { NextRequest } from "next/server"
-import { db } from "@/lib/infra/clients/db"
+import * as userRepo from "@/lib/repository/user-repo"
 import { redis } from "@/lib/infra/clients/redis"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, errorResponse } from "@/lib/infra/http/response"
@@ -22,7 +22,7 @@ function parseMessage(raw: WebSocketData) {
 
 export async function GET(request: NextRequest) {
   const userId = getUserId(request)
-  const { activeRole, staffRole } = await db.user.findUniqueOrThrow({ where: { id: userId }, select: { activeRole: true, staffRole: true } })
+  const { activeRole, staffRole } = await userRepo.roles(userId)
   const channels = staffRole ? [userChannel(userId), adminChannel] : [userChannel(userId)]
   try {
     return upgradeWebSocket((ws) => {

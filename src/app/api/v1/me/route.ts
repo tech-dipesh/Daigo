@@ -1,50 +1,17 @@
-import { verifyPassword } from "@/lib/infra/auth/password"
-import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
-import { AppError, successResponse } from "@/lib/infra/http/response"
+import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import { sendEmailBestEffort } from "@/lib/infra/clients/email"
-import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
-import { env } from "@/lib/infra/clients/env"
-import { getWarningSummary } from "@/lib/infra/economy/warnings"
+import * as userService from "@/lib/services/user-service"
 import { mePatchSchema } from "@/lib/validation/user-schema"
-import * as userRepo from "@/lib/repository/user-repo"
 
 export const GET = withErrorHandling(async (request) => {
-  const userId = getUserId(request)
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: { id: true, email: true, name: true, language: true, emailVerifiedAt: true, activeRole: true, trustScore: true, isBanned: true, createdAt: true },
-  })
-  if (!user) {
-    throw new AppError("User not found", 404)
-  }
-  const warnings = await getWarningSummary(userId)
-  return successResponse({ ...user, warnings })
+  const me = await userService.getMe(getUserId(request))
+  return successResponse(me)
 })
-const emailLifetimeMs = 1000 * 60 * 60 * 24
 
 export const PATCH = withErrorHandling(async (request) => {
-  const userId = getUserId(request)
-  const body = await parseJsonBody(request)
-  const { role, name, email, language, currentPassword } = mePatchSchema.parse(body)
-  const current = await userRepo.getById(userId)
-  if (role && current.staffRole) throw new AppError("Staff accounts cannot switch rider or driver mode", 403)
-  const newEmail = email && email !== current.email ? email : undefined
-  if (newEmail) {
-    const ok = currentPassword ? await verifyPassword(currentPassword, current.passwordHash) : false
-    if (!ok) throw new AppError("Enter your current password to change email", 403)
-  }
-  const user = await db.user.update({
-    where: { id: userId },
-    data: { activeRole: role, name, language, email: newEmail, emailVerifiedAt: newEmail ? null : undefined },
-    select: { id: true, email: true, name: true, language: true, activeRole: true },
-  })
-  if (newEmail) {
-    const token = await issueVerificationToken(userId, "EMAIL_VERIFICATION", emailLifetimeMs)
-    const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${token}`
-    await sendEmailBestEffort({ to: newEmail, subject: "Verify your new DaiGo email", text: `Click here to verify: ${verifyLink}\n\nThis expires in 24 hours.` })
-  }
+  const input = mePatchSchema.parse(await parseJsonBody(request))
+  const user = await userService.updateMe(getUserId(request), input)
   return successResponse(user)
 })

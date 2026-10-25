@@ -6,3 +6,5 @@ export const uploadSignSchema = z.object({
   contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
   sizeBytes: z.number().int().min(1).max(maxUploadBytes),
 })
+
+export type UploadSignInput = z.infer<typeof uploadSignSchema>

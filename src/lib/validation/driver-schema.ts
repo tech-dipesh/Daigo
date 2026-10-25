@@ -30,3 +30,7 @@ export const vehicleSchema = z.object({
   rcNumber: z.string().min(6).max(20),
   rcUploadId: z.uuid(),
 })
+
+export type DriverDocumentInput = z.infer<typeof driverDocumentSchema>
+export type RouteInput = z.infer<typeof routeSchema>
+export type VehicleInput = z.infer<typeof vehicleSchema>

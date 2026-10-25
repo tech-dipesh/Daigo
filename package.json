@@ -50,7 +50,6 @@
     "next-list": "^2.0.0",
     "prisma": "^7.10.0",
     "tailwindcss": "^4",
-    "tsx": "^4.20.0",
     "typescript": "^5"
   },
   "packageManager": "pnpm@12.14.0"

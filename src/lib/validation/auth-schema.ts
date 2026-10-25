@@ -29,3 +29,11 @@ export const signupSchema = z.object({
   email: z.email(),
   password: z.string().min(8),
 })
+
+export type EmailConfirmInput = z.infer<typeof emailConfirmSchema>
+export type EmailCodeInput = z.infer<typeof emailCodeSchema>
+export type LoginInput = z.infer<typeof loginSchema>
+export type LoginVerifyInput = z.infer<typeof loginVerifySchema>
+export type PasswordResetConfirmInput = z.infer<typeof passwordResetConfirmSchema>
+export type PasswordResetRequestInput = z.infer<typeof passwordResetRequestSchema>
+export type SignupInput = z.infer<typeof signupSchema>

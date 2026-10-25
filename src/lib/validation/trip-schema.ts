@@ -20,7 +20,8 @@ export const paymentConfirmSchema = z.object({
 })
 
 export const paymentSchema = z.object({
-  proofPhotoUrl: z.url(),
+  method: z.enum(["ONLINE", "CASH"]),
+  redeemCoins: z.boolean().default(false),
 })
 
 export const ratingSchema = z.object({
@@ -32,3 +33,12 @@ export const ratingSchema = z.object({
 export const verifyPickupSchema = z.object({
   otp: z.string().regex(/^\d{6}$/),
 })
+
+export type CancelInput = z.infer<typeof cancelSchema>
+export type LocationInput = z.infer<typeof locationSchema>
+export type TripMessageInput = z.infer<typeof tripMessageSchema>
+export type NoShowReasonInput = z.infer<typeof noShowReasonSchema>
+export type PaymentConfirmInput = z.infer<typeof paymentConfirmSchema>
+export type PaymentInput = z.infer<typeof paymentSchema>
+export type RatingInput = z.infer<typeof ratingSchema>
+export type VerifyPickupInput = z.infer<typeof verifyPickupSchema>

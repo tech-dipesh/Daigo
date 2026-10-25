@@ -13,3 +13,6 @@ export const emergencySchema = z.object({
   lat: z.number(),
   lng: z.number(),
 })
+
+export type EmergencyContactInput = z.infer<typeof emergencyContactSchema>
+export type EmergencyInput = z.infer<typeof emergencySchema>

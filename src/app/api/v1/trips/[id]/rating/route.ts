@@ -1,40 +1,15 @@
-import { db } from "@/lib/infra/clients/db"
 import { getUserId } from "@/lib/infra/auth/auth"
-import { AppError, successResponse } from "@/lib/infra/http/response"
+import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
-import { idFrom } from "@/lib/infra/http/route-params"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import { getTripForUser } from "@/lib/infra/auth/trip-access"
-import { ratingDelta } from "@/lib/infra/economy/trust"
-import * as userRepo from "@/lib/repository/user-repo"
-import { clearChat } from "@/lib/infra/realtime/chat"
+import { idFrom } from "@/lib/infra/http/route-params"
 import type { RouteParams } from "@/types/api"
+import * as ratingService from "@/lib/services/rating-service"
 import { ratingSchema } from "@/lib/validation/trip-schema"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
-  const raterId = getUserId(request)
   const id = await idFrom(params)
-  const trip = await getTripForUser(id, raterId)
-  if (trip.status !== "COMPLETED") {
-    throw new AppError("You can only rate a completed trip", 409)
-  }
-  const alreadyRated = await db.rating.findUnique({
-    where: { tripId_raterId: { tripId: trip.id, raterId } },
-  })
-  if (alreadyRated) {
-    throw new AppError("You have already rated this trip", 409)
-  }
-  const body = await parseJsonBody(request)
-  const data = ratingSchema.parse(body)
-  const ratedUserId = trip.riderId === raterId ? trip.driverId : trip.riderId
-  const rating = await db.$transaction(async (tx) => {
-    const created = await tx.rating.create({
-      data: { ...data, tripId: trip.id, raterId, ratedUserId },
-    })
-    await userRepo.adjustTrust(tx, ratedUserId, ratingDelta(data.score))
-    return created
-  })
-  const ratingCount = await db.rating.count({ where: { tripId: trip.id } })
-  if (ratingCount >= 2) await clearChat(trip.id)
-  return successResponse(rating, 201)
+  const input = ratingSchema.parse(await parseJsonBody(request))
+  const result = await ratingService.rateTrip(getUserId(request), id, input)
+  return successResponse(result, 201)
 })

@@ -29,3 +29,6 @@ export const priceEstimateQuerySchema = z.object({
   when: z.coerce.date().optional(),
   minor: z.enum(["true", "false"]).default("false"),
 })
+
+export type RideRequestInput = z.infer<typeof rideRequestSchema>
+export type PriceEstimateQueryInput = z.infer<typeof priceEstimateQuerySchema>

@@ -11,3 +11,6 @@ export const complaintSchema = z.object({
   type: z.enum(["PAYMENT", "ROUTE", "RATING", "CONDUCT", "OTHER"]),
   text: z.string().trim().min(10).max(500),
 })
+
+export type AppealInput = z.infer<typeof appealSchema>
+export type ComplaintInput = z.infer<typeof complaintSchema>
