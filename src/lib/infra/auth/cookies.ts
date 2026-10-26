@@ -22,3 +22,9 @@ export function setAuthCookies(response: NextResponse, accessToken: string, refr
 
   return response
 }
+
+export function clearAuthCookies(response: NextResponse) {
+  response.cookies.set("access_token", "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 })
+  response.cookies.set("refresh_token", "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 })
+  return response
+}
