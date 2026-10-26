@@ -4,8 +4,9 @@ import { env } from "@/lib/infra/clients/env"
 import { verifyPassword } from "@/lib/infra/auth/password"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import { getWarningSummary } from "@/lib/infra/economy/warnings"
+import * as tripRepo from "@/lib/repository/trip-repo"
 import * as userRepo from "@/lib/repository/user-repo"
-import type { MePatchInput } from "@/lib/validation/user-schema"
+import type { AccountDeleteInput, MePatchInput } from "@/lib/validation/user-schema"
 
 import { coinsRequiredToRedeem, redemptionDiscountRupees } from "@/lib/infra/economy/coins"
 const emailLifetimeMs = 1000 * 60 * 60 * 24
@@ -45,4 +46,13 @@ export async function getCoinStatus(userId: string) {
     discountRupees: eligible ? redemptionDiscountRupees : 0,
     coinsNeeded: eligible ? 0 : coinsRequiredToRedeem - user.coinBalance,
   }
+}
+
+export async function deleteMe(userId: string, { currentPassword }: AccountDeleteInput) {
+  const user = await userRepo.getById(userId)
+  if (user.staffRole) throw new AppError("Staff accounts can't be deleted here", 403)
+  if (!(await verifyPassword(currentPassword, user.passwordHash))) throw new AppError("Wrong password", 403)
+  if (await tripRepo.hasActiveTrip(userId)) throw new AppError("Finish or cancel your active trip first", 409)
+  await userRepo.softDelete(userId)
+  return { deleted: true }
 }

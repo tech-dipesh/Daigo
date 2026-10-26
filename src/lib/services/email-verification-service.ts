@@ -5,6 +5,7 @@ import { issueOtp, otpMinutes, verifyOtp } from "@/lib/infra/auth/otp"
 import { consumeVerificationToken, issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import * as userRepo from "@/lib/repository/user-repo"
 import type { EmailCodeInput, EmailConfirmInput } from "@/lib/validation/auth-schema"
+import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -39,6 +40,7 @@ export async function verifyEmailToken({ token }: EmailConfirmInput) {
 }
 
 export async function verifyEmailCode(userId: string, { code }: EmailCodeInput) {
+  await enforceLimit("code", userId)
   const ok = await verifyOtp(userId, "EMAIL_VERIFY", code)
   if (!ok) throw new AppError("Invalid or expired code", 400)
   return userRepo.verifyEmail(userId)

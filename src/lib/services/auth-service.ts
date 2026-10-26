@@ -8,6 +8,7 @@ import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import * as otpRepo from "@/lib/repository/otp-repo"
 import * as userRepo from "@/lib/repository/user-repo"
 import type { LoginInput, LoginVerifyInput, SignupInput } from "@/lib/validation/auth-schema"
+import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -31,6 +32,7 @@ export async function signup({ email, password }: SignupInput) {
 }
 
 export async function login({ email, password }: LoginInput) {
+  await enforceLimit("login", email.toLowerCase())
   const user = await userRepo.findByEmail(email)
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     throw new AppError("Invalid email or password", 401)
@@ -45,6 +47,7 @@ export async function login({ email, password }: LoginInput) {
 }
 
 export async function verifyAdminLogin({ challengeId, code }: LoginVerifyInput) {
+  await enforceLimit("code", challengeId)
   const row = await otpRepo.findById(challengeId)
   const ok = row && row.purpose === "ADMIN_LOGIN" ? await verifyOtp(row.userId, "ADMIN_LOGIN", code, challengeId) : false
   if (!row || !ok) throw new AppError("Invalid or expired code", 401)

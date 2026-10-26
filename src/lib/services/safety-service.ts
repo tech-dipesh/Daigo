@@ -3,6 +3,7 @@ import { publishAdmin } from "@/lib/infra/realtime/publish"
 import * as emergencyRepo from "@/lib/repository/emergency-repo"
 import * as userRepo from "@/lib/repository/user-repo"
 import type { EmergencyContactInput, EmergencyInput } from "@/lib/validation/emergency-schema"
+import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 export const listContacts = (userId: string) => emergencyRepo.listContacts(userId)
 
@@ -13,6 +14,7 @@ export async function addContact(userId: string, { yourName, ...data }: Emergenc
 }
 
 export async function triggerEmergency(userId: string, { tripId, lat, lng }: EmergencyInput) {
+  await enforceLimit("emergency", userId)
   const user = await userRepo.withPrimaryContact(userId)
   const event = await emergencyRepo.createEvent({ userId, tripId, lat, lng })
   await publishAdmin("emergency.new", { eventId: event.id, userId, tripId, lat, lng })

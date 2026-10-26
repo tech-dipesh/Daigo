@@ -4,8 +4,10 @@ import { signRead, signUpload, objectSize } from "@/lib/infra/storage/s3"
 import { deleteUpload, keyFor, maxUploadBytes, signedExpirySeconds } from "@/lib/infra/storage/uploads"
 import * as uploadRepo from "@/lib/repository/upload-repo"
 import type { UploadSignInput } from "@/lib/validation/upload-schema"
+import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 export async function signNewUpload(userId: string, { kind, contentType, sizeBytes }: UploadSignInput) {
+  await enforceLimit("upload", userId)
   await requireMember(userId)
   const key = keyFor(kind, userId, contentType)
   const upload = await uploadRepo.create({ userId, kind, key, contentType, sizeBytes })
