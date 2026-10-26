@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto"
 import { db } from "@/lib/infra/clients/db"
 import { clampTrust } from "@/lib/infra/economy/trust"
 
@@ -38,3 +39,18 @@ export const withPrimaryContact = (id: string) => db.user.findUniqueOrThrow({ wh
 export const setStaffRole = (id: string, staffRole: "MODERATOR" | "SUPER_ADMIN" | null) => db.user.update({ where: { id }, data: { staffRole }, select: { id: true, email: true, staffRole: true } })
 export const roles = (id: string) => db.user.findUniqueOrThrow({ where: { id }, select: { activeRole: true, staffRole: true } })
 export const adjustTrustNow = (userId: string, delta: number) => adjustTrust(db, userId, delta)
+
+/*
+  soft delete: the row stays for history but the person is gone
+  email is anonymised, password becomes unusable and the live stuff is closed
+*/
+export const softDelete = (id: string) =>
+  db.$transaction(async (tx) => {
+    await tx.user.update({ where: { id }, data: { deletedAt: new Date(), email: `deleted-${id}@deleted.invalid`, passwordHash: randomBytes(32).toString("hex"), name: null, profilePhotoUrl: null } })
+    await tx.refreshToken.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() } })
+    await tx.route.updateMany({ where: { driverId: id, status: "ACTIVE" }, data: { status: "PAUSED" } })
+    await tx.rideRequest.updateMany({ where: { riderId: id, status: "PENDING" }, data: { status: "EXPIRED" } })
+    await tx.waitlist.updateMany({ where: { riderId: id, status: "WAITING" }, data: { status: "CANCELLED" } })
+    await tx.emergencyContact.deleteMany({ where: { userId: id } })
+    await tx.savedRoute.deleteMany({ where: { userId: id } })
+  })

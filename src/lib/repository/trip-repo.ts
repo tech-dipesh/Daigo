@@ -57,9 +57,9 @@ export const saveNoShowReason = (id: string, riderId: string, reason: string, bo
 
 export const findWithLocationContext = (id: string) => db.trip.findUnique({ where: { id }, include: { rideRequest: true, route: { include: { vehicle: true } }, driver: true } })
 export const findWithPeople = (id: string) => db.trip.findUniqueOrThrow({ where: { id }, include: { rideRequest: true, rider: true, driver: true, route: { include: { vehicle: true } } } })
-export const findBySharedToken = (shareToken: string) => db.trip.findUnique({ where: { shareToken }, include: { route: { include: { vehicle: true } } } })
+export const findBySharedToken = (shareToken: string) => db.trip.findUnique({ where: { shareToken }, include: { rideRequest: true, route: { include: { vehicle: true } } } })
 export const findCompletedOwned = (id: string, riderId: string) => db.trip.findFirst({ where: { id, riderId, status: "COMPLETED" }, include: { rideRequest: true } })
-export const setShareToken = (id: string, shareToken: string) => db.trip.update({ where: { id }, data: { shareToken } })
+export const setShareToken = (id: string, shareToken: string | null) => db.trip.update({ where: { id }, data: { shareToken } })
 export const saveLocation = (id: string, lat: number, lng: number, isDeviated: boolean) => db.trip.update({ where: { id }, data: { lastLat: lat, lastLng: lng, lastLocationAt: new Date(), isDeviated } })
 
 export const completedForRider = (riderId: string) => db.trip.findMany({ where: { riderId, status: "COMPLETED" }, select: { priceEstimate: true, distanceKm: true } })
@@ -67,3 +67,4 @@ export const recentForRider = (riderId: string) => db.trip.findMany({ where: { r
 export const activeForRider = (riderId: string) => db.trip.findFirst({ where: { riderId, status: { in: ["PENDING_PICKUP", "IN_PROGRESS"] } }, select: { id: true, status: true, priceEstimate: true } })
 export const completedSummaryForDriver = (driverId: string) => db.trip.aggregate({ where: { driverId, status: "COMPLETED" }, _count: { _all: true }, _sum: { priceEstimate: true } })
 export const upcomingCountForDriver = (driverId: string) => db.trip.count({ where: { driverId, status: "PENDING_PICKUP" } })
+export const hasActiveTrip = async (userId: string) => (await db.trip.count({ where: { OR: [{ riderId: userId }, { driverId: userId }], status: { in: ["PENDING_PICKUP", "IN_PROGRESS"] } } })) > 0
