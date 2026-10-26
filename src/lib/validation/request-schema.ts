@@ -16,6 +16,7 @@ export const rideRequestSchema = z.object({
   womenOnly: z.boolean().default(false),
   acOnly: z.boolean().default(false),
   allowShared: z.boolean().default(false),
+  forEmail: z.email().optional(),
   passenger: z.object({ name: z.string().min(3).max(15), age: z.number().int().min(1).max(13) }).optional(),
   vehiclePreference: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]).optional(),
 })

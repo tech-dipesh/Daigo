@@ -18,6 +18,9 @@ export const notificationQuerySchema = z.object({
 
 export const warningQuerySchema = z.object({ scope: z.enum(["current", "all"]).default("current") })
 
+export const accountDeleteSchema = z.object({ currentPassword: z.string().min(1) })
+
 export type MePatchInput = z.infer<typeof mePatchSchema>
 export type NotificationQueryInput = z.infer<typeof notificationQuerySchema>
 export type WarningQueryInput = z.infer<typeof warningQuerySchema>
+export type AccountDeleteInput = z.infer<typeof accountDeleteSchema>
