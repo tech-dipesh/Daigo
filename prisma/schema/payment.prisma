@@ -11,7 +11,8 @@ model Payment {
   createdAt     DateTime @db.Timestamptz      @default(now()) @map("created_at")
   updatedAt     DateTime @db.Timestamptz      @updatedAt @map("updated_at")
 
-  trip Trip @relation(fields: [tripId], references: [id])
+  trip   Trip           @relation(fields: [tripId], references: [id])
+  shares PaymentShare[]
 
   @@map("payments")
 }

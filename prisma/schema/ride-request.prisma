@@ -19,6 +19,7 @@ model RideRequest {
   allowShared       Boolean           @default(false) @map("allow_shared")
   minorName         String?           @map("minor_name")
   minorAge          Int?              @map("minor_age")
+  passengerEmail    String?           @map("passenger_email")
   vehiclePreference VehicleType?      @map("vehicle_preference")
   status            RideRequestStatus @default(PENDING)
   createdAt         DateTime          @default(now()) @map("created_at")

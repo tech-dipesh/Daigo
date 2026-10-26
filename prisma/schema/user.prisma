@@ -9,6 +9,7 @@ model User {
   trustScore        Int                @default(100) @map("trust_score")
   coinBalance       Int                @default(0) @map("coin_balance")
   isBanned          Boolean            @default(false) @map("is_banned")
+  deletedAt         DateTime?          @map("deleted_at")
   language          Language           @default(EN)
   warningCycleStart DateTime?          @map("warning_cycle_start")
   staffRole         StaffRole?         @map("staff_role")
@@ -34,6 +35,7 @@ model User {
   appeals           Appeal[]
   uploads           Upload[]
   complaints        Complaint[]
+  savedRoutes       SavedRoute[]
 
   @@map("users")
 }

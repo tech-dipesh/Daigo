@@ -1,0 +1,17 @@
+model SavedRoute {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  label     String
+  fromLabel String   @map("from_label")
+  fromLat   Float    @map("from_lat")
+  fromLng   Float    @map("from_lng")
+  toLabel   String   @map("to_label")
+  toLat     Float    @map("to_lat")
+  toLng     Float    @map("to_lng")
+  groupSize Int      @default(1) @map("group_size")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("saved_routes")
+}
