@@ -24,7 +24,6 @@ const schema = z.object({
 })
 const parsed = schema.safeParse(process.env)
 if (!parsed.success) {
-  console.log("parsed", parsed.error);
   const keys = Object.keys(z.flattenError(parsed.error).fieldErrors)
   console.error(`missing or invalid env keys, server wont work: ${keys.join(", ")}`)
   // console.error("Please Enter all the env keys", envKey);

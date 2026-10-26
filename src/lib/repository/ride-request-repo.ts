@@ -6,6 +6,7 @@ export type RideRequest = NonNullable<Awaited<ReturnType<typeof findOwned>>>
 
 export const listByRider = (riderId: string) => db.rideRequest.findMany({ where: { riderId } })
 export const findOwned = (id: string, riderId: string) => db.rideRequest.findFirst({ where: { id, riderId } })
+export const groupSizeOf = async (id: string) => (await db.rideRequest.findUniqueOrThrow({ where: { id }, select: { groupSize: true } })).groupSize
 export const minorAgeOf = async (id: string) => (await db.rideRequest.findUniqueOrThrow({ where: { id }, select: { minorAge: true } })).minorAge
 export const create = (data: NewRequest) => db.rideRequest.create({ data })
 
@@ -48,6 +49,7 @@ export const replaceWithCopy = (old: RideRequest, windowStart: Date, windowEnd: 
         allowShared: old.allowShared,
         minorName: old.minorName,
         minorAge: old.minorAge,
+        passengerEmail: old.passengerEmail,
         vehiclePreference: old.vehiclePreference,
         expiresAt,
       },

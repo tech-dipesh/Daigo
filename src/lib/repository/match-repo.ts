@@ -45,7 +45,7 @@ export function acceptInTransaction(match: DetailedMatch, driverId: string, pric
         priceEstimate: price,
         distanceKm: match.distanceKm,
         pickupOtp: randomInt(100000, 999999).toString(),
-        shareToken: match.rideRequest.minorAge === null ? undefined : randomBytes(16).toString("hex"),
+        shareToken: match.rideRequest.minorAge === null && !match.rideRequest.passengerEmail ? undefined : randomBytes(16).toString("hex"),
       },
     })
     const updatedMatch = await tx.match.update({ where: { id: match.id }, data: { status: "ACCEPTED" } })
