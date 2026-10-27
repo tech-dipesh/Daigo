@@ -8,6 +8,7 @@ import * as tripRepo from "@/lib/repository/trip-repo"
 import * as userRepo from "@/lib/repository/user-repo"
 import type { NoShowReasonInput } from "@/lib/validation/trip-schema"
 import { asDriver } from "@/lib/services/trip-guards"
+import { forViewer } from "@/lib/services/trip-view"
 
 export async function markNoShow(driverId: string, id: string) {
   const trip = await asDriver(id, driverId, "Only the driver can report a no-show")
@@ -18,7 +19,7 @@ export async function markNoShow(driverId: string, id: string) {
   if (!updated) throw new AppError("This trip is not waiting for pickup", 409)
   await publishEvent(trip.riderId, "trip.status", { tripId: id, status: updated.status })
   await notify(trip.riderId, "TRIP_STATUS", "Marked as no-show", "Your driver waited and could not find you. Retry your request any time", { tripId: id })
-  return updated
+  return forViewer(updated, driverId)
 }
 
 export async function explainNoShow(riderId: string, id: string, { reason }: NoShowReasonInput) {
@@ -26,7 +27,8 @@ export async function explainNoShow(riderId: string, id: string, { reason }: NoS
   if (trip.riderId !== riderId) throw new AppError("Only the rider can explain a no-show", 403)
   if (trip.status !== "NO_SHOW" || trip.noShowReason) throw new AppError("There is nothing to explain on this trip", 409)
   if (Date.now() - trip.updatedAt.getTime() > noShowReasonHours * 60 * 60 * 1000) throw new AppError("The time to explain this no-show is over", 409)
-  return tripRepo.saveNoShowReason(id, riderId, reason, noShowReasonBonus)
+  const saved = await tripRepo.saveNoShowReason(id, riderId, reason, noShowReasonBonus)
+  return forViewer(saved, riderId)
 }
 
 export async function reportFirstLegLate(driverId: string, id: string) {

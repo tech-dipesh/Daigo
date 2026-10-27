@@ -35,6 +35,14 @@ export async function acceptMatch(matchId: string, price?: number) {
     subject: "Your DaiGo pickup code",
     text: `Your driver has accepted your request. Share this code at pickup: ${trip.pickupOtp}${shareNote}`,
   })
+  const passengerEmail = match.rideRequest.passengerEmail
+  if (passengerEmail) {
+    await sendEmailBestEffort({
+      to: passengerEmail,
+      subject: "A DaiGo ride was booked for you",
+      text: `${rider.email} booked a ride for you. Give this code to the driver at pickup: ${trip.pickupOtp}${shareNote}`,
+    })
+  }
   return result
 }
 

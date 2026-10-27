@@ -4,18 +4,13 @@ import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { looksSpoofed, spoofPenalty } from "@/lib/infra/economy/abuse"
 import { issueWarning } from "@/lib/infra/economy/warnings"
 import { deviationThresholdKm, distanceFromPathKm } from "@/lib/infra/matching/deviation"
+import { etaMinutes } from "@/lib/infra/matching/eta"
 import { distanceKm } from "@/lib/infra/matching/geo"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import * as routeRepo from "@/lib/repository/route-repo"
 import * as tripRepo from "@/lib/repository/trip-repo"
 import * as userRepo from "@/lib/repository/user-repo"
 import type { LocationInput } from "@/lib/validation/trip-schema"
-
-/*
-  the real routing is not yet build
-  with the assumption with the placeholder on this i've used
-*/
-const assumedSpeedKmh = 25
 
 async function canViewTripLocation(
   trip: { id: string; riderId: string; driverId: string; relayMatchId: string | null; relayLeg: "FIRST" | "SECOND" | null },
@@ -82,7 +77,7 @@ export async function getLocation(userId: string, id: string) {
     lastLocationAt: trip.lastLocationAt,
     isDeviated: trip.isDeviated,
     remainingKm: Math.round(remainingKm * 10) / 10,
-    etaMinutes: Math.round((remainingKm / assumedSpeedKmh) * 60),
+    etaMinutes: etaMinutes(remainingKm),
     driver: { email: trip.driver.email, vehicle: `${trip.route.vehicle.make} ${trip.route.vehicle.model}` },
   }
 }
