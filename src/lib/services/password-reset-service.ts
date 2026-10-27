@@ -5,10 +5,12 @@ import { hashPassword } from "@/lib/infra/auth/password"
 import { consumeVerificationToken, issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import * as userRepo from "@/lib/repository/user-repo"
 import type { PasswordResetConfirmInput, PasswordResetRequestInput } from "@/lib/validation/auth-schema"
+import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 const resetLifetimeMs = 1000 * 60 * 60
 
 export async function requestPasswordReset({ email }: PasswordResetRequestInput) {
+  await enforceLimit("reset", email.toLowerCase())
   const user = await userRepo.findByEmail(email)
   if (!user) {
     throw new AppError("The Email is not registered please register first", 401)
