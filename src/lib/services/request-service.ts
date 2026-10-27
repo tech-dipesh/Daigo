@@ -15,12 +15,13 @@ export const listRequests = (riderId: string) => rideRequestRepo.listByRider(rid
 
 export const listWaitlist = (riderId: string) => waitlistRepo.listActive(riderId)
 
-export async function createRequest(riderId: string, { passenger, ...data }: RideRequestInput) {
+export async function createRequest(riderId: string, { passenger, forEmail, ...data }: RideRequestInput) {
   await requireMember(riderId)
   const user = await userRepo.findById(riderId)
   if (user?.activeRole !== "RIDER") {
     throw new AppError("Switch to rider mode to post a request", 403)
   }
+  if (passenger && forEmail) throw new AppError("Book for a child or for another adult, not both", 400)
   if (data.windowEnd <= data.windowStart) {
     throw new AppError("The time window end must be after the start", 400)
   }
@@ -29,7 +30,7 @@ export async function createRequest(riderId: string, { passenger, ...data }: Rid
     throw new AppError("You already have an active request for this trip", 409)
   }
   const minor = passenger ? { minorName: passenger.name, minorAge: passenger.age, isVulnerable: true } : {}
-  return rideRequestRepo.create({ ...data, ...minor, riderId, expiresAt: expiryFromNow() })
+  return rideRequestRepo.create({ ...data, ...minor, passengerEmail: forEmail, riderId, expiresAt: expiryFromNow() })
 }
 
 async function findLapsed(riderId: string, id: string, action: string) {

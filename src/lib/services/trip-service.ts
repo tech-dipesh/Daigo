@@ -11,19 +11,26 @@ import * as rideRequestRepo from "@/lib/repository/ride-request-repo"
 import * as tripRepo from "@/lib/repository/trip-repo"
 import type { CancelInput, VerifyPickupInput } from "@/lib/validation/trip-schema"
 import { asDriver } from "@/lib/services/trip-guards"
+import { forViewer } from "@/lib/services/trip-view"
 
-export const listTrips = (userId: string) => tripRepo.listForUser(userId)
+export async function listTrips(userId: string) {
+  const trips = await tripRepo.listForUser(userId)
+  return trips.map((trip) => forViewer(trip, userId))
+}
 
-export const getTrip = (userId: string, id: string) => getTripForUser(id, userId)
+export async function getTrip(userId: string, id: string) {
+  const trip = await getTripForUser(id, userId)
+  return forViewer(trip, userId)
+}
 
 export async function markArrived(driverId: string, id: string) {
   const trip = await asDriver(id, driverId, "Only the driver can mark arrival")
   if (trip.status !== "PENDING_PICKUP") throw new AppError("This trip is not waiting for pickup", 409)
-  if (trip.arrivedAt) return trip
+  if (trip.arrivedAt) return forViewer(trip, driverId)
   const updated = await tripRepo.markArrived(id)
   await publishEvent(trip.riderId, "trip.status", { tripId: id, status: updated.status, arrivedAt: updated.arrivedAt })
   await notify(trip.riderId, "TRIP_STATUS", "Driver arrived", "Your driver is at the pickup point, share your pickup code", { tripId: id })
-  return updated
+  return forViewer(updated, driverId)
 }
 
 export async function verifyPickup(driverId: string, id: string, { otp }: VerifyPickupInput) {
@@ -39,7 +46,7 @@ export async function verifyPickup(driverId: string, id: string, { otp }: Verify
   const updated = await tripRepo.startTrip(trip.id)
   await publishEvent(trip.riderId, "trip.status", { tripId: trip.id, status: updated.status })
   await notify(trip.riderId, "TRIP_STATUS", "Trip started", "Your pickup was verified and the trip has started", { tripId: trip.id })
-  return updated
+  return forViewer(updated, driverId)
 }
 
 export async function completeTrip(driverId: string, id: string) {
@@ -53,7 +60,7 @@ export async function completeTrip(driverId: string, id: string) {
   const cab = await cabRate()
   const saved = moneySaved(trip.distanceKm, trip.priceEstimate, cab)
   if (saved > 0) await notify(trip.riderId, "SAVINGS", "You saved money", `You saved ${saved} rupees compared to a solo cab`, { tripId: trip.id, saved })
-  return updated
+  return forViewer(updated, driverId)
 }
 
 export async function cancelTrip(userId: string, id: string, { reason }: CancelInput) {
@@ -74,5 +81,5 @@ export async function cancelTrip(userId: string, id: string, { reason }: CancelI
   const other = cancelledBy === "RIDER" ? trip.driverId : trip.riderId
   await publishEvent(other, "trip.status", { tripId: trip.id, status: updated.status })
   await notify(other, "TRIP_STATUS", "Trip cancelled", "The other person cancelled this trip", { tripId: trip.id })
-  return updated
+  return forViewer(updated, userId)
 }
