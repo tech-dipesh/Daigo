@@ -1,6 +1,6 @@
 import { cabRate, moneySaved } from "@/lib/infra/economy/savings"
-import * as ratingRepo from "@/lib/repository/rating-repo"
-import * as tripRepo from "@/lib/repository/trip-repo"
+import * as ratingRepo from "@/lib/repository/trip/rating-repo"
+import * as tripRepo from "@/lib/repository/trip/trip-repo"
 
 export async function riderDashboard(riderId: string) {
   const [completed, recent, active, cab] = await Promise.all([tripRepo.completedForRider(riderId), tripRepo.recentForRider(riderId), tripRepo.activeForRider(riderId), cabRate()])

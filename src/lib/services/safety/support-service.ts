@@ -2,12 +2,12 @@ import { AppError } from "@/lib/infra/http/response"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import type { Staff } from "@/lib/infra/auth/admin-access"
 import { notify } from "@/lib/infra/realtime/notify"
-import * as appealRepo from "@/lib/repository/appeal-repo"
-import * as complaintRepo from "@/lib/repository/complaint-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import * as warningRepo from "@/lib/repository/warning-repo"
-import type { AppealDecisionInput, ComplaintDecisionInput } from "@/lib/validation/admin-schema"
-import type { AppealInput, ComplaintInput } from "@/lib/validation/support-schema"
+import * as appealRepo from "@/lib/repository/safety/appeal-repo"
+import * as complaintRepo from "@/lib/repository/safety/complaint-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import * as warningRepo from "@/lib/repository/safety/warning-repo"
+import type { AppealDecisionInput, ComplaintDecisionInput } from "@/lib/validation/admin/admin-schema"
+import type { AppealInput, ComplaintInput } from "@/lib/validation/safety/support-schema"
 
 export const listMyAppeals = (userId: string) => appealRepo.listByUser(userId)
 export const listMyComplaints = (userId: string) => complaintRepo.listByUser(userId)

@@ -1,6 +1,6 @@
 import { countByDay } from "@/lib/infra/economy/analytics"
 import { cabRate, moneySaved } from "@/lib/infra/economy/savings"
-import * as analyticsRepo from "@/lib/repository/analytics-repo"
+import * as analyticsRepo from "@/lib/repository/admin/analytics-repo"
 
 export async function getAnalytics(days: number) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)

@@ -1,8 +1,8 @@
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { publishAdmin } from "@/lib/infra/realtime/publish"
-import * as emergencyRepo from "@/lib/repository/emergency-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import type { EmergencyContactInput, EmergencyInput } from "@/lib/validation/emergency-schema"
+import * as emergencyRepo from "@/lib/repository/safety/emergency-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import type { EmergencyContactInput, EmergencyInput } from "@/lib/validation/safety/emergency-schema"
 import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 export const listContacts = (userId: string) => emergencyRepo.listContacts(userId)
@@ -23,21 +23,10 @@ export async function triggerEmergency(userId: string, { tripId, lat, lng }: Eme
 */
   const superAdmins = await userRepo.superAdmins()
   const mapsLink = `https://maps.google.com/?q=${lat},${lng}`
-  for (const admin of superAdmins) {
-    await sendEmailBestEffort({
-      to: admin.email,
-      subject: "HIGH ALERT: DaiGo emergency triggered",
-      text: `${user.email} triggered an emergency. Location: ${mapsLink}`,
-    })
-  }
+  const adminMails = superAdmins.map((admin) => sendEmailBestEffort({ to: admin.email, subject: "HIGH ALERT: DaiGo emergency triggered", text: `${user.email} triggered an emergency. Location: ${mapsLink}` }))
   const contactEmail = user.emergencyContacts[0]?.email
-  if (contactEmail) {
-    await sendEmailBestEffort({
-      to: contactEmail,
-      subject: "DaiGo emergency alert",
-      text: `${user.name ?? user.email} may need help. Last known location: ${mapsLink}`,
-    })
-  }
+  const contactMail = contactEmail ? sendEmailBestEffort({ to: contactEmail, subject: "DaiGo emergency alert", text: `${user.name ?? user.email} may need help. Last known location: ${mapsLink}` }) : undefined
+  await Promise.all([...adminMails, contactMail])
   return event
 }
 
