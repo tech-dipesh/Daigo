@@ -1,5 +1,5 @@
 import { db } from "@/lib/infra/clients/db"
-import * as userRepo from "@/lib/repository/user-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
 
 export const goodRatingsBy = (raterId: string) =>
   db.rating.findMany({

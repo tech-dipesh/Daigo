@@ -1,6 +1,6 @@
 import { db } from "@/lib/infra/clients/db"
 import { awardCoins, tripCompletionCoins } from "@/lib/infra/economy/coins"
-import * as userRepo from "@/lib/repository/user-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
 
 type Booked = { id: string; rideRequestId: string; routeId: string; matchId: string | null }
 
