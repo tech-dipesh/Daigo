@@ -3,8 +3,8 @@ import { env } from "@/lib/infra/clients/env"
 import { AppError } from "@/lib/infra/http/response"
 import { hashPassword } from "@/lib/infra/auth/password"
 import { consumeVerificationToken, issueVerificationToken } from "@/lib/infra/auth/verification-token"
-import * as userRepo from "@/lib/repository/user-repo"
-import type { PasswordResetConfirmInput, PasswordResetRequestInput } from "@/lib/validation/auth-schema"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import type { PasswordResetConfirmInput, PasswordResetRequestInput } from "@/lib/validation/account/auth-schema"
 import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 const resetLifetimeMs = 1000 * 60 * 60

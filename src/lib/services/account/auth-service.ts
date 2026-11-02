@@ -5,9 +5,9 @@ import { issueOtp, otpMinutes, verifyOtp } from "@/lib/infra/auth/otp"
 import { hashPassword, verifyPassword } from "@/lib/infra/auth/password"
 import { issueTokenPair } from "@/lib/infra/auth/token"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
-import * as otpRepo from "@/lib/repository/otp-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import type { LoginInput, LoginVerifyInput, SignupInput } from "@/lib/validation/auth-schema"
+import * as otpRepo from "@/lib/repository/account/otp-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import type { LoginInput, LoginVerifyInput, SignupInput } from "@/lib/validation/account/auth-schema"
 import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 const dayMs = 1000 * 60 * 60 * 24
@@ -19,9 +19,7 @@ export async function signup({ email, password }: SignupInput) {
   }
   const passwordHash = await hashPassword(password)
   const user = await userRepo.createUser(email, passwordHash)
-  const tokens = await issueTokenPair(user.id)
-  const verificationToken = await issueVerificationToken(user.id, "EMAIL_VERIFICATION", dayMs)
-  const { code } = await issueOtp(user.id, "EMAIL_VERIFY")
+  const [tokens, verificationToken, { code }] = await Promise.all([issueTokenPair(user.id), issueVerificationToken(user.id, "EMAIL_VERIFICATION", dayMs), issueOtp(user.id, "EMAIL_VERIFY")])
   const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${verificationToken}`
   await sendEmailBestEffort({
     to: user.email,

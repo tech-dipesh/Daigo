@@ -1,6 +1,6 @@
 import { AppError } from "@/lib/infra/http/response"
-import * as notificationRepo from "@/lib/repository/notification-repo"
-import type { NotificationQueryInput } from "@/lib/validation/user-schema"
+import * as notificationRepo from "@/lib/repository/account/notification-repo"
+import type { NotificationQueryInput } from "@/lib/validation/account/user-schema"
 
 export async function listNotifications(userId: string, { unread, limit, cursor }: NotificationQueryInput) {
   const [rows, unreadCount] = await Promise.all([notificationRepo.page(userId, unread === "true", limit + 1, cursor), notificationRepo.unreadCount(userId)])

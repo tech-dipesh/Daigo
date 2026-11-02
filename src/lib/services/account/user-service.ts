@@ -4,9 +4,9 @@ import { env } from "@/lib/infra/clients/env"
 import { verifyPassword } from "@/lib/infra/auth/password"
 import { issueVerificationToken } from "@/lib/infra/auth/verification-token"
 import { getWarningSummary } from "@/lib/infra/economy/warnings"
-import * as tripRepo from "@/lib/repository/trip-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import type { AccountDeleteInput, MePatchInput } from "@/lib/validation/user-schema"
+import * as tripRepo from "@/lib/repository/trip/trip-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import type { AccountDeleteInput, MePatchInput } from "@/lib/validation/account/user-schema"
 
 import { coinsRequiredToRedeem, redemptionDiscountRupees } from "@/lib/infra/economy/coins"
 const emailLifetimeMs = 1000 * 60 * 60 * 24

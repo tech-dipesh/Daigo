@@ -3,8 +3,8 @@ import { env } from "@/lib/infra/clients/env"
 import { AppError } from "@/lib/infra/http/response"
 import { issueOtp, otpMinutes, verifyOtp } from "@/lib/infra/auth/otp"
 import { consumeVerificationToken, issueVerificationToken } from "@/lib/infra/auth/verification-token"
-import * as userRepo from "@/lib/repository/user-repo"
-import type { EmailCodeInput, EmailConfirmInput } from "@/lib/validation/auth-schema"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import type { EmailCodeInput, EmailConfirmInput } from "@/lib/validation/account/auth-schema"
 import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 const dayMs = 1000 * 60 * 60 * 24
