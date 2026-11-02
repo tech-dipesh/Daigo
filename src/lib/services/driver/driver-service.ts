@@ -2,12 +2,12 @@ import { AppError } from "@/lib/infra/http/response"
 import { requireMember } from "@/lib/infra/auth/require-verified"
 import { notifyWaitlist } from "@/lib/infra/matching/waitlist"
 import { assertOwnUpload } from "@/lib/infra/storage/uploads"
-import * as driverDocumentRepo from "@/lib/repository/driver-document-repo"
-import * as routeRepo from "@/lib/repository/route-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import * as vehicleRepo from "@/lib/repository/vehicle-repo"
-import type { AutoAcceptInput } from "@/lib/validation/match-schema"
-import type { DriverDocumentInput, RouteInput, VehicleInput } from "@/lib/validation/driver-schema"
+import * as driverDocumentRepo from "@/lib/repository/driver/driver-document-repo"
+import * as routeRepo from "@/lib/repository/driver/route-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import * as vehicleRepo from "@/lib/repository/driver/vehicle-repo"
+import type { AutoAcceptInput } from "@/lib/validation/ride/match-schema"
+import type { DriverDocumentInput, RouteInput, VehicleInput } from "@/lib/validation/driver/driver-schema"
 
 async function requireDriverMode(userId: string, message: string) {
   await requireMember(userId)
@@ -33,14 +33,13 @@ export async function submitLicence(userId: string, data: DriverDocumentInput) {
 
 export async function createRoute(driverId: string, data: RouteInput) {
   await requireDriverMode(driverId, "Switch to driver mode to create a route")
-  const vehicle = await vehicleRepo.findOwned(data.vehicleId, driverId)
+  const [vehicle, licence] = await Promise.all([vehicleRepo.findOwned(data.vehicleId, driverId), driverDocumentRepo.findApproved(driverId)])
   if (!vehicle) {
     throw new AppError("Vehicle not found", 404)
   }
   if (vehicle.verificationStatus !== "APPROVED") {
     throw new AppError("This vehicle hasn't been approved yet", 403)
   }
-  const licence = await driverDocumentRepo.findApproved(driverId)
   if (!licence) {
     throw new AppError("Your licence hasn't been approved yet", 403)
   }
