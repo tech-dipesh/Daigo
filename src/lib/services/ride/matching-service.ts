@@ -8,12 +8,12 @@ import { findGeoCandidates } from "@/lib/infra/matching/postgis"
 import { findRelayCandidates } from "@/lib/infra/matching/relay-matching"
 import { routeDepartsInWindow } from "@/lib/infra/matching/schedule"
 import { publishOnce } from "@/lib/infra/realtime/publish"
-import { tryAutoAccept } from "@/lib/services/accept-service"
-import * as matchRepo from "@/lib/repository/match-repo"
-import * as relayRepo from "@/lib/repository/relay-repo"
-import * as rideRequestRepo from "@/lib/repository/ride-request-repo"
-import * as routeRepo from "@/lib/repository/route-repo"
-import * as userRepo from "@/lib/repository/user-repo"
+import { tryAutoAccept } from "@/lib/services/ride/accept-service"
+import * as matchRepo from "@/lib/repository/ride/match-repo"
+import * as relayRepo from "@/lib/repository/ride/relay-repo"
+import * as rideRequestRepo from "@/lib/repository/ride/ride-request-repo"
+import * as routeRepo from "@/lib/repository/driver/route-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
 
 export async function findMatches(riderId: string, id: string) {
   const rideRequest = await rideRequestRepo.findOwned(id, riderId)
@@ -21,10 +21,12 @@ export async function findMatches(riderId: string, id: string) {
     throw new AppError("Ride request not found", 404)
   }
   if (isExpired(rideRequest.expiresAt)) throw new AppError("This request expired, retry it to search again", 410)
-  const rider = await userRepo.getById(riderId)
   const { fromLat, fromLng, toLat, toLng, groupSize, windowStart } = rideRequest
-  const pricing = await buildPricing({ fromLat, fromLng, toLat, toLng, groupSize, when: windowStart, minor: rideRequest.minorAge !== null })
-  const geoCandidates = await findGeoCandidates({ riderId, groupSize, fromLat, fromLng, toLat, toLng })
+  const [rider, pricing, geoCandidates] = await Promise.all([
+    userRepo.getById(riderId),
+    buildPricing({ fromLat, fromLng, toLat, toLng, groupSize, when: windowStart, minor: rideRequest.minorAge !== null }),
+    findGeoCandidates({ riderId, groupSize, fromLat, fromLng, toLat, toLng }),
+  ])
   const distanceByRouteId = new Map(geoCandidates.map((c) => [c.id, c]))
   const directRoutes = geoCandidates.length ? await routeRepo.findForMatching(geoCandidates.map((c) => c.id), rideRequest.vehiclePreference) : []
   const routesInWindow = directRoutes.filter((route) => routeDepartsInWindow(route, rideRequest.windowStart, rideRequest.windowEnd))

@@ -1,8 +1,8 @@
 import { AppError } from "@/lib/infra/http/response"
-import { createRequest } from "@/lib/services/request-service"
-import * as savedRouteRepo from "@/lib/repository/saved-route-repo"
-import { rideRequestSchema } from "@/lib/validation/request-schema"
-import type { OneTapInput, SavedRouteInput } from "@/lib/validation/saved-route-schema"
+import { createRequest } from "@/lib/services/ride/request-service"
+import * as savedRouteRepo from "@/lib/repository/ride/saved-route-repo"
+import { rideRequestSchema } from "@/lib/validation/ride/request-schema"
+import type { OneTapInput, SavedRouteInput } from "@/lib/validation/ride/saved-route-schema"
 
 const maxSaved = 10
 

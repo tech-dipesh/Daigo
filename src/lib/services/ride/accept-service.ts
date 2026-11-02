@@ -5,7 +5,7 @@ import { requireMember } from "@/lib/infra/auth/require-verified"
 import { isExpired } from "@/lib/infra/matching/expiry"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
-import * as matchRepo from "@/lib/repository/match-repo"
+import * as matchRepo from "@/lib/repository/ride/match-repo"
 
 type AutoCandidate = {
   id: string
@@ -27,22 +27,16 @@ export async function acceptMatch(matchId: string, price?: number) {
   const { riderId, rider } = match.rideRequest
   const result = await matchRepo.acceptInTransaction(match, driverId, price ?? match.priceEstimate)
   const { trip } = result
-  await publishEvent(riderId, "match.accepted", { tripId: trip.id, matchId: match.id })
-  await notify(riderId, "MATCH_ACCEPTED", "Driver accepted", "A driver accepted your ride request", { tripId: trip.id })
   const shareNote = trip.shareToken ? `\n\nFollow the trip live: ${env.APP_URL}/api/v1/trips/shared/${trip.shareToken}` : ""
-  await sendEmailBestEffort({
-    to: rider.email,
-    subject: "Your DaiGo pickup code",
-    text: `Your driver has accepted your request. Share this code at pickup: ${trip.pickupOtp}${shareNote}`,
-  })
+  const riderMail = { to: rider.email, subject: "Your DaiGo pickup code", text: `Your driver has accepted your request. Share this code at pickup: ${trip.pickupOtp}${shareNote}` }
   const passengerEmail = match.rideRequest.passengerEmail
-  if (passengerEmail) {
-    await sendEmailBestEffort({
-      to: passengerEmail,
-      subject: "A DaiGo ride was booked for you",
-      text: `${rider.email} booked a ride for you. Give this code to the driver at pickup: ${trip.pickupOtp}${shareNote}`,
-    })
-  }
+  const passengerMail = { to: passengerEmail ?? "", subject: "A DaiGo ride was booked for you", text: `${rider.email} booked a ride for you. Give this code to the driver at pickup: ${trip.pickupOtp}${shareNote}` }
+  const mails = passengerEmail ? [riderMail, passengerMail] : [riderMail]
+  await Promise.all([
+    publishEvent(riderId, "match.accepted", { tripId: trip.id, matchId: match.id }),
+    notify(riderId, "MATCH_ACCEPTED", "Driver accepted", "A driver accepted your ride request", { tripId: trip.id }),
+    ...mails.map((mail) => sendEmailBestEffort(mail)),
+  ])
   return result
 }
 

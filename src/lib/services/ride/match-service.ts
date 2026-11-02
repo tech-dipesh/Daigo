@@ -1,10 +1,10 @@
 import { AppError } from "@/lib/infra/http/response"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { requireMember } from "@/lib/infra/auth/require-verified"
-import * as matchRepo from "@/lib/repository/match-repo"
-import * as relayRepo from "@/lib/repository/relay-repo"
-import type { MatchDecisionInput, RelayDecisionInput } from "@/lib/validation/match-schema"
-import { acceptMatch } from "@/lib/services/accept-service"
+import * as matchRepo from "@/lib/repository/ride/match-repo"
+import * as relayRepo from "@/lib/repository/ride/relay-repo"
+import type { MatchDecisionInput, RelayDecisionInput } from "@/lib/validation/ride/match-schema"
+import { acceptMatch } from "@/lib/services/ride/accept-service"
 
 export async function decideMatch(driverId: string, id: string, { status }: MatchDecisionInput) {
   const match = await matchRepo.findForDriver(id, driverId)

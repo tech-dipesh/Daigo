@@ -5,10 +5,10 @@ import { isExpired } from "@/lib/infra/matching/expiry"
 import { maxRounds, offerBounds, offerWindowSeconds } from "@/lib/infra/matching/offers"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
-import * as matchRepo from "@/lib/repository/match-repo"
-import * as offerRepo from "@/lib/repository/offer-repo"
-import type { OfferInput } from "@/lib/validation/match-schema"
-import { acceptMatch } from "@/lib/services/accept-service"
+import * as matchRepo from "@/lib/repository/ride/match-repo"
+import * as offerRepo from "@/lib/repository/ride/offer-repo"
+import type { OfferInput } from "@/lib/validation/ride/match-schema"
+import { acceptMatch } from "@/lib/services/ride/accept-service"
 
 async function loadParty(id: string, userId: string) {
   const match = await matchRepo.findWithLastOffer(id)
@@ -40,8 +40,7 @@ export async function makeOffer(userId: string, id: string, { price }: OfferInpu
   const expiresAt = new Date(Date.now() + offerWindowSeconds * 1000)
   const offer = await offerRepo.createAndExtend({ matchId: id, rideRequestId: match.rideRequestId, round, by: party, price, expiresAt })
   const other = party === "DRIVER" ? match.rideRequest.riderId : match.route.driverId
-  await publishEvent(other, "offer.new", { matchId: id, offerId: offer.id, round, price, expiresAt })
-  await notify(other, "OFFER", "New price offer", `The other side offered ${price} rupees (round ${round} of ${maxRounds})`, { matchId: id, round, price })
+  await Promise.all([publishEvent(other, "offer.new", { matchId: id, offerId: offer.id, round, price, expiresAt }), notify(other, "OFFER", "New price offer", `The other side offered ${price} rupees (round ${round} of ${maxRounds})`, { matchId: id, round, price })])
   return offer
 }
 

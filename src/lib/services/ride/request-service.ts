@@ -4,12 +4,12 @@ import { buildPricing } from "@/lib/infra/economy/pricing"
 import { expiryFromNow, isExpired } from "@/lib/infra/matching/expiry"
 import { generatePermanentRequest } from "@/lib/infra/matching/permanent"
 import { waitlistHours } from "@/lib/infra/matching/waitlist"
-import * as permanentRequestRepo from "@/lib/repository/permanent-request-repo"
-import * as ratingRepo from "@/lib/repository/rating-repo"
-import * as rideRequestRepo from "@/lib/repository/ride-request-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import * as waitlistRepo from "@/lib/repository/waitlist-repo"
-import type { PriceEstimateQueryInput, RideRequestInput } from "@/lib/validation/request-schema"
+import * as permanentRequestRepo from "@/lib/repository/ride/permanent-request-repo"
+import * as ratingRepo from "@/lib/repository/trip/rating-repo"
+import * as rideRequestRepo from "@/lib/repository/ride/ride-request-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import * as waitlistRepo from "@/lib/repository/ride/waitlist-repo"
+import type { PriceEstimateQueryInput, RideRequestInput } from "@/lib/validation/ride/request-schema"
 
 export const listRequests = (riderId: string) => rideRequestRepo.listByRider(riderId)
 
@@ -17,7 +17,7 @@ export const listWaitlist = (riderId: string) => waitlistRepo.listActive(riderId
 
 export async function createRequest(riderId: string, { passenger, forEmail, ...data }: RideRequestInput) {
   await requireMember(riderId)
-  const user = await userRepo.findById(riderId)
+  const [user, duplicateRequest] = await Promise.all([userRepo.findById(riderId), rideRequestRepo.findDuplicate(riderId, data)])
   if (user?.activeRole !== "RIDER") {
     throw new AppError("Switch to rider mode to post a request", 403)
   }
@@ -25,7 +25,6 @@ export async function createRequest(riderId: string, { passenger, forEmail, ...d
   if (data.windowEnd <= data.windowStart) {
     throw new AppError("The time window end must be after the start", 400)
   }
-  const duplicateRequest = await rideRequestRepo.findDuplicate(riderId, data)
   if (duplicateRequest) {
     throw new AppError("You already have an active request for this trip", 409)
   }
