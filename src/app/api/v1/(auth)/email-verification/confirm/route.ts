@@ -2,8 +2,8 @@ import { NextResponse } from "next/server"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import * as emailVerificationService from "@/lib/services/email-verification-service"
-import { emailConfirmSchema } from "@/lib/validation/auth-schema"
+import * as emailVerificationService from "@/lib/services/account/email-verification-service"
+import { emailConfirmSchema } from "@/lib/validation/account/auth-schema"
 
 const htmlPage = (message: string) =>
   new NextResponse(`<!doctype html><body style="font-family: sans-serif; padding: 40px;">${message}</body>`, {

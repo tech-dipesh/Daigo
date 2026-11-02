@@ -3,8 +3,8 @@ import { clearAuthCookies } from "@/lib/infra/auth/cookies"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import * as userService from "@/lib/services/user-service"
-import { accountDeleteSchema, mePatchSchema } from "@/lib/validation/user-schema"
+import * as userService from "@/lib/services/account/user-service"
+import { accountDeleteSchema, mePatchSchema } from "@/lib/validation/account/user-schema"
 
 export const GET = withErrorHandling(async (request) => {
   const me = await userService.getMe(getUserId(request))

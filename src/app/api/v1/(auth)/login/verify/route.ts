@@ -2,8 +2,8 @@ import { setAuthCookies } from "@/lib/infra/auth/cookies"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import * as authService from "@/lib/services/auth-service"
-import { loginVerifySchema } from "@/lib/validation/auth-schema"
+import * as authService from "@/lib/services/account/auth-service"
+import { loginVerifySchema } from "@/lib/validation/account/auth-schema"
 
 export const POST = withErrorHandling(async (request) => {
   const input = loginVerifySchema.parse(await parseJsonBody(request))
