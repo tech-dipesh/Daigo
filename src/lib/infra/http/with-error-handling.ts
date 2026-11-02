@@ -1,7 +1,7 @@
 import type { NextRequest, NextResponse } from "next/server"
 import { errorResponse } from "@/lib/infra/http/response"
 
-type RouteHandler<Context> = (request: NextRequest, context: Context) => Promise<NextResponse>
+export type RouteHandler<Context> = (request: NextRequest, context: Context) => Promise<NextResponse>
 
 export function withErrorHandling<Context = unknown>(handler: RouteHandler<Context>): RouteHandler<Context> {
   return async (request, context) => {

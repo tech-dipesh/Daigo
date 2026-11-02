@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError } from "@/lib/infra/http/response"
-import * as userRepo from "@/lib/repository/user-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
 
 export type Staff = { id: string; staffRole: "MODERATOR" | "SUPER_ADMIN" }
 
