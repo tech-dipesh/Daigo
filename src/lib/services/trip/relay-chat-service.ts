@@ -1,8 +1,8 @@
 import { AppError } from "@/lib/infra/http/response"
 import { pushMessage, readMessages } from "@/lib/infra/realtime/chat"
 import { publishEvent } from "@/lib/infra/realtime/publish"
-import * as relayRepo from "@/lib/repository/relay-repo"
-import type { TripMessageInput } from "@/lib/validation/trip-schema"
+import * as relayRepo from "@/lib/repository/ride/relay-repo"
+import type { TripMessageInput } from "@/lib/validation/trip/trip-schema"
 
 async function asRelayDriver(id: string, driverId: string) {
   const relay = await relayRepo.findForDriver(id, driverId)

@@ -5,8 +5,8 @@ import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { env } from "@/lib/infra/clients/env"
 import { etaMinutes } from "@/lib/infra/matching/eta"
 import { distanceKm } from "@/lib/infra/matching/geo"
-import * as tripRepo from "@/lib/repository/trip-repo"
-import type { ShareInput } from "@/lib/validation/trip-schema"
+import * as tripRepo from "@/lib/repository/trip/trip-repo"
+import type { ShareInput } from "@/lib/validation/trip/trip-schema"
 
 const linkLifeAfterTripMs = 2 * 60 * 60 * 1000
 

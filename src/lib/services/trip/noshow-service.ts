@@ -4,11 +4,11 @@ import { noShowReasonBonus, noShowReasonHours, noShowWaitMinutes } from "@/lib/i
 import { relayLatePenalty } from "@/lib/infra/economy/trust"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
-import * as tripRepo from "@/lib/repository/trip-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import type { NoShowReasonInput } from "@/lib/validation/trip-schema"
-import { asDriver } from "@/lib/services/trip-guards"
-import { forViewer } from "@/lib/services/trip-view"
+import * as tripRepo from "@/lib/repository/trip/trip-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import type { NoShowReasonInput } from "@/lib/validation/trip/trip-schema"
+import { asDriver } from "@/lib/services/trip/trip-guards"
+import { forViewer } from "@/lib/services/trip/trip-view"
 
 export async function markNoShow(driverId: string, id: string) {
   const trip = await asDriver(id, driverId, "Only the driver can report a no-show")
@@ -17,8 +17,7 @@ export async function markNoShow(driverId: string, id: string) {
   if (remainingMs > 0) throw new AppError(`Wait ${Math.ceil(remainingMs / 1000)} more seconds before marking a no-show`, 409)
   const updated = await tripRepo.markNoShow(trip)
   if (!updated) throw new AppError("This trip is not waiting for pickup", 409)
-  await publishEvent(trip.riderId, "trip.status", { tripId: id, status: updated.status })
-  await notify(trip.riderId, "TRIP_STATUS", "Marked as no-show", "Your driver waited and could not find you. Retry your request any time", { tripId: id })
+  await Promise.all([publishEvent(trip.riderId, "trip.status", { tripId: id, status: updated.status }), notify(trip.riderId, "TRIP_STATUS", "Marked as no-show", "Your driver waited and could not find you. Retry your request any time", { tripId: id })])
   return forViewer(updated, driverId)
 }
 

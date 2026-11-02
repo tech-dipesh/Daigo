@@ -7,10 +7,10 @@ import { deviationThresholdKm, distanceFromPathKm } from "@/lib/infra/matching/d
 import { etaMinutes } from "@/lib/infra/matching/eta"
 import { distanceKm } from "@/lib/infra/matching/geo"
 import { publishEvent } from "@/lib/infra/realtime/publish"
-import * as routeRepo from "@/lib/repository/route-repo"
-import * as tripRepo from "@/lib/repository/trip-repo"
-import * as userRepo from "@/lib/repository/user-repo"
-import type { LocationInput } from "@/lib/validation/trip-schema"
+import * as routeRepo from "@/lib/repository/driver/route-repo"
+import * as tripRepo from "@/lib/repository/trip/trip-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
+import type { LocationInput } from "@/lib/validation/trip/trip-schema"
 
 async function canViewTripLocation(
   trip: { id: string; riderId: string; driverId: string; relayMatchId: string | null; relayLeg: "FIRST" | "SECOND" | null },
@@ -46,13 +46,8 @@ export async function postLocation(driverId: string, id: string, { lat, lng }: L
   await publishEvent(trip.riderId, "trip.location", { tripId: trip.id, lat, lng, isDeviated })
   if (isDeviated && !trip.isDeviated) {
     const superAdmins = await userRepo.superAdmins()
-    for (const admin of superAdmins) {
-      await sendEmailBestEffort({
-        to: admin.email,
-        subject: "Trip route deviation detected",
-        text: `Trip ${trip.id} has drifted more than ${deviationThresholdKm}km off its expected path.`,
-      })
-    }
+    const text = `Trip ${trip.id} has drifted more than ${deviationThresholdKm}km off its expected path.`
+    await Promise.all(superAdmins.map((admin) => sendEmailBestEffort({ to: admin.email, subject: "Trip route deviation detected", text })))
   }
   return { lastLat: updated.lastLat, lastLng: updated.lastLng, lastLocationAt: updated.lastLocationAt, isDeviated: updated.isDeviated }
 }

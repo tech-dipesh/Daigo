@@ -2,8 +2,8 @@ import { AppError } from "@/lib/infra/http/response"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { ratingDelta } from "@/lib/infra/economy/trust"
 import { clearChat } from "@/lib/infra/realtime/chat"
-import * as ratingRepo from "@/lib/repository/rating-repo"
-import type { RatingInput } from "@/lib/validation/trip-schema"
+import * as ratingRepo from "@/lib/repository/trip/rating-repo"
+import type { RatingInput } from "@/lib/validation/trip/trip-schema"
 
 export async function rateTrip(raterId: string, id: string, data: RatingInput) {
   const trip = await getTripForUser(id, raterId)

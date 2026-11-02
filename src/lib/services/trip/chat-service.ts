@@ -2,7 +2,7 @@ import { AppError } from "@/lib/infra/http/response"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { pushMessage, readMessages } from "@/lib/infra/realtime/chat"
 import { publishEvent } from "@/lib/infra/realtime/publish"
-import type { TripMessageInput } from "@/lib/validation/trip-schema"
+import type { TripMessageInput } from "@/lib/validation/trip/trip-schema"
 
 export async function listMessages(userId: string, id: string) {
   const trip = await getTripForUser(id, userId)
