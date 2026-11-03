@@ -1,14 +1,14 @@
 import { upgradeWebSocket } from "@vercel/functions"
 import type { WebSocketData } from "@vercel/functions"
 import type { NextRequest } from "next/server"
-import * as userRepo from "@/lib/repository/user-repo"
+import * as userRepo from "@/lib/repository/account/user-repo"
 import { redis } from "@/lib/infra/clients/redis"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, errorResponse } from "@/lib/infra/http/response"
 import { adminChannel, userChannel } from "@/lib/infra/realtime/events"
 import type { RealtimeEvent } from "@/lib/infra/realtime/events"
 import { setOffline, setOnline } from "@/lib/infra/realtime/presence"
-import { wsMessageSchema } from "@/lib/validation/realtime-schema"
+import { wsMessageSchema } from "@/lib/validation/driver/realtime-schema"
 
 /*
   conn dies at max duration, client must reconnect

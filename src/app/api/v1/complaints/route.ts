@@ -2,8 +2,8 @@ import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
-import * as supportService from "@/lib/services/support-service"
-import { complaintSchema } from "@/lib/validation/support-schema"
+import * as supportService from "@/lib/services/safety/support-service"
+import { complaintSchema } from "@/lib/validation/safety/support-schema"
 
 export const GET = withErrorHandling(async (request) => {
   const complaints = await supportService.listMyComplaints(getUserId(request))
