@@ -3,7 +3,7 @@ import { AppError, successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { enqueue, jobUrl, queueClient, queueEnabled } from "@/lib/infra/queue/queue"
-import { adminJobSchema } from "@/lib/validation/admin-schema"
+import { adminJobSchema } from "@/lib/validation/admin/admin-schema"
 
 /*
   schedule uses scheduleId so running it twice just updates it

@@ -3,8 +3,8 @@ import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import type { RouteParams } from "@/types/api"
-import * as adminService from "@/lib/services/admin-service"
-import { fareRatePatchSchema, fareRateTypeSchema } from "@/lib/validation/admin-schema"
+import * as adminService from "@/lib/services/admin/admin-service"
+import { fareRatePatchSchema, fareRateTypeSchema } from "@/lib/validation/admin/admin-schema"
 
 export const PATCH = withErrorHandling<RouteParams<{ type: string }>>(async (request, { params }) => {
   await requireStaff(request)

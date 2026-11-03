@@ -2,7 +2,7 @@ import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { idFrom } from "@/lib/infra/http/route-params"
-import * as safetyService from "@/lib/services/safety-service"
+import * as safetyService from "@/lib/services/safety/safety-service"
 import type { RouteParams } from "@/types/api"
 
 export const PATCH = withErrorHandling<RouteParams>(async (request, { params }) => {

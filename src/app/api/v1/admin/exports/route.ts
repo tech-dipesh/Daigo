@@ -3,7 +3,7 @@ import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { enqueue } from "@/lib/infra/queue/queue"
-import { exportSchema } from "@/lib/validation/admin-schema"
+import { exportSchema } from "@/lib/validation/admin/admin-schema"
 
 const dayMs = 24 * 60 * 60 * 1000
 

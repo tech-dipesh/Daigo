@@ -1,8 +1,8 @@
 import { requireStaff } from "@/lib/infra/auth/admin-access"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
-import * as adminService from "@/lib/services/admin-service"
-import { verificationQuerySchema } from "@/lib/validation/admin-schema"
+import * as adminService from "@/lib/services/admin/admin-service"
+import { verificationQuerySchema } from "@/lib/validation/admin/admin-schema"
 
 export const GET = withErrorHandling(async (request) => {
   await requireStaff(request)
