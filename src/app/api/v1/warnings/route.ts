@@ -2,7 +2,7 @@ import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { getWarningSummary } from "@/lib/infra/economy/warnings"
-import { warningQuerySchema } from "@/lib/validation/user-schema"
+import { warningQuerySchema } from "@/lib/validation/account/user-schema"
 
 export const GET = withErrorHandling(async (request) => {
   const userId = getUserId(request)
