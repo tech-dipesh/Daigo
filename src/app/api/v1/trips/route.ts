@@ -1,10 +1,12 @@
+import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
-import * as shareService from "@/lib/services/share-service"
+import { idFrom } from "@/lib/infra/http/route-params"
+import * as tripService from "@/lib/services/trip/trip-service"
 import type { RouteParams } from "@/types/api"
 
-export const GET = withErrorHandling<RouteParams<{ token: string }>>(async (_request, { params }) => {
-  const { token } = await params
-  const view = await shareService.sharedView(token)
-  return successResponse(view)
+export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
+  const id = await idFrom(params)
+  const result = await tripService.markArrived(getUserId(request), id)
+  return successResponse(result)
 })

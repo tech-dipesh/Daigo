@@ -4,8 +4,8 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
 import type { RouteParams } from "@/types/api"
-import * as locationService from "@/lib/services/location-service"
-import { locationSchema } from "@/lib/validation/trip-schema"
+import * as locationService from "@/lib/services/trip/location-service"
+import { locationSchema } from "@/lib/validation/trip/trip-schema"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const id = await idFrom(params)

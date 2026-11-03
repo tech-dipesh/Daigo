@@ -4,8 +4,8 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
 import type { RouteParams } from "@/types/api"
-import * as chatService from "@/lib/services/chat-service"
-import { tripMessageSchema } from "@/lib/validation/trip-schema"
+import * as chatService from "@/lib/services/trip/chat-service"
+import { tripMessageSchema } from "@/lib/validation/trip/trip-schema"
 
 export const GET = withErrorHandling<RouteParams>(async (request, { params }) => {
   const id = await idFrom(params)

@@ -4,8 +4,8 @@ import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
 import type { RouteParams } from "@/types/api"
-import * as ratingService from "@/lib/services/rating-service"
-import { ratingSchema } from "@/lib/validation/trip-schema"
+import * as ratingService from "@/lib/services/trip/rating-service"
+import { ratingSchema } from "@/lib/validation/trip/trip-schema"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
   const id = await idFrom(params)

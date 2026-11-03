@@ -3,8 +3,8 @@ import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
 import { parseOptionalJsonBody } from "@/lib/infra/http/request"
 import { idFrom } from "@/lib/infra/http/route-params"
-import * as shareService from "@/lib/services/share-service"
-import { shareSchema } from "@/lib/validation/trip-schema"
+import * as shareService from "@/lib/services/trip/share-service"
+import { shareSchema } from "@/lib/validation/trip/trip-schema"
 import type { RouteParams } from "@/types/api"
 
 export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
