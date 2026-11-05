@@ -43,3 +43,4 @@ yarn-error.log*
 *.zip
 .vercel
 .env*
+_apply/

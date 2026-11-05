@@ -1,8 +1,8 @@
 import { AppError } from "@/lib/infra/http/response"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { distanceKm } from "@/lib/infra/matching/geo"
-import * as routeRepo from "@/lib/repository/route-repo"
-import * as tripRepo from "@/lib/repository/trip-repo"
+import * as routeRepo from "@/lib/repository/driver/route-repo"
+import * as tripRepo from "@/lib/repository/trip/trip-repo"
 
 const driverRevealKm = 10
 
