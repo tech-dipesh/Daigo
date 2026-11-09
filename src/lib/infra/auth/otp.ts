@@ -6,6 +6,7 @@ type Purpose = "EMAIL_VERIFY" | "ADMIN_LOGIN"
 
 export const otpMinutes = 10
 const maxAttempts = 5
+const encoder = new TextEncoder()
 const hashOf = (code: string, userId: string) => createHmac("sha256", env.ACCESS_TOKEN_SECRET).update(`${userId}:${code}`).digest("hex")
 
 /*
@@ -22,7 +23,7 @@ export async function issueOtp(userId: string, purpose: Purpose) {
 export async function verifyOtp(userId: string, purpose: Purpose, code: string, id?: string) {
   const row = await db.otpCode.findFirst({ where: { userId, purpose, usedAt: null, ...(id ? { id } : {}) }, orderBy: { createdAt: "desc" } })
   if (!row || row.expiresAt < new Date() || row.attempts >= maxAttempts) return false
-  const same = timingSafeEqual(Buffer.from(row.codeHash), Buffer.from(hashOf(code, userId)))
+  const same = timingSafeEqual(encoder.encode(row.codeHash), encoder.encode(hashOf(code, userId)))
   if (!same) {
     await db.otpCode.update({ where: { id: row.id }, data: { attempts: { increment: 1 } } })
     return false

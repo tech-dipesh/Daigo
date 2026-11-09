@@ -13,9 +13,11 @@ let cached: { s3: S3Client; Bucket: string } | null = null
 function storage() {
   if (cached) return cached
   const { S3_URL, S3_KEY, S3_SECRET, S3_BUCKET, S3_REGION } = env
-  if (!S3_URL || !S3_KEY || !S3_SECRET || !S3_BUCKET) throw new AppError("File storage is not configured", 503)
-  const s3 = new S3Client({ region: S3_REGION, endpoint: S3_URL, forcePathStyle: true, credentials: { accessKeyId: S3_KEY, secretAccessKey: S3_SECRET } })
-  cached = { s3, Bucket: S3_BUCKET }
+  const hasKeys = Boolean(S3_KEY && S3_SECRET)
+  if (!S3_BUCKET || (S3_URL && !hasKeys)) throw new AppError("File storage is not configured", 503)
+  const custom = S3_URL ? { endpoint: S3_URL, forcePathStyle: true } : {}
+  const keys = S3_KEY && S3_SECRET ? { credentials: { accessKeyId: S3_KEY, secretAccessKey: S3_SECRET } } : {}
+  cached = { s3: new S3Client({ region: S3_REGION, ...custom, ...keys }), Bucket: S3_BUCKET }
   return cached
 }
 

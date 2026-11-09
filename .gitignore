@@ -44,3 +44,4 @@ yarn-error.log*
 .vercel
 .env*
 _apply/
+assets/
