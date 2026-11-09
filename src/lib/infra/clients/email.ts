@@ -1,5 +1,6 @@
 import "dotenv/config"
 import { enqueue } from "@/lib/infra/queue/queue"
+import { isDemoMailbox } from "@/lib/infra/demo/config"
 const brevoApiUrl = "https://api.brevo.com/v3/smtp/email"
 const fromEmail = process.env.BREVO_FROM_EMAIL ?? "no-reply@daigo.app"
 
@@ -30,6 +31,7 @@ export async function sendEmail({ to, subject, text }: SendEmailParams) {
 }
 
 export async function sendEmailBestEffort(params: SendEmailParams) {
+  if (isDemoMailbox(params.to)) return
   await enqueue({ name: "email.send", payload: params })
 }
 
