@@ -13,14 +13,16 @@ const schema = z.object({
   APP_URL: z.url(),
   STADIA_API: z.string().min(1),
   OWM_KEY: z.string().optional(),
-  S3_URL: z.url(),
-  S3_KEY: z.string().min(1),
-  S3_SECRET: z.string().min(1),
-  S3_BUCKET: z.string().min(1),
-  S3_REGION: z.string().default("ap-northeast-1"),
+  S3_URL: z.url().optional(),
+  S3_KEY: z.string().min(1).optional(),
+  S3_SECRET: z.string().min(1).optional(),
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_REGION: z.string().default("ap-south-1"),
   QTASH_TOKEN: z.string().optional(),
   QTASH_CURRENT: z.string().optional(),
   QTASH_NEXT: z.string().optional(),
+  DEMO_MODE: z.enum(["true", "false"]).default("false"),
+  DEMO_LIVE_EMAIL: z.email().optional(),
 })
 const parsed = schema.safeParse(process.env)
 if (!parsed.success) {
