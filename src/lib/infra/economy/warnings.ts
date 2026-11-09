@@ -2,7 +2,7 @@ import { db } from "@/lib/infra/clients/db"
 import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { notify } from "@/lib/infra/realtime/notify"
 
-type WarningReason = "GPS_SPOOF" | "CANCEL_GAMING" | "PRICE_OVER_CAP" | "LATE_ARRIVAL"
+type WarningReason = "GPS_SPOOF" | "CANCEL_GAMING" | "PRICE_OVER_CAP"
 
 export const warningLimit = 5
 const cycleDays = 90

@@ -17,5 +17,4 @@ enum WarningReason {
   GPS_SPOOF
   CANCEL_GAMING
   PRICE_OVER_CAP
-  LATE_ARRIVAl
 }
