@@ -41,10 +41,10 @@ export async function forceExpire({ requestId }: ForceExpireInput) {
   return { requestId, expiresAt: expired.expiresAt }
 }
 
-/* pretends the driver arrived a while ago, so the 5 minute no-show wait is skipped */
 export async function forceArrival({ tripId, minutesAgo }: ForceArrivalInput) {
   const trip = await tripRepo.findWithPeople(tripId)
   onlyDemo(trip.rider.email, trip.driver.email)
+  // The Driver arrived while 5/10 minute ago i add this
   const updated = await tripRepo.setArrivedAt(tripId, new Date(Date.now() - minutesAgo * 60 * 1000))
   return { tripId, arrivedAt: updated.arrivedAt }
 }

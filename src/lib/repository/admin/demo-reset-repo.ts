@@ -1,8 +1,9 @@
 import { db } from "@/lib/infra/clients/db"
 
 const same = "insensitive" as const
-
-/* staff are never touched, even if their email matches */
+/* 
+  The staff which is not touch even it's a email is matched.
+*/
 export async function demoUserIds(domain: string, liveEmail: string | undefined) {
   const byDomain = { email: { endsWith: domain, mode: same } }
   const live = liveEmail ? [{ email: { equals: liveEmail, mode: same } }] : []
@@ -36,7 +37,6 @@ async function relatedIds(ids: string[]) {
   return { tripIds, requestIds, routeIds, matchIds: matches.map((match) => match.id) }
 }
 
-/* children before parents, so no foreign key ever blocks a delete */
 export async function wipe(ids: string[]) {
   const { tripIds, requestIds, routeIds, matchIds } = await relatedIds(ids)
   const user = { in: ids }
