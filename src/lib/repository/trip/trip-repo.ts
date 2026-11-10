@@ -68,3 +68,4 @@ export const activeForRider = (riderId: string) => db.trip.findFirst({ where: { 
 export const completedSummaryForDriver = (driverId: string) => db.trip.aggregate({ where: { driverId, status: "COMPLETED" }, _count: { _all: true }, _sum: { priceEstimate: true } })
 export const upcomingCountForDriver = (driverId: string) => db.trip.count({ where: { driverId, status: "PENDING_PICKUP" } })
 export const hasActiveTrip = async (userId: string) => (await db.trip.count({ where: { OR: [{ riderId: userId }, { driverId: userId }], status: { in: ["PENDING_PICKUP", "IN_PROGRESS"] } } })) > 0
+export const setArrivedAt = (id: string, arrivedAt: Date) => db.trip.update({ where: { id }, data: { arrivedAt } })

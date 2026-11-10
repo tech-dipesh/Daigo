@@ -14,3 +14,4 @@ export const findForMatching = (ids: string[], vehiclePreference: VehicleKind | 
   db.route.findMany({ where: { id: { in: ids }, ...(vehiclePreference ? { vehicle: { type: vehiclePreference } } : {}) }, include: { vehicle: true, driver: true } })
 export const getById = (id: string) => db.route.findUniqueOrThrow({ where: { id } })
 export const activeByDriver = (driverId: string) => db.route.findMany({ where: { driverId, status: "ACTIVE" }, include: { vehicle: true } })
+export const findWithDriver = (id: string) => db.route.findUnique({ where: { id }, include: { vehicle: true, driver: true } })

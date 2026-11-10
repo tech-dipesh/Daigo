@@ -55,3 +55,5 @@ export const replaceWithCopy = (old: RideRequest, windowStart: Date, windowEnd: 
       },
     })
   })
+export const findWithRider = (id: string) => db.rideRequest.findUnique({ where: { id }, include: { rider: true } })
+export const setExpiry = (id: string, expiresAt: Date | null) => db.rideRequest.update({ where: { id }, data: { expiresAt } })
