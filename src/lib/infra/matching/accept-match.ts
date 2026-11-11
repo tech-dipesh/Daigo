@@ -9,10 +9,6 @@ import { isExpired } from "@/lib/infra/matching/expiry"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import { notify } from "@/lib/infra/realtime/notify"
 
-/*
-  one place that turns a match into a trip
-  used by driver accept, offer accept and auto accept
-*/
 export async function acceptMatch(matchId: string, price?: number) {
   const match = await db.match.findUnique({ where: { id: matchId }, include: { rideRequest: { include: { rider: true } }, route: true } })
   if (!match) throw new AppError("Match not found", 404)
