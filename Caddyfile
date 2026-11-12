@@ -1,0 +1,14 @@
+(daigo) {
+  encode zstd gzip
+  @socket path /api/v1/ws
+  reverse_proxy @socket ws:3001
+  reverse_proxy app:3000
+}
+
+daigo.dipsharma.me {
+  import daigo
+}
+
+:80 {
+  import daigo
+}

@@ -1,0 +1,27 @@
+services:
+  app:
+    image: ghcr.io/${OWNER}/daigo-app:${TAG:-latest}
+    env_file: .env
+    restart: unless-stopped
+    mem_limit: 450m
+  ws:
+    image: ghcr.io/${OWNER}/daigo-ws:${TAG:-latest}
+    env_file: .env
+    restart: unless-stopped
+    mem_limit: 250m
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - ws
+volumes:
+  caddy_data:
+  caddy_config:
