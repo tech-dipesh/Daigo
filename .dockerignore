@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.github
+.env*
+prisma/generated
+*.zip
+*.md
+docs

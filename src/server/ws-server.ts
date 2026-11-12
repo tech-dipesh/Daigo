@@ -19,7 +19,6 @@ const server = createServer((req, res) => {
   res.writeHead(req.url === "/health" ? 200 : 404).end()
 })
 
-/* same cookie check the proxy does, no silent refresh here, client calls any api then reconnects */
 server.on("upgrade", async (req, socket, head) => {
   try {
     const token = cookie(req.headers.cookie, "access_token")

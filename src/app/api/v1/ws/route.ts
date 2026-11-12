@@ -1,14 +1,9 @@
 import { upgradeWebSocket } from "@vercel/functions"
-import type { WebSocketData } from "@vercel/functions"
 import type { NextRequest } from "next/server"
 import * as userRepo from "@/lib/repository/account/user-repo"
-import { redis } from "@/lib/infra/clients/redis"
 import { getUserId } from "@/lib/infra/auth/auth"
 import { AppError, errorResponse } from "@/lib/infra/http/response"
-import { adminChannel, userChannel } from "@/lib/infra/realtime/events"
-import type { RealtimeEvent } from "@/lib/infra/realtime/events"
-import { setOffline, setOnline } from "@/lib/infra/realtime/presence"
-import { wsMessageSchema } from "@/lib/validation/driver/realtime-schema"
+import { attachSocket } from "@/lib/infra/realtime/socket"
 
 /*
   conn dies at max duration, client must reconnect
@@ -16,34 +11,13 @@ import { wsMessageSchema } from "@/lib/validation/driver/realtime-schema"
 */
 export const maxDuration = 300
 
-function parseMessage(raw: WebSocketData) {
-  try { return wsMessageSchema.safeParse(JSON.parse(raw.toString())) } catch { return null }
-}
-
 export async function GET(request: NextRequest) {
+  // on ec2 caddy sends this path to the ws container, so reaching here means a wrong proxy rule
+  if (!process.env.VERCEL) return errorResponse(new AppError("WebSocket runs in the ws container on this host, check the proxy rule", 501))
   const userId = getUserId(request)
-  const { activeRole, staffRole } = await userRepo.roles(userId)
-  const channels = staffRole ? [userChannel(userId), adminChannel] : [userChannel(userId)]
+  const roles = await userRepo.roles(userId)
   try {
-    return upgradeWebSocket((ws) => {
-      let live = false
-      const sub = redis.subscribe<RealtimeEvent>(channels)
-      sub.on("message", ({ message }) => ws.send(JSON.stringify(message)))
-      ws.send(JSON.stringify({ type: "ready" }))
-      ws.on("message", async (raw: WebSocketData) => {
-        const parsed = parseMessage(raw)
-        if (!parsed?.success) return ws.send(JSON.stringify({ type: "error", message: "Unknown message" }))
-        const { type } = parsed.data
-        if (type === "online" && activeRole === "DRIVER") live = true
-        if (type === "offline") live = false
-        if (live) await setOnline(userId)
-        else await setOffline(userId)
-      })
-      ws.on("close", async () => {
-        await sub.unsubscribe()
-        await setOffline(userId)
-      })
-    })
+    return await upgradeWebSocket((ws) => attachSocket(ws, { userId, ...roles }))
   } catch (error) {
     console.error(error)
     return errorResponse(new AppError("WebSocket is not available here, poll /api/v1/events instead", 501))
