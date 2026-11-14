@@ -1,0 +1,14 @@
+{
+  "common": { "loading": "Loading", "retry": "Try again", "home": "Go home", "close": "Close" },
+  "errors": {
+    "title": "Something went wrong",
+    "body": "We hit a problem on our side. Please try again.",
+    "notFoundTitle": "We can't find that page",
+    "notFoundBody": "The link may be old or typed wrong.",
+    "slowDown": "You are going too fast, please wait a moment",
+    "timeout": "This is taking too long, please try again",
+    "network": "Please check your internet connection",
+    "unknown": "Something went wrong, please try again",
+    "call112": "Call 112"
+  }
+}
