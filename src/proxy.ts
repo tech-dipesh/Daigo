@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { verifyAccessToken, rotateRefreshToken } from "@/lib/infra/auth/token"
-import { setAuthCookies } from "@/lib/infra/auth/cookies"
+import { setAuthCookies, clearAuthCookies } from "@/lib/infra/auth/cookies"
 import { rateLimit } from "@/lib/infra/clients/rate-limit"
 
 const publicPaths = [
@@ -15,6 +15,10 @@ const publicPaths = [
   "/api/v1/email-verification/confirm",
 ]
 
+const guestPages = ["/login", "/signup", "/forgot-password"]
+const openPages = ["/reset-password", "/verify-email/confirm", "/emergency", "/terms", "/tutorial", "/suspended", "/offline"]
+const openPrefixes = ["/trips/shared/", "/pay/"]
+
 function unauthenticated() {
   return NextResponse.json(
     { success: false, data: null, error: { message: "Not authenticated" } },
@@ -22,7 +26,30 @@ function unauthenticated() {
   )
 }
 
+// pages never get a 401, they get sent to /login. same silent refresh as the api below
+async function pageProxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const access = request.cookies.get("access_token")?.value
+  const refresh = request.cookies.get("refresh_token")?.value
+  const payload = access ? await verifyAccessToken(access) : null
+  const rotated = !payload && refresh ? await rotateRefreshToken(refresh) : null
+  const userId = payload?.userId ?? rotated?.userId
+  const stale = !userId && Boolean(access || refresh)
+  const isGuest = guestPages.includes(pathname)
+  const isOpen = isGuest || openPages.includes(pathname) || openPrefixes.some((p) => pathname.startsWith(p))
+  const headers = new Headers(request.headers)
+  // never trust an x-user-id coming from the browser
+  headers.delete("x-user-id")
+  if (userId) headers.set("x-user-id", userId)
+  const target = !userId && !isOpen ? "/login" : userId && isGuest ? "/" : null
+  const response = target ? NextResponse.redirect(new URL(target, request.url)) : NextResponse.next({ request: { headers } })
+  if (rotated) setAuthCookies(response, rotated.accessToken, rotated.refreshToken)
+  return stale ? clearAuthCookies(response) : response
+}
+
 export async function proxy(request: NextRequest) {
+  if (!request.nextUrl.pathname.startsWith("/api/")) return pageProxy(request)
+
   const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
   const { success } = await rateLimit.limit(clientIp)
 
@@ -68,5 +95,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/v1/:path*",
+  matcher: "/((?!_next/static|_next/image|.*\\..*).*)",
 }

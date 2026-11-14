@@ -13,7 +13,7 @@ export function handleError(err: ApiError, dispatch: Dispatch) {
   if (err.timeout) return void dispatch(pushToast({ key: "errors.timeout", kind: "error" }))
   if (err.status === 0) return void dispatch(pushToast({ key: "errors.network", kind: "error" }))
   if (err.status === 429) return void dispatch(pushToast({ key: "errors.slowDown", kind: "error" }))
-  // proxy already refreshes quietly so a 401 here means the session is really gone
+  // This is for the suspend code name on the guess form
   if (err.status === 401 && !authPages.includes(window.location.pathname)) return void window.location.replace("/login")
   if (err.status >= 500) dispatch(pushToast({ key: "errors.unknown", kind: "error" }))
 }
