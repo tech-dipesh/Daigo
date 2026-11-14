@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
 import "@/lib/infra/clients/env"
 
 const nextConfig: NextConfig = {
@@ -6,4 +7,5 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['100.96.0.6']
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin();
+export default withNextIntl(nextConfig);

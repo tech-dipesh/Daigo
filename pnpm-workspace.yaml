@@ -1,5 +1,9 @@
 allowBuilds:
+  '@parcel/watcher': true
   '@prisma/engines': true
+  '@swc/core': true
   esbuild: true
   prisma: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.73.0
