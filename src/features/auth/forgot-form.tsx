@@ -36,7 +36,7 @@ export function ForgotForm() {
       <p className="text-muted">{t("forgotSub")}</p>
       <Input label={t("email")} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={emailOk(email) ? undefined : t("emailBad")} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideSend")} lockedLabel={t("locked")} locked={!emailOk(email)} onDone={go} />
+      <Slide label={t("slideSend")} lockedLabel={t("locked")} locked={!emailOk(email)} onDoneAction={go} />
       <Link href="/login" className="text-center text-sm text-primary">{t("logIn")}</Link>
     </div>
   )

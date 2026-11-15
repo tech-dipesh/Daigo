@@ -43,7 +43,7 @@ export function ContactForm() {
       {!hurry && <Input label={t("contactEmail")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} error={emailOk(email) ? undefined : t("emailBad")} />}
       <button type="button" onClick={() => setHurry(!hurry)} className="self-start text-sm text-primary outline-hidden">{hurry ? t("full") : t("hurry")}</button>
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideContact")} lockedLabel={t("locked")} locked={!ready} onDone={go} />
+      <Slide label={t("slideContact")} lockedLabel={t("locked")} locked={!ready} onDoneAction={go} />
       <LogoutButton />
     </div>
   )

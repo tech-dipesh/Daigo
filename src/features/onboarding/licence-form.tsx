@@ -32,9 +32,9 @@ export function LicenceForm() {
     <div className="flex flex-col gap-4">
       <h1 className="text-title font-semibold">{t("licTitle")}</h1>
       <Input label={t("licNo")} value={number} onChange={(e) => setNumber(e.target.value.toUpperCase())} error={licenceOk(number) ? undefined : t("licBad")} />
-      <PhotoField label={t("licPhoto")} hint={t("choosePhoto")} file={photo} onFile={setPhoto} error={photo && issue ? t(issue) : undefined} />
+      <PhotoField label={t("licPhoto")} hint={t("choosePhoto")} file={photo} onFileAction={setPhoto} error={photo && issue ? t(issue) : undefined} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideLicence")} lockedLabel={t("locked")} locked={!licenceOk(number) || Boolean(issue)} onDone={go} />
+      <Slide label={t("slideLicence")} lockedLabel={t("locked")} locked={!licenceOk(number) || Boolean(issue)} onDoneAction={go} />
     </div>
   )
 }

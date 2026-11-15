@@ -66,8 +66,8 @@ export function RequestForm() {
       <div className="min-h-64 lg:sticky lg:top-4 lg:h-[calc(100dvh-8rem)]"><LazyMap from={from} to={to} label={t("mapLabel")} /></div>
       <div className="flex flex-col gap-4">
         <h1 className="text-title font-semibold">{t("newTitle")}</h1>
-        <PlaceInput label={t("pickup")} place={from} onPlace={setFrom} locate />
-        <PlaceInput label={t("drop")} place={to} onPlace={setTo} />
+        <PlaceInput label={t("pickup")} place={from} onPlaceAction={setFrom} locate />
+        <PlaceInput label={t("drop")} place={to} onPlaceAction={setTo} />
         <div role="radiogroup" aria-label={t("when")} className="flex flex-wrap gap-2">
           {chips.map((c) => <button key={c.id} type="button" role="radio" aria-checked={when === c.id} onClick={() => chip(c.id)} className={`flex h-11 items-center gap-2 rounded-2xl px-4 text-sm outline-hidden ${when === c.id ? "bg-primary text-on-primary" : "bg-surface text-ink"}`}>{c.id === "pick" && <ClockIcon size={16} />}{c.label}</button>)}
         </div>
@@ -92,15 +92,15 @@ export function RequestForm() {
         <button type="button" onClick={() => setMore(!more)} aria-expanded={more} className="flex items-center gap-1 self-start text-sm text-primary outline-hidden">{t("moreOptions")}{more ? <UpIcon size={16} /> : <DownIcon size={16} />}</button>
         {more && (
           <div className="flex flex-col gap-2">
-            <Toggle label={t("womenOnly")} on={women} onChange={setWomen} />
-            <Toggle label={t("acOnly")} on={ac} onChange={setAc} />
-            <Toggle label={t("shared")} on={shared} onChange={setShared} />
-            <Toggle label={t("safety")} hint={t("safetyHelp")} on={care} onChange={setCare} />
+            <Toggle label={t("womenOnly")} on={women} onChangeAction={setWomen} />
+            <Toggle label={t("acOnly")} on={ac} onChangeAction={setAc} />
+            <Toggle label={t("shared")} on={shared} onChangeAction={setShared} />
+            <Toggle label={t("safety")} hint={t("safetyHelp")} on={care} onChangeAction={setCare} />
             <textarea value={notes} maxLength={300} onChange={(e) => setNotes(e.target.value)} placeholder={t("notes")} aria-label={t("notes")} className="min-h-24 rounded-2xl bg-surface p-4 text-base text-ink outline-hidden placeholder:text-muted" />
           </div>
         )}
         <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-        <Slide label={t("slideSend")} lockedLabel={t("lockedSend")} locked={!ready} onDone={go} />
+        <Slide label={t("slideSend")} lockedLabel={t("lockedSend")} locked={!ready} onDoneAction={go} />
       </div>
     </div>
   )

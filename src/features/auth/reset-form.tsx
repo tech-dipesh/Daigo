@@ -33,7 +33,7 @@ export function ResetForm({ token }: { token: string }) {
       <Input label={t("newPassword")} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => setBlurred(true)} error={passOk(password) ? undefined : t("passBad")} />
       <PasswordRules value={password} touched={blurred} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideReset")} lockedLabel={t("locked")} locked={!passOk(password)} onDone={go} />
+      <Slide label={t("slideReset")} lockedLabel={t("locked")} locked={!passOk(password)} onDoneAction={go} />
     </div>
   )
 }

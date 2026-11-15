@@ -7,9 +7,9 @@ import { LocateIcon, PinIcon, SpinnerIcon } from "@/components/icons"
 import { searchPlaces } from "@/features/places/search"
 import type { Place } from "@/features/places/search"
 
-type Props = { label: string; place: Place | null; onPlace: (p: Place | null) => void; locate?: boolean }
+type Props = { label: string; place: Place | null; onPlaceAction: (p: Place | null) => void; locate?: boolean }
 
-export function PlaceInput({ label, place, onPlace, locate }: Props) {
+export function PlaceInput({ label, place, onPlaceAction, locate }: Props) {
   const t = useTranslations("rider")
   const list = useId()
   const [text, setText] = useState(place?.label ?? "")
@@ -37,12 +37,12 @@ export function PlaceInput({ label, place, onPlace, locate }: Props) {
   const type = (v: string) => {
     setText(v)
     setOpen(true)
-    if (place) onPlace(null)
+    if (place) onPlaceAction(null)
   }
   const choose = (p: Place) => {
     setText(p.label)
     setOpen(false)
-    onPlace(p)
+    onPlaceAction(p)
   }
   const here = () => navigator.geolocation.getCurrentPosition((pos) => choose({ label: t("myLocation"), lat: pos.coords.latitude, lng: pos.coords.longitude }))
   const key = (e: KeyboardEvent<HTMLInputElement>) => {

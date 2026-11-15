@@ -41,7 +41,7 @@ export function VerifyForm({ email }: { email: string }) {
       </div>
       <CodeBoxes value={code} onChangeAction={setCode} label={t("codeLabel")} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideVerify")} lockedLabel={t("locked")} locked={code.length < 6} onDone={go} />
+      <Slide label={t("slideVerify")} lockedLabel={t("locked")} locked={code.length < 6} onDoneAction={go} />
       <button type="button" onClick={again} className="text-center text-sm text-primary outline-hidden">{t("resend")}</button>
       <LogoutButton />
     </div>

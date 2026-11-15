@@ -7,10 +7,10 @@ const max = 5 * 1024 * 1024
 
 export const photoIssue = (f: File | null) => (!f ? "photoNeed" : !types.includes(f.type) ? "photoType" : f.size > max ? "photoBig" : null)
 
-type Props = { label: string; hint: string; file: File | null; onFile: (f: File | null) => void; error?: string }
+type Props = { label: string; hint: string; file: File | null; onFileAction: (f: File | null) => void; error?: string }
 
-export function PhotoField({ label, hint, file, onFile, error }: Props) {
-  const pick = (e: ChangeEvent<HTMLInputElement>) => onFile(e.target.files?.[0] ?? null)
+export function PhotoField({ label, hint, file, onFileAction, error }: Props) {
+  const pick = (e: ChangeEvent<HTMLInputElement>) => onFileAction(e.target.files?.[0] ?? null)
   const tone = error ? "text-danger" : file ? "text-success" : "text-muted"
   return (
     <div>

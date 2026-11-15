@@ -3,12 +3,12 @@ import { useRef, useState } from "react"
 import type { KeyboardEvent, PointerEvent } from "react"
 import { ArrowIcon, CheckIcon, SpinnerIcon } from "@/components/icons"
 
-type Props = { label: string; lockedLabel: string; locked: boolean; onDone: () => void | Promise<void> }
+type Props = { label: string; lockedLabel: string; locked: boolean; onDoneAction: () => void | Promise<void> }
 
 const thumb = 64
 const pad = 4
 
-export function Slide({ label, lockedLabel, locked, onDone }: Props) {
+export function Slide({ label, lockedLabel, locked, onDoneAction }: Props) {
   const track = useRef<HTMLDivElement>(null)
   const from = useRef(0)
   const [x, setX] = useState(0)
@@ -19,7 +19,7 @@ export function Slide({ label, lockedLabel, locked, onDone }: Props) {
   const text = locked ? lockedLabel : label
   const finish = async () => {
     setBusy(true)
-    try { await onDone() } finally { setBusy(false); setX(0) }
+    try { await onDoneAction() } finally { setBusy(false); setX(0) }
   }
   const down = (e: PointerEvent<HTMLButtonElement>) => {
     if (locked || busy || !track.current) return

@@ -70,9 +70,9 @@ export function LoginForm({ start = "" }: { start?: string }) {
       <div className="flex flex-col gap-6">
         <h1 className="text-title font-semibold">{t("adminCode")}</h1>
         <p className="text-muted">{t("adminCodeSub", { email })}</p>
-        <CodeBoxes value={code} onChange={setCode} label={t("codeLabel")} />
+        <CodeBoxes value={code} onChangeAction={setCode} label={t("codeLabel")} />
         <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-        <Slide label={t("slideVerify")} lockedLabel={t("locked")} locked={code.length < 6} onDone={doCode} />
+        <Slide label={t("slideVerify")} lockedLabel={t("locked")} locked={code.length < 6} onDoneAction={doCode} />
       </div>
     )
   }
@@ -88,7 +88,7 @@ export function LoginForm({ start = "" }: { start?: string }) {
       </div>
       <Input label={t("password")} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideLogin")} lockedLabel={t("locked")} locked={!password} onDone={doLogin} />
+      <Slide label={t("slideLogin")} lockedLabel={t("locked")} locked={!password} onDoneAction={doLogin} />
       <p className="text-center text-sm text-muted">{t("forgot")} <Link href="/forgot-password" className="text-primary">{t("resetIt")}</Link></p>
     </div>
   )

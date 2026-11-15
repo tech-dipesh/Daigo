@@ -33,7 +33,7 @@ export function SignupForm({ start = "" }: { start?: string }) {
       <Input label={t("password")} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => setBlurred(true)} error={passOk(password) ? undefined : t("passBad")} />
       <PasswordRules value={password} touched={blurred} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideSignup")} lockedLabel={t("locked")} locked={!ready} onDone={go} />
+      <Slide label={t("slideSignup")} lockedLabel={t("locked")} locked={!ready} onDoneAction={go} />
       <p className="text-center text-sm text-muted">{t("haveAccount")} <Link href={`/login?email=${encodeURIComponent(email)}`} className="text-primary">{t("logIn")}</Link></p>
       <p className="text-center text-xs text-muted"><Link href="/terms" className="text-primary">{t("terms")}</Link></p>
     </div>

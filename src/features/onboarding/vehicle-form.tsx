@@ -67,9 +67,9 @@ export function VehicleForm() {
         </span>
       </div>
       <Input label={t("rc")} value={rc} onChange={(e) => setRc(e.target.value)} error={between(rc, 6, 20) ? undefined : t("rcBad")} />
-      <PhotoField label={t("rcPhoto")} hint={t("choosePhoto")} file={photo} onFile={setPhoto} error={photo && issue ? t(issue) : undefined} />
+      <PhotoField label={t("rcPhoto")} hint={t("choosePhoto")} file={photo} onFileAction={setPhoto} error={photo && issue ? t(issue) : undefined} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slideVehicle")} lockedLabel={t("locked")} locked={!ready} onDone={go} />
+      <Slide label={t("slideVehicle")} lockedLabel={t("locked")} locked={!ready} onDoneAction={go} />
     </div>
   )
 }
