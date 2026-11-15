@@ -17,6 +17,7 @@ export function ResetForm({ token }: { token: string }) {
   const [confirm] = useResetConfirmMutation()
   const [password, setPassword] = useState("")
   const [fail, setFail] = useState("")
+  const [blurred, setBlurred] = useState(false)
   const go = async () => {
     setFail("")
     try {
@@ -29,8 +30,8 @@ export function ResetForm({ token }: { token: string }) {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-title font-semibold">{t("resetTitle")}</h1>
-      <Input label={t("newPassword")} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} error={passOk(password) ? undefined : t("passBad")} />
-      <PasswordRules value={password} />
+      <Input label={t("newPassword")} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => setBlurred(true)} error={passOk(password) ? undefined : t("passBad")} />
+      <PasswordRules value={password} touched={blurred} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
       <Slide label={t("slideReset")} lockedLabel={t("locked")} locked={!passOk(password)} onDone={go} />
     </div>

@@ -16,6 +16,7 @@ export function SignupForm({ start = "" }: { start?: string }) {
   const [email, setEmail] = useState(start)
   const [password, setPassword] = useState("")
   const [fail, setFail] = useState("")
+  const [blurred, setBlurred] = useState(false)
   const ready = emailOk(email) && passOk(password)
   const go = async () => {
     setFail("")
@@ -29,8 +30,8 @@ export function SignupForm({ start = "" }: { start?: string }) {
     <div className="flex flex-col gap-4">
       <h1 className="text-title font-semibold">{t("signupTitle")}</h1>
       <Input label={t("email")} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={emailOk(email) ? undefined : t("emailBad")} />
-      <Input label={t("password")} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} error={passOk(password) ? undefined : t("passBad")} />
-      <PasswordRules value={password} />
+      <Input label={t("password")} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => setBlurred(true)} error={passOk(password) ? undefined : t("passBad")} />
+      <PasswordRules value={password} touched={blurred} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
       <Slide label={t("slideSignup")} lockedLabel={t("locked")} locked={!ready} onDone={go} />
       <p className="text-center text-sm text-muted">{t("haveAccount")} <Link href={`/login?email=${encodeURIComponent(email)}`} className="text-primary">{t("logIn")}</Link></p>

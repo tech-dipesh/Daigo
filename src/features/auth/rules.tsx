@@ -12,13 +12,13 @@ const checks = [
 
 export const passOk = (v: string) => checks.every((c) => c.ok(v))
 
-export function PasswordRules({ value }: { value: string }) {
+export function PasswordRules({ value, touched }: { value: string; touched: boolean }) {
   const t = useTranslations("auth")
   return (
     <ul className="flex flex-col gap-1 px-1 text-sm">
       {checks.map((c) => {
         const met = c.ok(value)
-        const tone = met ? "text-success" : value ? "text-danger" : "text-muted"
+        const tone = met ? "text-success" : value && touched ? "text-danger" : "text-muted"
         return <li key={c.key} className={`flex items-center gap-2 ${tone}`}>{met ? <CheckIcon size={16} /> : <CrossIcon size={16} />}{t(c.key)}</li>
       })}
     </ul>

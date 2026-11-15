@@ -7,7 +7,7 @@ const expiresIn = 300
 let cached: { s3: S3Client; Bucket: string } | null = null
 
 /*
-  this is supabase storage through its s3 compatible api, not aws
+  this is plain aws s3, leave S3_URL empty. S3_URL only exists for s3 compatible stores
   keys are optional so the app starts without them, uploads just say not configured
 */
 function storage() {
