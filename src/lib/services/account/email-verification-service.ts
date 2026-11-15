@@ -16,7 +16,7 @@ export async function requestEmailVerification(userId: string) {
   }
   const token = await issueVerificationToken(userId, "EMAIL_VERIFICATION", dayMs)
   const { code } = await issueOtp(userId, "EMAIL_VERIFY")
-  const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${token}`
+  const verifyLink = `${env.APP_URL}/verify-email/confirm?token=${token}`
   await sendEmailBestEffort({
     to: user.email,
     subject: "Verify your DaiGo email",

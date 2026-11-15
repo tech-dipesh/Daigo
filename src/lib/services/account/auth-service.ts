@@ -20,7 +20,7 @@ export async function signup({ email, password }: SignupInput) {
   const passwordHash = await hashPassword(password)
   const user = await userRepo.createUser(email, passwordHash)
   const [tokens, verificationToken, { code }] = await Promise.all([issueTokenPair(user.id), issueVerificationToken(user.id, "EMAIL_VERIFICATION", dayMs), issueOtp(user.id, "EMAIL_VERIFY")])
-  const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${verificationToken}`
+  const verifyLink = `${env.APP_URL}/verify-email/confirm?token=${verificationToken}`
   await sendEmailBestEffort({
     to: user.email,
     subject: "Verify your DaiGo email",

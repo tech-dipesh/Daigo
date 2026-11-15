@@ -8,13 +8,12 @@ import type { PasswordResetConfirmInput, PasswordResetRequestInput } from "@/lib
 import { enforceLimit } from "@/lib/infra/clients/action-limit"
 
 const resetLifetimeMs = 1000 * 60 * 60
+const resetMessage = "If that email is registered, a reset code has been sent."
 
 export async function requestPasswordReset({ email }: PasswordResetRequestInput) {
   await enforceLimit("reset", email.toLowerCase())
   const user = await userRepo.findByEmail(email)
-  if (!user) {
-    throw new AppError("The Email is not registered please register first", 401)
-  }
+  if (!user) return { message: resetMessage }
   const token = await issueVerificationToken(user.id, "PASSWORD_RESET", resetLifetimeMs)
   /*
     it's have to be on the frontend form with a new password,
@@ -26,7 +25,7 @@ export async function requestPasswordReset({ email }: PasswordResetRequestInput)
     subject: "Reset your DaiGo password",
     text: `Click here to reset your password: ${resetLink}\n\nOr use this code: ${token}\n\nThis expires in 1 hour.`,
   })
-  return { message: "If that email is registered, a reset code has been sent." }
+  return { message: resetMessage }
 }
 
 /*

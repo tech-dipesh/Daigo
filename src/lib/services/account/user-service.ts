@@ -31,7 +31,7 @@ export async function updateMe(userId: string, { role, name, email, language, cu
   const user = await userRepo.updateProfile(userId, { activeRole: role, name, language, email: newEmail, emailVerifiedAt: newEmail ? null : undefined })
   if (newEmail) {
     const token = await issueVerificationToken(userId, "EMAIL_VERIFICATION", emailLifetimeMs)
-    const verifyLink = `${env.APP_URL}/api/v1/email-verification/confirm?token=${token}`
+    const verifyLink = `${env.APP_URL}/verify-email/confirm?token=${token}`
     await sendEmailBestEffort({ to: newEmail, subject: "Verify your new DaiGo email", text: `Click here to verify: ${verifyLink}\n\nThis expires in 24 hours.` })
   }
   return user

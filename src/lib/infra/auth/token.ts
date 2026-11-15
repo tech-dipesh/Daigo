@@ -76,3 +76,9 @@ export async function rotateRefreshToken(refreshTokenCookie: string) {
   })
   return tokens ? { ...tokens, userId: payload.userId } : null
 }
+
+export async function revokeRefreshToken(refreshTokenCookie: string) {
+  const payload = await verifyRefreshToken(refreshTokenCookie)
+  if (!payload) return
+  await db.refreshToken.updateMany({ where: { userId: payload.userId, tokenHash: sha256(refreshTokenCookie), revokedAt: null }, data: { revokedAt: new Date() } })
+}
