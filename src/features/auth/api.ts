@@ -13,8 +13,9 @@ export const authApi = baseApi.injectEndpoints({
     confirmEmail: b.mutation<{ id: string; email: string }, { token: string }>({ query: (body) => ({ url: "/email-verification/confirm", method: "post", body }) }),
     resetRequest: b.mutation<{ message: string }, { email: string }>({ query: (body) => ({ url: "/password-reset/request", method: "post", body }) }),
     resetConfirm: b.mutation<{ message: string }, { token: string; newPassword: string }>({ query: (body) => ({ url: "/password-reset/confirm", method: "post", body }) }),
+    logout: b.mutation<{ loggedOut: boolean }, void>({ query: () => ({ url: "/logout", method: "post" }) }),
     setRole: b.mutation<{ id: string }, { role: "RIDER" | "DRIVER" }>({ query: (body) => ({ url: "/me", method: "patch", body }) }),
   }),
 })
 
-export const { useLoginMutation, useLoginVerifyMutation, useSignupMutation, useVerifyCodeMutation, useResendCodeMutation, useConfirmEmailMutation, useResetRequestMutation, useResetConfirmMutation, useSetRoleMutation } = authApi
+export const { useLoginMutation, useLoginVerifyMutation, useSignupMutation, useVerifyCodeMutation, useResendCodeMutation, useConfirmEmailMutation, useResetRequestMutation, useResetConfirmMutation, useLogoutMutation, useSetRoleMutation } = authApi

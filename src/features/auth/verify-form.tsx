@@ -8,6 +8,7 @@ import { pushToast } from "@/store/ui"
 import { useAppDispatch } from "@/store"
 import { useResendCodeMutation, useVerifyCodeMutation } from "@/features/auth/api"
 import { CodeBoxes } from "@/features/auth/code-boxes"
+import { LogoutButton } from "@/features/auth/logout-button"
 
 export function VerifyForm({ email }: { email: string }) {
   const t = useTranslations("auth")
@@ -38,10 +39,11 @@ export function VerifyForm({ email }: { email: string }) {
         <h1 className="text-title font-semibold">{t("verifyTitle")}</h1>
         <p className="text-muted">{t("verifySub", { email })}</p>
       </div>
-      <CodeBoxes value={code} onChange={setCode} label={t("codeLabel")} />
+      <CodeBoxes value={code} onChangeAction={setCode} label={t("codeLabel")} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
       <Slide label={t("slideVerify")} lockedLabel={t("locked")} locked={code.length < 6} onDone={go} />
       <button type="button" onClick={again} className="text-center text-sm text-primary outline-hidden">{t("resend")}</button>
+      <LogoutButton />
     </div>
   )
 }

@@ -8,6 +8,7 @@ const publicPaths = [
   "/api/v1/signup",
   "/api/v1/login",
   "/api/v1/login/verify",
+  "/api/v1/logout",
   "/api/v1/jobs/run",
   "/api/v1/refresh",
   "/api/v1/password-reset/request",

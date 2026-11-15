@@ -1,4 +1,4 @@
-import { ArrowRight, Check, ChevronRight, Eye, EyeOff, Loader2, Moon, ShieldCheck, Sun, X } from "lucide-react"
+import { ArrowRight, Bike, Camera, Car, CarTaxiFront, Check, ChevronRight, Eye, EyeOff, Loader2, Minus, Moon, Plus, ShieldCheck, Sun, Truck, X } from "lucide-react"
 import type { LucideIcon, LucideProps } from "lucide-react"
 
 const stroke = 1.75
@@ -14,3 +14,10 @@ export const SpinnerIcon = wrap(Loader2)
 export const MoonIcon = wrap(Moon)
 export const SunIcon = wrap(Sun)
 export const SosIcon = wrap(ShieldCheck)
+export const CameraIcon = wrap(Camera)
+export const PlusIcon = wrap(Plus)
+export const MinusIcon = wrap(Minus)
+export const BikeIcon = wrap(Bike)
+export const CarIcon = wrap(Car)
+export const CabIcon = wrap(CarTaxiFront)
+export const AutoIcon = wrap(Truck)
