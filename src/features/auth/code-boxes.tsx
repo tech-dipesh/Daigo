@@ -4,7 +4,7 @@ import type { ClipboardEvent, KeyboardEvent } from "react"
 
 const size = 6
 
-export function CodeBoxes({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
+export function CodeBoxes({ value, onChangeAction, label }: { value: string; onChangeAction: (v: string) => void; label: string }) {
   const refs = useRef<(HTMLInputElement | null)[]>([])
   const done = value.length === size
   const tone = done ? "text-success" : "text-danger"
@@ -13,19 +13,19 @@ export function CodeBoxes({ value, onChange, label }: { value: string; onChange:
     const digits = raw.replace(/\D/g, "")
     if (!digits) return
     const next = (value.slice(0, i) + digits).slice(0, size)
-    onChange(next)
+    onChangeAction(next)
     focus(next.length)
   }
   const back = (i: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Backspace") return
     e.preventDefault()
-    onChange(value.length > i ? value.slice(0, i) + value.slice(i + 1) : value.slice(0, -1))
+    onChangeAction(value.length > i ? value.slice(0, i) + value.slice(i + 1) : value.slice(0, -1))
     focus(value.length > i ? i : i - 1)
   }
   const paste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
     const next = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, size)
-    onChange(next)
+    onChangeAction(next)
     focus(next.length)
   }
   return (

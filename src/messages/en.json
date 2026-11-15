@@ -1,5 +1,10 @@
 {
-  "common": { "loading": "Loading", "retry": "Try again", "home": "Go home", "close": "Close" },
+  "common": {
+    "loading": "Loading",
+    "retry": "Try again",
+    "home": "Go home",
+    "close": "Close"
+  },
   "errors": {
     "title": "Something went wrong",
     "body": "We hit a problem on our side. Please try again.",
@@ -10,5 +15,65 @@
     "network": "Please check your internet connection",
     "unknown": "Something went wrong, please try again",
     "call112": "Call 112"
+  },
+  "auth": {
+    "start": "Enter your email to start riding",
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New password",
+    "next": "Continue",
+    "newHere": "New here?",
+    "createAccount": "Create an account",
+    "haveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "welcome": "Welcome back",
+    "change": "Change",
+    "loginAs": "Log in as",
+    "rider": "Rider",
+    "driver": "Driver",
+    "slideLogin": "Slide to log in",
+    "slideSignup": "Slide to sign up",
+    "slideVerify": "Slide to verify",
+    "slideReset": "Slide to reset",
+    "slideSend": "Slide to send the link",
+    "locked": "Complete the details to unlock",
+    "forgot": "Forgot password?",
+    "resetIt": "Reset it",
+    "signupTitle": "Create your account",
+    "terms": "Terms and cost-sharing notice",
+    "verifyTitle": "Check your email",
+    "verifySub": "We sent a 6 digit code to {email}",
+    "codeLabel": "Verification code",
+    "resend": "Send a new code",
+    "resent": "A new code is on its way",
+    "confirmTitle": "Confirm your email",
+    "confirmBtn": "Confirm email",
+    "confirmOk": "Your email is verified",
+    "confirmBad": "This link is invalid or has expired",
+    "continue": "Continue",
+    "forgotTitle": "Reset your password",
+    "forgotSub": "Enter your email and we will send you a link.",
+    "checkMail": "Check your email",
+    "checkMailSub": "We sent a reset link to {email}. It works for one hour.",
+    "resetTitle": "Choose a new password",
+    "resetOk": "Password updated, please log in",
+    "noToken": "This reset link is missing its code",
+    "adminCode": "Enter your login code",
+    "adminCodeSub": "We sent a 6 digit code to {email}",
+    "emailBad": "Please enter a valid email, for example name@mail.com",
+    "passBad": "Please enter a password that follows the rules below",
+    "ruleLen": "At least 8 characters",
+    "ruleLetter": "A letter",
+    "ruleNum": "A number"
+  },
+  "prefs": {
+    "language": "Language",
+    "theme": "Switch theme",
+    "sos": "Emergency"
+  },
+  "emergency": {
+    "title": "Emergency",
+    "body": "If you are in danger, call 112 now. It is India's emergency number.",
+    "call": "Call 112"
   }
 }
