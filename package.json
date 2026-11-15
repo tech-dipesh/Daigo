@@ -34,6 +34,7 @@
     "bcryptjs": "^3.0.3",
     "jose": "^6.0.0",
     "lucide-react": "^1.73.0",
+    "maplibre-gl": "^6.18.0",
     "next": "^16.3.5",
     "next-intl": "^4.15.1",
     "pg": "^8.23.0",
