@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="56" viewBox="0 0 220 56" role="img" aria-label="DaiGo">
+  <circle cx="28" cy="28" r="22" fill="#2563EB"/>
+  <path d="M16 36 C22 36 22 20 28 20 C34 20 34 36 40 36" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="16" cy="36" r="3" fill="#FFFFFF"/>
+  <circle cx="40" cy="36" r="3" fill="#FFFFFF"/>
+  <text x="64" y="38" font-family="Hind, system-ui, sans-serif" font-size="30" font-weight="600" fill="#1C2433">DaiGo</text>
+</svg>
