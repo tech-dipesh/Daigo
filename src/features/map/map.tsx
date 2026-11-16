@@ -12,7 +12,7 @@ const isDark = () => document.documentElement.dataset.theme === "dark"
 const style = (dark: boolean) => `https://tiles.stadiamaps.com/styles/${dark ? "alidade_smooth_dark" : "alidade_smooth"}.json${STADIA ? `?api_key=${STADIA}` : ""}`
 const pin = (cls: string) => Object.assign(document.createElement("div"), { className: `size-4 rounded-full shadow-xs ${cls}` })
 
-export function RouteMap({ from, to, label }: { from?: Pt | null; to?: Pt | null; label: string }) {
+export function RouteMap({ from, to, driver, label }: { from?: Pt | null; to?: Pt | null; driver?: Pt | null; label: string }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<GL | null>(null)
   const pins = useRef<Marker[]>([])
@@ -49,8 +49,10 @@ export function RouteMap({ from, to, label }: { from?: Pt | null; to?: Pt | null
     const add = (p: Pt, cls: string) => pins.current.push(new ml.Marker({ element: pin(cls) }).setLngLat([p.lng, p.lat]).addTo(gl))
     if (from) add(from, "bg-primary")
     if (to) add(to, "bg-danger")
-    if (from && to) gl.fitBounds([[Math.min(from.lng, to.lng), Math.min(from.lat, to.lat)], [Math.max(from.lng, to.lng), Math.max(from.lat, to.lat)]], { padding: 70, maxZoom: 15, animate: !calm })
-    else if (from || to) gl.easeTo({ center: [(from ?? to)?.lng ?? home[0], (from ?? to)?.lat ?? home[1]], zoom: 14, animate: !calm })
-  }, [ready, from?.lat, from?.lng, to?.lat, to?.lng])
+    if (driver) add(driver, "bg-success")
+    const all = [from, to, driver].filter((p): p is Pt => Boolean(p))
+    if (all.length > 1) gl.fitBounds([[Math.min(...all.map((p) => p.lng)), Math.min(...all.map((p) => p.lat))], [Math.max(...all.map((p) => p.lng)), Math.max(...all.map((p) => p.lat))]], { padding: 70, maxZoom: 15, animate: !calm })
+    else if (all[0]) gl.easeTo({ center: [all[0].lng, all[0].lat], zoom: 14, animate: !calm })
+  }, [ready, from?.lat, from?.lng, to?.lat, to?.lng, driver?.lat, driver?.lng])
   return <div ref={box} role="img" aria-label={label} className="size-full min-h-64 overflow-hidden rounded-3xl bg-tint" />
 }
