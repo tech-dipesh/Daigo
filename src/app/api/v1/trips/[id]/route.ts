@@ -10,3 +10,10 @@ export const GET = withErrorHandling<RouteParams>(async (request, { params }) =>
   const trip = await tripService.getTrip(getUserId(request), id)
   return successResponse(trip)
 })
+
+export const POST = withErrorHandling<RouteParams>(withIdempotency(async (request, { params }) => {
+  const id = await idFrom(params)
+  const input = paymentSchema.parse(await parseJsonBody(request))
+  const payment = await paymentService.payTrip(getUserId(request), id, input)
+  return successResponse(payment, 201)
+}))

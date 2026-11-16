@@ -1,18 +1,18 @@
 import { getUserId } from "@/lib/infra/auth/auth"
 import { successResponse } from "@/lib/infra/http/response"
 import { withErrorHandling } from "@/lib/infra/http/with-error-handling"
-import { idFrom } from "@/lib/infra/http/route-params"
+import { withIdempotency } from "@/lib/infra/http/idempotency"
+import { parseJsonBody } from "@/lib/infra/http/request"
 import * as requestService from "@/lib/services/ride/request-service"
-import type { RouteParams } from "@/types/api"
+import { rideRequestSchema } from "@/lib/validation/ride/request-schema"
 
-export const POST = withErrorHandling<RouteParams>(async (request, { params }) => {
-  const id = await idFrom(params)
-  const entry = await requestService.joinWaitlist(getUserId(request), id)
-  return successResponse(entry, 201)
+export const GET = withErrorHandling(async (request) => {
+  const requests = await requestService.listRequests(getUserId(request))
+  return successResponse(requests)
 })
 
-export const DELETE = withErrorHandling<RouteParams>(async (request, { params }) => {
-  const id = await idFrom(params)
-  const result = await requestService.leaveWaitlist(getUserId(request), id)
-  return successResponse(result)
-})
+export const POST = withErrorHandling(withIdempotency(async (request) => {
+  const input = rideRequestSchema.parse(await parseJsonBody(request))
+  const created = await requestService.createRequest(getUserId(request), input)
+  return successResponse(created, 201)
+}))
