@@ -12,12 +12,17 @@ const isDark = () => document.documentElement.dataset.theme === "dark"
 const style = (dark: boolean) => `https://tiles.stadiamaps.com/styles/${dark ? "alidade_smooth_dark" : "alidade_smooth"}.json${STADIA ? `?api_key=${STADIA}` : ""}`
 const pin = (cls: string) => Object.assign(document.createElement("div"), { className: `size-4 rounded-full shadow-xs ${cls}` })
 
-export function RouteMap({ from, to, driver, label }: { from?: Pt | null; to?: Pt | null; driver?: Pt | null; label: string }) {
+export function RouteMap({ from, to, driver, label, onPickAction }: { from?: Pt | null; to?: Pt | null; driver?: Pt | null; label: string; onPickAction?: (p: Pt) => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<GL | null>(null)
   const pins = useRef<Marker[]>([])
   const lib = useRef<Lib | null>(null)
+  const pick = useRef(onPickAction)
   const [ready, setReady] = useState(false)
+  useEffect(() => {
+    pick.current = onPickAction
+    if (map.current) map.current.getCanvas().style.cursor = onPickAction ? "crosshair" : ""
+  }, [onPickAction, ready])
   useEffect(() => {
     let gone = false
     let watcher: MutationObserver | null = null
@@ -25,8 +30,10 @@ export function RouteMap({ from, to, driver, label }: { from?: Pt | null; to?: P
       const ml = await import("maplibre-gl")
       if (gone || !box.current) return
       lib.current = ml
+      ml.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs")
       const gl = new ml.Map({ container: box.current, style: style(isDark()), center: home, zoom: 11, attributionControl: { compact: true } })
       map.current = gl
+      gl.on("click", (e) => pick.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }))
       watcher = new MutationObserver(() => gl.setStyle(style(isDark())))
       watcher.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] })
       setReady(true)

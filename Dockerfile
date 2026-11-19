@@ -1,9 +1,10 @@
 FROM node:22-alpine AS base
-RUN npm i -g "pnpm@^10.15.10"
 WORKDIR /app
+COPY package.json ./
+RUN npm i -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 
 FROM base AS deps
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # build args are only dummies so env.ts passes while next collects pages, they never reach the running image
