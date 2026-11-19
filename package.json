@@ -2,9 +2,9 @@
   "name": "daigo",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/maplibre.mjs && next dev",
     "vdev": "vercel dev",
-    "build": "next build",
+    "build": "node scripts/maplibre.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "migrate": "prisma migrate dev",

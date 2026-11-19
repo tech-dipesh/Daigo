@@ -9,7 +9,6 @@ export const dayMonth = (d: string | number | Date) => new Intl.DateTimeFormat("
 export const stamp = (d: string | number | Date) => `${dayMonth(d)}, ${clock(d)}`
 export const clockOf = (t: string) => clock(`1970-01-01T${t}:00+05:30`)
 
-/* backend keeps route times as a utc clock, so the screen converts both ways and moves the weekday when it crosses midnight */
 export function toUtc(time: string, days: number[]) {
   const total = minutes(time) - offset
   const shift = total < 0 ? -1 : 0
