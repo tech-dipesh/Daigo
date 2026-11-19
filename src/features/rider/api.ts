@@ -15,6 +15,7 @@ export const riderApi = baseApi.injectEndpoints({
     listRequests: b.query<RideRequest[], void>({ query: () => ({ url: "/requests" }), providesTags: ["Request"] }),
     createRequest: b.mutation<RideRequest, NewRequest>({ query: (body) => ({ url: "/requests", method: "post", body }), invalidatesTags: ["Request"] }),
     findMatches: b.query<Matches, string>({ query: (id) => ({ url: `/requests/${id}/matches` }) }),
+    cancelRequest: b.mutation<{ cancelled: boolean }, string>({ query: (id) => ({ url: `/requests/${id}`, method: "delete" }), invalidatesTags: ["Request"] }),
     retryRequest: b.mutation<RideRequest, string>({ query: (id) => ({ url: `/requests/${id}/retry`, method: "post" }), invalidatesTags: ["Request"] }),
     joinWaitlist: b.mutation<{ id: string }, string>({ query: (id) => ({ url: `/requests/${id}/waitlist`, method: "post" }), invalidatesTags: ["Request"] }),
     listTrips: b.query<Trip[], void>({ query: () => ({ url: "/trips" }), providesTags: ["Trip"] }),
@@ -22,4 +23,4 @@ export const riderApi = baseApi.injectEndpoints({
   }),
 })
 
-export const { useEstimateQuery, useListRequestsQuery, useCreateRequestMutation, useFindMatchesQuery, useRetryRequestMutation, useJoinWaitlistMutation, useListTripsQuery, useRiderDashboardQuery } = riderApi
+export const { useEstimateQuery, useListRequestsQuery, useCreateRequestMutation, useFindMatchesQuery, useCancelRequestMutation, useRetryRequestMutation, useJoinWaitlistMutation, useListTripsQuery, useRiderDashboardQuery } = riderApi

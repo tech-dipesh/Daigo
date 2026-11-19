@@ -19,7 +19,7 @@ const kinds = [
   { id: "CAB", icon: CabIcon, seats: 4 },
 ]
 
-export function VehicleForm() {
+export function VehicleForm({ next = "/onboarding/driver/licence" }: { next?: string }) {
   const t = useTranslations("onb")
   const router = useRouter()
   const upload = usePhotoUpload()
@@ -44,7 +44,7 @@ export function VehicleForm() {
     try {
       const rcUploadId = await upload("RC", photo)
       await addVehicle({ type, make: make.trim(), model: model.trim(), plateNumber: plate.trim(), seatCapacity: seats, rcNumber: rc.trim(), rcUploadId }).unwrap()
-      router.push("/onboarding/driver/licence")
+      router.push(next)
     } catch (err) { setFail(errText(err) || t("uploadFailed")) }
   }
   return (

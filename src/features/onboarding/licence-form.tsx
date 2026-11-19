@@ -10,7 +10,7 @@ import { usePhotoUpload } from "@/features/upload/api"
 import { useSubmitLicenceMutation } from "@/features/onboarding/api"
 import { licenceOk } from "@/features/onboarding/rules"
 
-export function LicenceForm() {
+export function LicenceForm({ next = "/onboarding/driver/review" }: { next?: string }) {
   const t = useTranslations("onb")
   const router = useRouter()
   const upload = usePhotoUpload()
@@ -25,7 +25,7 @@ export function LicenceForm() {
     try {
       const licenseUploadId = await upload("LICENCE", photo)
       await submit({ licenseNumber: number.trim(), licenseUploadId }).unwrap()
-      router.push("/onboarding/driver/review")
+      router.push(next)
     } catch (err) { setFail(errText(err) || t("uploadFailed")) }
   }
   return (

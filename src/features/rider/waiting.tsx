@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { SpinnerIcon } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { LazyMap } from "@/features/map/map-lazy"
-import { useFindMatchesQuery, useJoinWaitlistMutation, useListRequestsQuery, useListTripsQuery, useRetryRequestMutation } from "@/features/rider/api"
+import { useCancelRequestMutation, useFindMatchesQuery, useJoinWaitlistMutation, useListRequestsQuery, useListTripsQuery, useRetryRequestMutation } from "@/features/rider/api"
 import { useCountdown } from "@/features/rider/use-countdown"
 import { pushToast } from "@/store/ui"
 import { useAppDispatch } from "@/store"
@@ -23,6 +23,7 @@ export function Waiting({ id }: { id: string }) {
   const matched = req?.status === "MATCHED"
   const trips = useListTripsQuery(undefined, { skip: !matched })
   const [retry, retrying] = useRetryRequestMutation()
+  const [cancel, cancelling] = useCancelRequestMutation()
   const [join, joining] = useJoinWaitlistMutation()
   const left = useCountdown(req?.expiresAt)
   const tripId = matches.data?.autoAccepted?.tripId ?? trips.data?.find((x) => x.rideRequestId === id)?.id
@@ -44,6 +45,12 @@ export function Waiting({ id }: { id: string }) {
       router.push("/home")
     } catch { dispatch(pushToast({ key: "rider.retryFail", kind: "error" })) }
   }
+  const stop = async () => {
+    try {
+      await cancel(id).unwrap()
+      router.push("/home")
+    } catch { dispatch(pushToast({ key: "rider.retryFail", kind: "error" })) }
+  }
   if (reqs.isLoading) return <SpinnerIcon size={28} className="mt-10 animate-spin text-muted" />
   if (!req) return <p role="alert" className="mt-10 text-danger">{t("notFound")}</p>
   return (
@@ -62,7 +69,7 @@ export function Waiting({ id }: { id: string }) {
               <div className="h-2 overflow-hidden rounded-full bg-tint"><div className="h-full rounded-full bg-primary transition-[width] duration-300" style={{ width: `${((left ?? total) / total) * 100}%` }} /></div>
             </div>
             <p className="text-base">{matches.isLoading ? t("searching") : notified ? t("notified", { count: notified }) : t("noneYet")}</p>
-            <Link href="/home" className="flex h-12 items-center justify-center rounded-2xl bg-danger px-5 font-medium text-on-primary">{t("stop")}</Link>
+            <Button look="danger" onClick={stop} disabled={cancelling.isLoading}>{t("stop")}</Button>
           </>
         )}
         {over && (

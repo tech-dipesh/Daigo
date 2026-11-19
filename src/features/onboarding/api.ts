@@ -1,7 +1,7 @@
 import { baseApi } from "@/store/api"
 
 type Status = "PENDING" | "APPROVED" | "REJECTED"
-export type Vehicle = { id: string; type: string; make: string; model: string; plateNumber: string; verificationStatus: Status; rejectionReason: string | null }
+export type Vehicle = { id: string; type: string; make: string; model: string; plateNumber: string; seatCapacity: number; verificationStatus: Status; rejectionReason: string | null }
 export type Licence = { id: string; licenseNumber: string; verificationStatus: Status; rejectionReason: string | null }
 type ContactBody = { name: string; phone: string; email?: string; yourName?: string; isPrimary: boolean }
 type VehicleBody = { type: string; make: string; model: string; plateNumber: string; seatCapacity: number; rcNumber: string; rcUploadId: string }
