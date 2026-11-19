@@ -5,10 +5,10 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { SendIcon, SpinnerIcon } from "@/components/icons"
 import { errText } from "@/lib/errors"
+import { clock } from "@/lib/time"
 import { useMeQuery } from "@/features/me/api"
 import { useGetTripQuery, useMessagesQuery, useSendMessageMutation } from "@/features/trips/api"
 
-const time = (s: string) => new Date(s).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
 
 export function TripChat({ id }: { id: string }) {
   const t = useTranslations("trips")
@@ -47,7 +47,7 @@ export function TripChat({ id }: { id: string }) {
         {msgs.data && !count && <p className="text-muted">{t("chatEmpty")}</p>}
         {msgs.data?.map((m) => {
           const mine = m.senderId === me.data?.id
-          return <div key={m.id} className={`flex max-w-[80%] flex-col rounded-2xl px-4 py-2 ${mine ? "self-end bg-primary text-on-primary" : "self-start bg-surface text-ink"}`}><span className="whitespace-pre-wrap">{m.text}</span><span className="self-end text-xs">{time(m.at)}</span></div>
+          return <div key={m.id} className={`flex max-w-[80%] flex-col rounded-2xl px-4 py-2 ${mine ? "self-end bg-primary text-on-primary" : "self-start bg-surface text-ink"}`}><span className="whitespace-pre-wrap">{m.text}</span><span className="self-end text-xs">{clock(m.at)}</span></div>
         })}
         <div ref={end} />
       </div>

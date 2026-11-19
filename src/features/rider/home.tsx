@@ -2,9 +2,9 @@
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { ArrowIcon, SpinnerIcon } from "@/components/icons"
+import { dayMonth } from "@/lib/time"
 import { useListRequestsQuery, useRiderDashboardQuery } from "@/features/rider/api"
 
-const day = (s: string) => new Date(s).toLocaleDateString(undefined, { day: "numeric", month: "short" })
 
 export function Home() {
   const t = useTranslations("rider")
@@ -36,7 +36,7 @@ export function Home() {
           {recent.map((r) => (
             <li key={r.id}>
               <Link href={live(r.status, r.expiresAt) ? `/request/${r.id}/waiting` : "/request/new"} className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3">
-                <span className="flex min-w-0 flex-col"><span className="truncate text-ink">{r.fromLabel} - {r.toLabel}</span><span className="text-sm text-muted">{day(r.createdAt)}</span></span>
+                <span className="flex min-w-0 flex-col"><span className="truncate text-ink">{r.fromLabel} - {r.toLabel}</span><span className="text-sm text-muted">{dayMonth(r.createdAt)}</span></span>
                 <span className={`shrink-0 text-sm font-medium ${r.status === "MATCHED" ? "text-success" : "text-muted"}`}>{t.has(`status${r.status}`) ? t(`status${r.status}`) : r.status}</span>
               </Link>
             </li>

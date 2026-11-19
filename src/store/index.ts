@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { useDispatch, useSelector } from "react-redux"
 import { baseApi } from "@/store/api"
+import away from "@/store/away"
+import realtime from "@/store/realtime"
 import ui from "@/store/ui"
 
-export const makeStore = () => configureStore({ reducer: { ui, [baseApi.reducerPath]: baseApi.reducer }, middleware: (d) => d().concat(baseApi.middleware) })
+export const makeStore = () => configureStore({ reducer: { ui, away, realtime, [baseApi.reducerPath]: baseApi.reducer }, middleware: (d) => d().concat(baseApi.middleware) })
 export type AppStore = ReturnType<typeof makeStore>
 export type RootState = ReturnType<AppStore["getState"]>
 export type AppDispatch = AppStore["dispatch"]
