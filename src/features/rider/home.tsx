@@ -43,6 +43,9 @@ export function Home() {
           ))}
         </ul>
       </section>
+      <nav className="grid grid-cols-3 gap-2" aria-label={t("shortcuts")}>
+        {[["/routines", "routines"], ["/waitlist", "waitlist"], ["/child-ride", "child"]].map(([href, key]) => <Link key={href} href={href} className="flex h-14 items-center justify-center rounded-2xl bg-surface px-2 text-center text-sm text-ink">{t(key)}</Link>)}
+      </nav>
       <p className="text-sm text-muted">{t("driveNote")} <Link href="/me" className="text-primary">{t("openMe")}</Link></p>
     </div>
   )

@@ -69,6 +69,7 @@ export function Waiting({ id }: { id: string }) {
               <div className="h-2 overflow-hidden rounded-full bg-tint"><div className="h-full rounded-full bg-primary transition-[width] duration-300" style={{ width: `${((left ?? total) / total) * 100}%` }} /></div>
             </div>
             <p className="text-base">{matches.isLoading ? t("searching") : notified ? t("notified", { count: notified }) : t("noneYet")}</p>
+            {notified > 0 && <Link href={`/request/${id}/offers`} className="flex h-12 items-center justify-center rounded-2xl bg-tint px-5 font-medium text-ink">{t("seeOffers")}</Link>}
             <Button look="danger" onClick={stop} disabled={cancelling.isLoading}>{t("stop")}</Button>
           </>
         )}

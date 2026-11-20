@@ -6,7 +6,7 @@ import { ChatIcon, FlagIcon, HelpIcon, SpinnerIcon, UserIcon } from "@/component
 import { trustWord } from "@/lib/trust"
 import { LazyMap } from "@/features/map/map-lazy"
 import { useMeQuery } from "@/features/me/api"
-import { useListRequestsQuery } from "@/features/rider/api"
+import { useTripPlacesQuery } from "@/features/driver/trip-api"
 import { useCounterpartQuery, useGetTripQuery, useLiveQuery } from "@/features/trips/api"
 import { CancelPanel } from "@/features/trips/cancel-panel"
 import { NoShowForm } from "@/features/trips/noshow-form"
@@ -19,12 +19,12 @@ export function TripDetail({ id }: { id: string }) {
   const t = useTranslations("trips")
   const trip = useGetTripQuery(id, { pollingInterval: 5000 })
   const me = useMeQuery()
-  const reqs = useListRequestsQuery()
+  const places = useTripPlacesQuery(id)
   const data = trip.data
   const active = data?.status === "PENDING_PICKUP" || data?.status === "IN_PROGRESS"
   const live = useLiveQuery(id, { skip: !active, pollingInterval: 5000 })
   const who = useCounterpartQuery(id, { skip: !data })
-  const req = reqs.data?.find((r) => r.id === data?.rideRequestId)
+  const req = places.data
   const spot = live.data?.available ? { lat: live.data.lastLat, lng: live.data.lastLng } : null
   const rider = Boolean(data && me.data && data.riderId === me.data.id)
   const waiting = data?.status === "PENDING_PICKUP"
@@ -38,6 +38,7 @@ export function TripDetail({ id }: { id: string }) {
           <h1 className="text-title font-semibold">{t(`h_${data.status}`)}</h1>
           <p className="text-muted">₹{data.priceEstimate} · {data.distanceKm.toFixed(1)} km{data.relayLeg ? ` · ${t(data.relayLeg === "FIRST" ? "leg1" : "leg2")}` : ""}</p>
         </div>
+        {req && <div className="flex flex-col gap-1 rounded-2xl bg-surface p-4"><p className="text-xs text-muted">{t("pickupAt")}</p><p className="text-base text-ink">{req.fromLabel}</p><p className="mt-2 text-xs text-muted">{t("dropAt")}</p><p className="text-base text-ink">{req.toLabel}</p></div>}
         {rider && waiting && data.pickupOtp && (
           <div className="flex flex-col gap-1 rounded-3xl bg-primary p-6 text-on-primary" aria-live="polite">
             <p className="text-sm">{t("pickupCode")}</p>
