@@ -30,8 +30,12 @@ COPY --from=build /app/public ./public
 EXPOSE 3000
 CMD ["node", "server.js"]
 
-# ws keeps the full tree because it runs the ts file with tsx
 FROM build AS ws
 ENV NODE_ENV=production PORT=3001
+
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
 EXPOSE 3001
-CMD ["pnpm", "exec", "tsx", "src/server/ws-server.ts"]
+CMD ["bun", "run", "src/server/ws-server.ts"]
