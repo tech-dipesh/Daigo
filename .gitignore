@@ -45,3 +45,4 @@ yarn-error.log*
 .env*
 _apply/
 assets/
+daigo_local_data.sql

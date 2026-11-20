@@ -29,9 +29,11 @@ COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 EXPOSE 3000
 CMD ["node", "server.js"]
-
 FROM build AS ws
 ENV NODE_ENV=production PORT=3001
+
+# Install dependencies needed for Bun installation on Alpine
+RUN apk add --no-cache curl bash
 
 # Install Bun
 RUN curl -fsSL https://bun.sh/install | bash
