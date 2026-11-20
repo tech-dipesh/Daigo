@@ -1,14 +1,39 @@
 services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: daigo
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d daigo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     image: ghcr.io/${OWNER}/daigo-app:${TAG:-latest}
     env_file: .env
     restart: unless-stopped
     mem_limit: 450m
+    depends_on:
+      db:
+        condition: service_healthy
+
   ws:
     image: ghcr.io/${OWNER}/daigo-ws:${TAG:-latest}
     env_file: .env
     restart: unless-stopped
     mem_limit: 250m
+    depends_on:
+      db:
+        condition: service_healthy
+
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -22,6 +47,8 @@ services:
     depends_on:
       - app
       - ws
+
 volumes:
+  pgdata:
   caddy_data:
   caddy_config:
