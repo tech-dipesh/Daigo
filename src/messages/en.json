@@ -215,7 +215,12 @@
     "waitJoined": "You are on the waitlist",
     "retryFail": "That did not work, please try again",
     "backHome": "Back home",
-    "notFound": "We could not find this request"
+    "notFound": "We could not find this request",
+    "seeOffers": "Compare drivers",
+    "shortcuts": "Shortcuts",
+    "routines": "Saved rides",
+    "waitlist": "Waitlist",
+    "child": "Child ride"
   },
   "trips": {
     "listTitle": "Your trips",
@@ -315,7 +320,9 @@
     "slideReport": "Slide to report",
     "lockedReport": "Pick a topic and write a few words",
     "reportSent": "We got your report",
-    "reportSentSub": "Our team will look into it and get back to you."
+    "reportSentSub": "Our team will look into it and get back to you.",
+    "pickupAt": "Pickup",
+    "dropAt": "Drop"
   },
   "driver": {
     "offline": "You are offline",
@@ -402,7 +409,8 @@
     "noDocs": "No documents yet.",
     "licence": "Driving licence",
     "ending": "ending {last}",
-    "myEarnings": "Earnings"
+    "myEarnings": "Earnings",
+    "negotiate": "Talk about the price"
   },
   "alert": {
     "title": "New ride request",
@@ -434,7 +442,13 @@
     "paid": "Paid",
     "collectCash": "Collect the cash from the rider",
     "waitPay": "Waiting for the rider to pay",
-    "firstLate": "Report first leg late"
+    "firstLate": "Report first leg late",
+    "pickupAt": "Pickup",
+    "dropAt": "Drop",
+    "proofHelp": "Got the cash? Take a photo of the cash or the receipt to confirm.",
+    "proofPhoto": "Cash photo",
+    "slideCash": "Slide to confirm cash",
+    "lockedCash": "Add a photo to unlock"
   },
   "earn": {
     "title": "Earnings",
@@ -454,5 +468,80 @@
     "empty": "Nothing here yet.",
     "unread": "Unread",
     "more": "Show more"
+  },
+  "offers": {
+    "title": "Drivers for your ride",
+    "backWaiting": "Back to waiting",
+    "sort": "Sort drivers",
+    "best": "Best",
+    "cheapest": "Cheapest",
+    "nearest": "Nearest",
+    "loadFail": "We could not load this right now",
+    "matched": "A driver accepted. Opening your trip.",
+    "empty": "No drivers yet. Keep waiting or try again.",
+    "driver": "Driver",
+    "detour": "{km} km detour",
+    "negotiate": "Talk about the price",
+    "fast": "Decide fast, someone else might take this ride.",
+    "you": "You offered",
+    "them": "They offered",
+    "acceptAt": "Accept {price} rupees",
+    "waitOther": "Waiting for the other side, {time} left",
+    "between": "Offer between {low} and {high} rupees",
+    "yourPrice": "Your price in rupees",
+    "offer": "Offer",
+    "noMore": "No more offers on this ride."
+  },
+  "waitlist": {
+    "title": "Waitlist",
+    "sub": "We tell you when a driver appears on your route.",
+    "loadFail": "We could not load this right now",
+    "empty": "Your waitlist is empty.",
+    "ride": "Ride",
+    "until": "Valid until {time}",
+    "waiting": "Waiting",
+    "remove": "Leave waitlist",
+    "newRide": "Plan a ride"
+  },
+  "routines": {
+    "d0": "Sun",
+    "d1": "Mon",
+    "d2": "Tue",
+    "d3": "Wed",
+    "d4": "Thu",
+    "d5": "Fri",
+    "d6": "Sat",
+    "people": "{count} people",
+    "fewer": "Fewer people",
+    "more": "More people",
+    "savedTitle": "Saved routes",
+    "add": "Add",
+    "savedEmpty": "No saved routes. Save the trips you take often for one tap rides.",
+    "rideNow": "Ride now",
+    "remove": "Remove",
+    "labelHint": "Name, for example Hostel to college",
+    "pickup": "Pickup",
+    "drop": "Drop",
+    "save": "Save",
+    "weekTitle": "Weekday rides",
+    "weekHelp": "We post your ride on the days you pick, so you do not have to.",
+    "weekEmpty": "No weekday rides yet.",
+    "postToday": "Post today's ride",
+    "stop": "Stop",
+    "days": "Days",
+    "from": "From (India time)",
+    "until": "Until (India time)",
+    "windowBad": "Pick an end time after the start, and not across 5:30 am.",
+    "posted": "Today's ride is posted"
+  },
+  "child": {
+    "title": "Child ride",
+    "rules": "You book and pay. Only drivers with a high trust score can accept, live tracking stays on, and you get the pickup code.",
+    "name": "Child's name",
+    "nameBad": "Please enter 3 to 15 characters",
+    "age": "Child's age",
+    "ageBad": "Please enter an age from 1 to 13",
+    "slide": "Slide to send",
+    "locked": "Complete the details to unlock"
   }
 }
