@@ -4,7 +4,7 @@ import { hardCapFor } from "@/lib/infra/economy/pricing"
 type MatchForBounds = { priceEstimate: number; rideRequest: { fromLat: number; fromLng: number; toLat: number; toLng: number } }
 
 export const maxRounds = 3
-export const offerWindowSeconds = 75
+export const offerWindowSeconds = 300
 const lowFactor = 0.8
 const highFactor = 1.3
 
