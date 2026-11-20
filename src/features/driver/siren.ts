@@ -1,7 +1,6 @@
 let ctx: AudioContext | null = null
 const make = () => (ctx ??= new AudioContext())
 
-/* browsers keep sound locked until the first tap, so we wake it on any tap */
 export function unlockAudio() {
   window.addEventListener("pointerdown", () => void make().resume(), { once: true })
 }

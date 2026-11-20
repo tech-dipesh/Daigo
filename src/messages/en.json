@@ -401,6 +401,58 @@
     "addLicence": "Add licence",
     "noDocs": "No documents yet.",
     "licence": "Driving licence",
-    "ending": "ending {last}"
+    "ending": "ending {last}",
+    "myEarnings": "Earnings"
+  },
+  "alert": {
+    "title": "New ride request",
+    "gone": "This request is no longer available",
+    "loading": "Loading",
+    "detour": "{km} km detour",
+    "people": "{count} people",
+    "care": "extra care",
+    "left": "{seconds} seconds left",
+    "accept": "Accept",
+    "reject": "Reject",
+    "failed": "That did not work, please try again",
+    "soundOff": "Tap to turn sound on"
+  },
+  "dtrip": {
+    "loadFail": "We could not load this trip",
+    "mapLabel": "Map of your route",
+    "sharingOn": "Sharing your location with the rider",
+    "sharingDenied": "Location is blocked. Allow it so the rider can see you.",
+    "sharingWait": "Waiting for your location",
+    "arrived": "I have arrived",
+    "askCode": "Ask the rider for the 6 digit pickup code.",
+    "codeLabel": "Pickup code",
+    "slideStart": "Slide to start trip",
+    "lockedStart": "Enter the 6 digit code",
+    "waitLeft": "You can mark a no show in {time}",
+    "noShow": "Rider did not show up",
+    "slideDone": "Slide to complete trip",
+    "paid": "Paid",
+    "collectCash": "Collect the cash from the rider",
+    "waitPay": "Waiting for the rider to pay",
+    "firstLate": "Report first leg late"
+  },
+  "earn": {
+    "title": "Earnings",
+    "loadFail": "We could not load this right now",
+    "total": "Total earned",
+    "sub": "{trips} trips, about {avg} rupees each",
+    "week": "Last 7 days",
+    "rated": "{avg} stars from {count} ratings"
+  },
+  "alerts": {
+    "coins": "Your coins",
+    "coinsReady": "Enough for {rupees} rupees off your next ride",
+    "coinsNeed": "{coins} more coins unlock a discount",
+    "title": "Alerts",
+    "readAll": "Mark all read",
+    "loadFail": "We could not load this right now",
+    "empty": "Nothing here yet.",
+    "unread": "Unread",
+    "more": "Show more"
   }
 }
