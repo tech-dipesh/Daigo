@@ -2,12 +2,12 @@ import { baseApi } from "@/store/api"
 
 export type Quote = { vehicleType: string; price: number; low: number; high: number; breakdown: { km: number; minutes: number; baseRate: number; zone: number; time: number; weather: number; demand: number; group: number } }
 export type Estimate = { distanceKm: number; minutes: number; zones: { pickup: string; drop: string }; quotes: Quote[] }
-export type EstimateArgs = { fromLat: number; fromLng: number; toLat: number; toLng: number; groupSize: number; when?: string }
+export type EstimateArgs = { fromLat: number; fromLng: number; toLat: number; toLng: number; groupSize: number; when?: string; minor?: "true" | "false" }
 export type RideRequest = { id: string; status: string; fromLabel: string; toLabel: string; fromLat: number; fromLng: number; toLat: number; toLng: number; groupSize: number; expiresAt: string | null; createdAt: string }
 export type Trip = { id: string; status: string; rideRequestId: string; priceEstimate: number; distanceKm: number; createdAt: string }
 export type Dashboard = { completedTrips: number; totalSpent: number; moneySaved: number; activeTrip: Trip | null; recentTrips: Trip[] }
 export type Matches = { direct: unknown[]; relay: unknown[]; autoAccepted?: { tripId: string } }
-export type NewRequest = { fromLabel: string; fromLat: number; fromLng: number; toLabel: string; toLat: number; toLng: number; windowStart: string; windowEnd: string; groupSize: number; hasLuggage: boolean; isVulnerable: boolean; womenOnly: boolean; acOnly: boolean; allowShared: boolean; notes?: string; vehiclePreference?: string }
+export type NewRequest = { fromLabel: string; fromLat: number; fromLng: number; toLabel: string; toLat: number; toLng: number; windowStart: string; windowEnd: string; groupSize: number; hasLuggage: boolean; isVulnerable: boolean; womenOnly: boolean; acOnly: boolean; allowShared: boolean; notes?: string; vehiclePreference?: string; passenger?: { name: string; age: number } }
 
 export const riderApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
