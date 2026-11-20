@@ -32,7 +32,6 @@ CMD ["node", "server.js"]
 FROM build AS ws
 ENV NODE_ENV=production PORT=3001
 
-# Install dependencies needed for Bun installation on Alpine
 RUN apk add --no-cache curl bash
 
 # Install Bun
