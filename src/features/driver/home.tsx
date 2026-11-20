@@ -40,6 +40,7 @@ export function DriverHome() {
         {!away && <ul className="flex flex-col gap-2">{incoming.data?.map((x) => <IncomingRow key={x.id} item={x} />)}</ul>}
       </section>
       <nav className="flex flex-col gap-2" aria-label={t("shortcuts")}>
+        <Link href="/driver/earnings" className={link}>{t("myEarnings")}<ArrowIcon size={18} /></Link>
         <Link href="/driver/routes" className={link}>{t("myRoutes")}<ArrowIcon size={18} /></Link>
         <Link href="/driver/vehicles" className={link}>{t("myVehicles")}<ArrowIcon size={18} /></Link>
         <Link href="/driver/documents" className={link}>{t("myDocuments")}<ArrowIcon size={18} /></Link>
