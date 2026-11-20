@@ -26,7 +26,12 @@ AWS S3: licence and RC photos, only through short-lived signed links
 Brevo: transactional email
 Redux Toolkit: client state and API calls
 next-intl: English, Nepali and Hindi
+State Management: Redux Toolkit (RTK) with RTK Query for all API caching, optimistic UI updates, and error mapping.
+Real-time Resilience: WebSockets are implemented for live driver alerts, but the client includes a polling fallback mechanism (away and realtime store slices) to ensure the app still works if the WS connection drops.
 
+Custom UI/UX: Built without a heavy component library. Includes a custom "Slide to Confirm" component for booking, 6-box OTP inputs, and a lazy-loaded MapLibre integration that follows the user's system theme (dark/light).
+
+Internationalization (i18n): Full localization for English, Nepali, and Hindi using next-intl, controlled via cookies.
 ## Start
 
 ```bash
@@ -98,6 +103,8 @@ erDiagram
 ```
 
 </details>
+Soft Deletes: User accounts and trips are soft-deleted. Deleting an account revokes all active JWTs, cancels active trips, and retains data for audit purposes without violating foreign key constraints.
+Direct-to-Storage Uploads: All images (licences, RC, profile photos, payment proofs) are uploaded directly to AWS S3 using short-lived Presigned URLs. This prevents large files from consuming backend memory.
 
 ## Features:
 - Daigo is a full stack platform built around the Next.js ecosystem, TypeScript, PostgreSQL, PostGIS, and Redis, AWS. The backend focuses on location based matching, distance calculations, dynamic pricing, and reliable request processing. PostGIS handles geospatial queries, while Redis supports caching, temporary data, and queue mechanisms for asynchronous tasks. The architecture also incorporates JWT refresh token rotation, OTP verification, real time communication through WebSockets, and payment integration with Razorpay. I’m designing the backend around clear service boundaries, efficient database queries, and dependable workflows, with attention to concurrency, request validation, and failure handling across interconnected services.
@@ -130,8 +137,16 @@ erDiagram
 
 ## Build:
 - The other tables mostly hang off `User`: refresh tokens, verification tokens, emergency contacts, driver documents, uploads, coin transactions, saved routes, permanent requests and complaints. `OtpCode` and `Waitlist` keep a plain user or request id without a foreign key, and `Zone` and `FareRate` hold the pricing settings.
-
- 
+- Daigo is built using a strict Separation of Concerns (SoC) pattern to ensure the codebase scales and remains testable. The backend is divided into four distinct layers:
+  - Route Handlers (Controller): Thin Next.js API routes that only handle HTTP requests/responses.
+  - Validation Layer: Centralized Zod schemas. Every input is strictly validated, with custom error formatters that translate Zod errors into human-readable messages for the frontend.
+  - Service Layer: Contains the core business logic (e.g., trip-service.ts, payment-split-service.ts). This layer handles complex transactions, trust-score calculations, and idempotency.
+  - Repository Layer: Handles all direct Prisma/PostgreSQL database interactions, keeping SQL and ORM queries isolated from business logic.
+- Idempotency Keys: Implemented a custom wrapper (idempotency.ts) for risky POST routes (e.g., payments, trip completions). If a network retry occurs, the server replays the first successful response instead of creating duplicate transactions.
+- Concurrency-Safe Matching: The "First-Accept-Wins" logic for driver matching is wrapped in database transactions to prevent race conditions when multiple drivers accept a ride simultaneously.
+- Offer/Bidding Window: When a driver is matched, a 5-minute offer window opens where the driver and rider can negotiate or finalize the price before the trip is locked.
+- Driver Auto-Accept: Drivers can toggle an "Auto-Accept" mode. If an incoming request falls within their preferred radius and base price, the system automatically accepts the match on their behalf (using the idempotency keys to prevent double-booking).
+- Relay Fallback: If no single driver matches, the system automatically queries PostGIS for a 3km radius around the midpoint to chain two drivers together.
 
 ## Something Tha I must Carefully Care:
 - WE Make sure that the jsonwebtoken also must be the revokable for some user that we can suspsend based on that activity we can't just let those people to use it unless that time is expired we must have hte power to revoke that.
@@ -331,7 +346,3 @@ use a Redis Stream for when the expired rides or running rides event, message qu
 ## Future Feature That I'm Plan to Build:
 - Route-deviation alert if the driver's live location drifts far off the expected route 
 - Dashboard: graphs of everything in the database (trips over time, money saved, active drivers, emergency triggers, coin redemptions, stats)
-
-### This is Just For My Recruiter Purpose:
-- Demo console: I'm plan to can trigger every major feature on demand (a concurrent-accept race, an emergency, a demand spike, a relay with its full data flow, a cancellation penalty, etc.) For Showing to the Other People admin can also manually force a stuck scenario forward (e.g. force-assign a driver)
-- Simulated-data seeding for the benchmark: ~100 seeded entities, with an option to reset the seed data
