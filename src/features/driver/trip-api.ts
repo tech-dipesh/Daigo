@@ -1,6 +1,7 @@
 import { baseApi } from "@/store/api"
 import type { TripFull } from "@/features/trips/api"
 
+export type Places = { fromLabel: string; fromLat: number; fromLng: number; toLabel: string; toLat: number; toLng: number }
 export type DriverTrip = TripFull & { routeId: string; completedAt: string | null }
 
 export const driverTripApi = baseApi.injectEndpoints({
@@ -12,8 +13,10 @@ export const driverTripApi = baseApi.injectEndpoints({
     completeTrip: b.mutation<DriverTrip, string>({ query: (id) => ({ url: `/trips/${id}/complete`, method: "post" }), invalidatesTags: ["Trip", "Payment"] }),
     noShow: b.mutation<DriverTrip, string>({ query: (id) => ({ url: `/trips/${id}/no-show`, method: "post" }), invalidatesTags: ["Trip"] }),
     firstLegLate: b.mutation<{ id: string }, string>({ query: (id) => ({ url: `/trips/${id}/report-first-leg-late`, method: "post" }), invalidatesTags: ["Trip"] }),
+    tripPlaces: b.query<Places, string>({ query: (id) => ({ url: `/trips/${id}/places` }) }),
+    confirmProof: b.mutation<{ id: string }, { id: string; proofUploadId: string }>({ query: ({ id, ...body }) => ({ url: `/trips/${id}/payment/confirm-proof`, method: "post", body }), invalidatesTags: ["Payment"] }),
     sendLocation: b.mutation<{ ok: boolean }, { id: string; lat: number; lng: number }>({ query: ({ id, ...body }) => ({ url: `/trips/${id}/location`, method: "post", body }) }),
   }),
 })
 
-export const { useDriverTripQuery, useDriverTripsQuery, useArrivedMutation, useVerifyPickupMutation, useCompleteTripMutation, useNoShowMutation, useFirstLegLateMutation, useSendLocationMutation } = driverTripApi
+export const { useDriverTripQuery, useDriverTripsQuery, useArrivedMutation, useVerifyPickupMutation, useCompleteTripMutation, useNoShowMutation, useFirstLegLateMutation, useTripPlacesQuery, useConfirmProofMutation, useSendLocationMutation } = driverTripApi

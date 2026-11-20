@@ -8,8 +8,8 @@ import { Slide } from "@/components/ui/slide"
 import { errText } from "@/lib/errors"
 import { trustWord } from "@/lib/trust"
 import { CodeBoxes } from "@/features/auth/code-boxes"
-import { useListRoutesQuery } from "@/features/driver/api"
-import { useArrivedMutation, useCompleteTripMutation, useDriverTripQuery, useFirstLegLateMutation, useNoShowMutation, useVerifyPickupMutation } from "@/features/driver/trip-api"
+import { CashProof } from "@/features/driver/cash-proof"
+import { useArrivedMutation, useCompleteTripMutation, useDriverTripQuery, useFirstLegLateMutation, useNoShowMutation, useTripPlacesQuery, useVerifyPickupMutation } from "@/features/driver/trip-api"
 import { useShareLocation } from "@/features/driver/use-share-location"
 import { LazyMap } from "@/features/map/map-lazy"
 import { useCountdown } from "@/features/rider/use-countdown"
@@ -25,7 +25,7 @@ export function DriverTrip({ id }: { id: string }) {
   const t = useTranslations("dtrip")
   const tt = useTranslations("trips")
   const trip = useDriverTripQuery(id, { pollingInterval: 5000 })
-  const routes = useListRoutesQuery()
+  const places = useTripPlacesQuery(id)
   const who = useCounterpartQuery(id, { skip: !trip.data })
   const data = trip.data
   const active = data?.status === "PENDING_PICKUP" || data?.status === "IN_PROGRESS"
@@ -39,7 +39,7 @@ export function DriverTrip({ id }: { id: string }) {
   const [otp, setOtp] = useState("")
   const [fail, setFail] = useState("")
   const wait = useCountdown(data?.arrivedAt ? new Date(new Date(data.arrivedAt).getTime() + waitMs).toISOString() : null)
-  const route = routes.data?.find((r) => r.id === data?.routeId)
+  const spot = places.data
   const run = async (job: () => Promise<unknown>) => {
     setFail("")
     try { await job() } catch (err) { setFail(errText(err)) }
@@ -49,12 +49,13 @@ export function DriverTrip({ id }: { id: string }) {
   const pending = data.status === "PENDING_PICKUP"
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="min-h-64 lg:sticky lg:top-4 lg:h-[calc(100dvh-8rem)]"><LazyMap from={route ? { lat: route.fromLat, lng: route.fromLng } : null} to={route ? { lat: route.toLat, lng: route.toLng } : null} label={t("mapLabel")} /></div>
+      <div className="min-h-64 lg:sticky lg:top-4 lg:h-[calc(100dvh-8rem)]"><LazyMap from={spot ? { lat: spot.fromLat, lng: spot.fromLng } : null} to={spot ? { lat: spot.toLat, lng: spot.toLng } : null} label={t("mapLabel")} /></div>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-title font-semibold">{tt(`h_${data.status}`)}</h1>
           <p className="text-muted">₹{data.priceEstimate}{data.relayLeg ? ` · ${tt(data.relayLeg === "FIRST" ? "leg1" : "leg2")}` : ""}</p>
         </div>
+        {spot && <div className="flex flex-col gap-1 rounded-2xl bg-surface p-4"><p className="text-xs text-muted">{t("pickupAt")}</p><p className="text-base text-ink">{spot.fromLabel}</p><p className="mt-2 text-xs text-muted">{t("dropAt")}</p><p className="text-base text-ink">{spot.toLabel}</p></div>}
         {who.data && (
           <div className="flex items-center gap-3 rounded-2xl bg-surface p-4">
             <span className="flex size-14 items-center justify-center rounded-full bg-tint text-muted"><UserIcon size={28} /></span>
@@ -79,6 +80,7 @@ export function DriverTrip({ id }: { id: string }) {
             <p className="text-sm text-muted">{pay.data ? (pay.data.status === "PAID" ? t("paid") : pay.data.method === "CASH" ? t("collectCash") : t("waitPay")) : t("waitPay")}</p>
           </div>
         )}
+        {pay.data?.method === "CASH" && pay.data.status !== "PAID" && <CashProof id={id} />}
         <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
         <Timeline trip={data} />
         {active && <Link href={`/trips/${id}/chat`} className={row}><ChatIcon size={20} />{tt("chat")}</Link>}
