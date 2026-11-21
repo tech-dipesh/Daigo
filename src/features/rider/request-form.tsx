@@ -7,6 +7,7 @@ import { AutoIcon, BikeIcon, CabIcon, CarIcon, ClockIcon, DownIcon, LuggageIcon,
 import { Slide } from "@/components/ui/slide"
 import { Toggle } from "@/components/ui/toggle"
 import { errText } from "@/lib/errors"
+import { metersApart, minApart } from "@/lib/geo"
 import { LazyMap } from "@/features/map/map-lazy"
 import { PlaceInput } from "@/features/places/place-input"
 import type { Place } from "@/features/places/search"
@@ -41,10 +42,11 @@ export function RequestForm() {
   const valid = !Number.isNaN(new Date(custom).getTime())
   const future = picked ? (valid ? new Date(custom).toISOString() : undefined) : anchor
   const begins = () => (picked ? new Date(custom) : anchor ? new Date(Math.max(Date.parse(anchor), Date.now())) : new Date())
-  const args = from && to ? { fromLat: from.lat, fromLng: from.lng, toLat: to.lat, toLng: to.lng, groupSize: people, when: future } : skipToken
+  const close = from && to ? metersApart(from, to) < minApart : false
+  const args = from && to && !close ? { fromLat: from.lat, fromLng: from.lng, toLat: to.lat, toLng: to.lng, groupSize: people, when: future } : skipToken
   const est = useEstimateQuery(args)
   const quote = est.data?.quotes.find((q) => q.vehicleType === vehicle) ?? null
-  const ready = Boolean(from && to) && (!picked || valid)
+  const ready = Boolean(from && to) && !close && (!picked || valid)
   const go = async () => {
     if (!from || !to) return
     setFail("")
@@ -82,7 +84,8 @@ export function RequestForm() {
           </div>
           <button type="button" role="switch" aria-checked={luggage} onClick={() => setLuggage(!luggage)} aria-label={t("luggage")} title={t("luggage")} className={`flex size-16 items-center justify-center rounded-2xl outline-hidden ${luggage ? "bg-primary text-on-primary" : "bg-surface text-ink"}`}><LuggageIcon size={22} /></button>
         </div>
-        <Fare data={est.data} picked={quote} loading={est.isFetching} failed={est.isError} ready={Boolean(from && to)} />
+        {close && <p role="alert" className="rounded-2xl bg-tint p-4 text-danger">{t("tooClose")}</p>}
+        <Fare data={est.data} picked={quote} loading={est.isFetching} failed={est.isError} ready={Boolean(from && to) && !close} />
         <div role="radiogroup" aria-label={t("vehicle")} className="grid grid-cols-4 gap-2">
           {tiles.map((v) => {
             const q = est.data?.quotes.find((x) => x.vehicleType === v.id)

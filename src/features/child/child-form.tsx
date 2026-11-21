@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Slide } from "@/components/ui/slide"
 import { errText } from "@/lib/errors"
+import { metersApart, minApart } from "@/lib/geo"
 import { LazyMap } from "@/features/map/map-lazy"
 import { PlaceInput } from "@/features/places/place-input"
 import type { Place } from "@/features/places/search"
@@ -29,8 +30,9 @@ export function ChildForm() {
   const [fail, setFail] = useState("")
   const years = Number(age)
   const ageOk = Number.isInteger(years) && years >= 1 && years <= 13
-  const est = useEstimateQuery(from && to ? { fromLat: from.lat, fromLng: from.lng, toLat: to.lat, toLng: to.lng, groupSize: 1, minor: "true" } : skipToken)
-  const ready = between(name, 3, 15) && ageOk && Boolean(from && to)
+  const close = from && to ? metersApart(from, to) < minApart : false
+  const est = useEstimateQuery(from && to && !close ? { fromLat: from.lat, fromLng: from.lng, toLat: to.lat, toLng: to.lng, groupSize: 1, minor: "true" } : skipToken)
+  const ready = between(name, 3, 15) && ageOk && Boolean(from && to) && !close
   const go = async () => {
     if (!from || !to) return
     setFail("")
@@ -52,7 +54,8 @@ export function ChildForm() {
         <PlaceInput label={tr("pickup")} place={from} onPlaceAction={setFrom} locate />
         <PlaceInput label={tr("drop")} place={to} onPlaceAction={setTo} />
         <div role="radiogroup" aria-label={tr("when")} className="flex flex-wrap gap-2">{chips.map((c) => <button key={c.id} type="button" role="radio" aria-checked={when === c.id} onClick={() => setWhen(c.id)} className={`h-11 rounded-2xl px-4 text-sm outline-hidden ${when === c.id ? "bg-primary text-on-primary" : "bg-surface text-ink"}`}>{c.label}</button>)}</div>
-        <Fare data={est.data} picked={null} loading={est.isFetching} failed={est.isError} ready={Boolean(from && to)} />
+        {close && <p role="alert" className="rounded-2xl bg-tint p-4 text-danger">{tr("tooClose")}</p>}
+        <Fare data={est.data} picked={null} loading={est.isFetching} failed={est.isError} ready={Boolean(from && to) && !close} />
         <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
         <Slide label={t("slide")} lockedLabel={t("locked")} locked={!ready} onDoneAction={go} />
       </div>

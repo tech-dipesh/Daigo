@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { PhotoField, photoIssue } from "@/components/ui/photo"
 import { Slide } from "@/components/ui/slide"
 import { errText } from "@/lib/errors"
-import { pushToast } from "@/store/ui"
+import { bumpPhoto, pushToast } from "@/store/ui"
 import { useAppDispatch } from "@/store"
 import { emailOk } from "@/features/auth/rules"
 import { useMeQuery, usePatchMeMutation, useResetLinkMutation, useSetPhotoMutation } from "@/features/me/api"
@@ -27,7 +27,6 @@ export function ProfileForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [photo, setPicked] = useState<File | null>(null)
-  const [bust, setBust] = useState("")
   const [fail, setFail] = useState("")
   const d = me.data
   useEffect(() => {
@@ -53,7 +52,7 @@ export function ProfileForm() {
     const id = await upload("PROFILE_PHOTO", photo)
     await setPhoto(id).unwrap()
     setPicked(null)
-    setBust(String(Date.now()))
+    dispatch(bumpPhoto())
   })
   const sendReset = () => run(async () => {
     if (!d) return
@@ -64,7 +63,7 @@ export function ProfileForm() {
   return (
     <div className="mx-auto flex max-w-md flex-col gap-4">
       <h1 className="text-title font-semibold">{t("editProfile")}</h1>
-      <div className="flex items-center gap-4"><Avatar id={d.id} size={72} bust={bust} /><div className="flex-1"><PhotoField label={t("photo")} hint={to("choosePhoto")} file={photo} onFileAction={setPicked} error={photo && issue ? to(issue) : undefined} /></div></div>
+      <div className="flex items-center gap-4"><Avatar id={d.id} size={72} /><div className="flex-1"><PhotoField label={t("photo")} hint={to("choosePhoto")} file={photo} onFileAction={setPicked} error={photo && issue ? to(issue) : undefined} /></div></div>
       {photo && !issue && <Slide label={t("slidePhoto")} lockedLabel={t("slidePhoto")} locked={false} onDoneAction={savePhoto} />}
       <Input label={t("name")} value={name} onChange={(e) => setName(e.target.value)} error={between(name, 3, 15) ? undefined : to("nameBad")} />
       <Input label={t("email")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} error={emailOk(email) ? undefined : to("emailBad")} />
