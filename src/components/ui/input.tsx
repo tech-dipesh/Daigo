@@ -1,18 +1,20 @@
 "use client"
 import { useId, useState } from "react"
+import { useTranslations } from "next-intl"
 import type { InputHTMLAttributes } from "react"
 import { CheckIcon, CrossIcon, EyeIcon, EyeOffIcon } from "@/components/icons"
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "value"> & { label: string; value: string; error?: string }
 
 export function Input({ label, value, error, type = "text", onBlur, ...rest }: Props) {
+  const t = useTranslations("common")
   const [show, setShow] = useState(false)
   const [touched, setTouched] = useState(false)
   const msg = useId()
   const state = !value ? "idle" : !error ? "ok" : touched ? "bad" : "idle"
   const tone = state === "bad" ? "text-danger" : state === "ok" ? "text-success" : "text-muted"
   const kind = type === "password" && show ? "text" : type
-  const eye = show ? "Hide password" : "Show password"
+  const eye = show ? t("hidePassword") : t("showPassword")
   return (
     <div>
       <label className="flex h-16 items-center gap-3 rounded-2xl bg-surface px-4 transition-colors focus-within:bg-tint">

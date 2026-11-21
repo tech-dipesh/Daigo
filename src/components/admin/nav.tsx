@@ -21,7 +21,7 @@ export function AdminNav({ isSuper }: { isSuper: boolean }) {
   const t = useTranslations("admin")
   const path = usePathname()
   return (
-    <nav aria-label="Admin" className="flex gap-1 overflow-x-auto bg-surface px-2 py-2 lg:sticky lg:top-0 lg:h-dvh lg:w-52 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:px-3 lg:pt-16">
+    <nav aria-label={t("adminNav")} className="flex gap-1 overflow-x-auto bg-surface px-2 py-2 lg:sticky lg:top-0 lg:h-dvh lg:w-52 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:px-3 lg:pt-16">
       {items.filter((i) => !i.super || isSuper).map((i) => {
         const on = path.startsWith(i.href)
         return <Link key={i.href} href={i.href} aria-current={on ? "page" : undefined} className={`shrink-0 rounded-xl px-3 py-2 text-sm ${on ? "bg-tint font-medium text-primary" : "text-muted"}`}>{t(`nav_${i.key}`)}</Link>

@@ -3,7 +3,9 @@
     "loading": "Loading",
     "retry": "Try again",
     "home": "Go home",
-    "close": "Close"
+    "close": "Close",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password"
   },
   "errors": {
     "title": "Something went wrong",
@@ -138,7 +140,8 @@
     "home": "Home",
     "trips": "Trips",
     "alerts": "Alerts",
-    "me": "Me"
+    "me": "Me",
+    "main": "Main"
   },
   "rider": {
     "homeTitle": "Where to?",
@@ -220,7 +223,8 @@
     "shortcuts": "Shortcuts",
     "routines": "Saved rides",
     "waitlist": "Waitlist",
-    "child": "Child ride"
+    "child": "Child ride",
+    "tooClose": "Pickup and drop are too close. Keep them at least 100 metres apart."
   },
   "trips": {
     "listTitle": "Your trips",
@@ -721,6 +725,97 @@
     "forceExpire": "Expire request",
     "forceArrival": "Mark arrived",
     "running": "Running",
-    "result": "Result"
+    "result": "Result",
+    "adminNav": "Admin"
+  },
+  "tutorial": {
+    "title": "How DaiGo works",
+    "skip": "Skip",
+    "read": "{percent}% read",
+    "steps": "Steps",
+    "previous": "Previous",
+    "next": "Next",
+    "start": "Start riding",
+    "place0": "Hostel",
+    "place1": "College gate",
+    "place2": "Sector 17",
+    "place3": "Railway station",
+    "from": "Where you are",
+    "to": "Where you go",
+    "exampleFare": "Example fare",
+    "s1_h": "Say where you are going",
+    "s1_b": "Pick a pickup and a drop. You see the price first, with no surprise charges.",
+    "s2_h": "Drivers on your way are told",
+    "s2_b": "Drivers who already go your way get the request and have 75 seconds to answer.",
+    "sendDemo": "Send a demo request",
+    "alertIdle": "Nobody has been told yet.",
+    "alertWait": "Telling drivers on your route",
+    "alertDone": "A driver accepted.",
+    "s3_h": "Agree on a fair price",
+    "s3_b": "You can talk about the price inside a safe range. The range keeps it fair for both sides.",
+    "priceLabel": "Your offer",
+    "price_low": "Too low for this ride",
+    "price_high": "Too high for this ride",
+    "price_ok": "Inside the allowed range",
+    "decideFast": "Decide fast, someone else might take the ride.",
+    "s4_h": "Ride safely",
+    "s4_b": "A pickup code makes sure you board the right car. You can share your live trip with family.",
+    "codeLabel": "Pickup code",
+    "shareLive": "Share live trip",
+    "shareLink": "Anyone with your link can follow the trip until you stop sharing.",
+    "s5_h": "Pay and rate",
+    "s5_b": "Pay online or in cash, then rate the ride. Good ratings build trust for everyone.",
+    "cash": "Pay in cash",
+    "cashHint": "The driver confirms with a photo",
+    "onlineHint": "Online with a test gateway",
+    "stars": "Stars"
+  },
+  "terms": {
+    "title": "Terms and cost sharing",
+    "notice": "A short plain summary. This is a student project, not legal advice.",
+    "back": "Back",
+    "what_h": "What DaiGo is",
+    "what_b": "DaiGo helps people who travel the same way share a ride. We connect riders with people already going that way.",
+    "cost_h": "Cost sharing, not a fare",
+    "cost_b": "The price shown is a contribution to the cost of the trip, kept under a cap. It is not a taxi fare. Always agree on the price before you start.",
+    "safety_h": "Safety",
+    "safety_b": "Check the pickup code, keep live sharing on, and use the emergency button if you feel unsafe. In danger, call 112.",
+    "accounts_h": "Accounts",
+    "accounts_b": "Use your real details. Repeated late cancellations or bad behaviour lead to warnings and, after five, a suspension you can appeal.",
+    "privacy_h": "Your data",
+    "privacy_b": "We keep only what the service needs. Phone numbers stay hidden until you are close. Photos are private and shown only through short links.",
+    "limits_h": "Limits",
+    "limits_b": "DaiGo is a connection tool. Drivers and riders are responsible for their own conduct, licences and insurance."
+  },
+  "shared": {
+    "ended": "This link has ended",
+    "loadFail": "We could not load this trip",
+    "vehicle": "Vehicle: {vehicle}",
+    "mapLabel": "Map showing the driver",
+    "eta": "About {minutes} minutes to go",
+    "deviated": "The vehicle is off the usual route.",
+    "updated": "Last seen {time}",
+    "noLocation": "The driver has not shared a location yet."
+  },
+  "payShare": {
+    "title": "Pay your share",
+    "paidTitle": "Your share is paid",
+    "before": "Please pay before {time}",
+    "slide": "Slide to pay",
+    "home": "Go home",
+    "loadFail": "We could not load this share",
+    "wrongAccount": "Log in with the email this share was sent to."
+  },
+  "offline": {
+    "title": "You are offline",
+    "body": "Check your internet connection and try again.",
+    "retry": "Try again",
+    "call": "Call 112"
+  },
+  "suspendedPage": {
+    "title": "Your account is suspended",
+    "body": "You reached the warning limit. You can read why and appeal from your standing page.",
+    "appeal": "See standing and appeal",
+    "terms": "Read the terms"
   }
 }
