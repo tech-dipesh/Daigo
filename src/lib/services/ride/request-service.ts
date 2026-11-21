@@ -2,6 +2,7 @@ import { AppError } from "@/lib/infra/http/response"
 import { requireMember } from "@/lib/infra/auth/require-verified"
 import { buildPricing } from "@/lib/infra/economy/pricing"
 import { expiryFromNow, isExpired } from "@/lib/infra/matching/expiry"
+import { assertApart } from "@/lib/infra/matching/too-close"
 import { generatePermanentRequest } from "@/lib/infra/matching/permanent"
 import { waitlistHours } from "@/lib/infra/matching/waitlist"
 import * as permanentRequestRepo from "@/lib/repository/ride/permanent-request-repo"
@@ -22,6 +23,7 @@ export async function createRequest(riderId: string, { passenger, forEmail, ...d
     throw new AppError("Switch to rider mode to post a request", 403)
   }
   if (passenger && forEmail) throw new AppError("Book for a child or for another adult, not both", 400)
+  assertApart(data)
   if (data.windowEnd <= data.windowStart) {
     throw new AppError("The time window end must be after the start", 400)
   }
@@ -83,6 +85,7 @@ export async function generateToday(riderId: string, id: string) {
 }
 
 export async function priceEstimate({ when, groupSize, minor, ...points }: PriceEstimateQueryInput) {
+  assertApart(points)
   const pricing = await buildPricing({ ...points, groupSize, minor: minor === "true", when: when ?? new Date() })
   const types = groupSize > 1 ? ["AUTO", "CAR", "CAB"] : ["BIKE", "SCOOTER", "AUTO", "CAR", "CAB"]
   const quotes = types.map((type) => pricing.quote(type))
