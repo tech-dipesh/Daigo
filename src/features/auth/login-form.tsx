@@ -14,7 +14,7 @@ import { emailOk } from "@/features/auth/rules"
 
 type Role = "RIDER" | "DRIVER"
 
-export function LoginForm({ start = "" }: { start?: string }) {
+export function LoginForm({ start = "", next: after }: { start?: string; next?: string }) {
   const t = useTranslations("auth")
   const router = useRouter()
   const [login] = useLoginMutation()
@@ -34,7 +34,7 @@ export function LoginForm({ start = "" }: { start?: string }) {
   }
   const finish = async () => {
     if (role === "DRIVER") await setRole({ role })
-    router.replace("/")
+    router.replace(after ?? "/")
     router.refresh()
   }
   const run = async (job: () => Promise<void>) => {

@@ -18,7 +18,7 @@ const publicPaths = [
 
 const guestPages = ["/login", "/signup", "/forgot-password", "/admin/login"]
 const openPages = ["/reset-password", "/verify-email/confirm", "/emergency", "/terms", "/tutorial", "/suspended", "/offline"]
-const openPrefixes = ["/trips/shared/", "/pay/"]
+const openPrefixes = ["/trips/shared/"]
 
 function unauthenticated() {
   return NextResponse.json(
@@ -42,7 +42,8 @@ async function pageProxy(request: NextRequest) {
   // never trust an x-user-id coming from the browser
   headers.delete("x-user-id")
   if (userId) headers.set("x-user-id", userId)
-  const target = !userId && !isOpen ? (pathname.startsWith("/admin") ? "/admin/login" : "/login") : userId && isGuest ? "/" : null
+  const back = pathname === "/" ? "" : `?next=${encodeURIComponent(pathname + request.nextUrl.search)}`
+  const target = !userId && !isOpen ? (pathname.startsWith("/admin") ? "/admin/login" : `/login${back}`) : userId && isGuest ? "/" : null
   const response = target ? NextResponse.redirect(new URL(target, request.url)) : NextResponse.next({ request: { headers } })
   if (rotated) setAuthCookies(response, rotated.accessToken, rotated.refreshToken)
   return stale ? clearAuthCookies(response) : response
