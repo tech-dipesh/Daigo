@@ -8,6 +8,7 @@ import { ChevronIcon, SpinnerIcon } from "@/components/icons"
 import { Toggle } from "@/components/ui/toggle"
 import { errText } from "@/lib/errors"
 import { LogoutButton } from "@/features/auth/logout-button"
+import { Reviews } from "@/features/me/reviews"
 import { TrustRing } from "@/features/me/trust-ring"
 import { useMeQuery, usePatchMeMutation } from "@/features/me/api"
 
@@ -45,6 +46,7 @@ export function MeHub() {
         <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-lg font-semibold text-ink">{d.name ?? t("noName")}</span><span className="truncate text-sm text-muted">{d.email}</span></span>
         <TrustRing score={d.trustScore} />
       </div>
+      <Reviews />
       <Toggle label={t("driveMode")} hint={t("driveHint")} on={drive} onChangeAction={switchMode} />
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
       <div role="radiogroup" aria-label={t("language")} className="grid grid-cols-3 gap-1 rounded-2xl bg-tint p-1">

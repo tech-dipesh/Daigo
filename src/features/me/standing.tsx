@@ -5,7 +5,7 @@ import { SpinnerIcon } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { errText } from "@/lib/errors"
 import { stamp } from "@/lib/time"
-import { useAppealsQuery, useFileAppealMutation, useMeQuery } from "@/features/me/api"
+import { useAppealsQuery, useFileAppealMutation, useMeQuery, useWarningHistoryQuery } from "@/features/me/api"
 
 const tone = { OPEN: "text-muted", APPROVED: "text-success", REJECTED: "text-danger" }
 
@@ -34,21 +34,26 @@ export function Standing() {
   const t = useTranslations("me")
   const me = useMeQuery()
   const appeals = useAppealsQuery()
+  const [history, setHistory] = useState(false)
+  const earlier = useWarningHistoryQuery(undefined, { skip: !history })
   const [open, setOpen] = useState("")
   const d = me.data
   const ended = (iso: string | null) => (iso ? stamp(iso) : "")
   if (me.isLoading) return <SpinnerIcon size={28} className="mt-10 animate-spin text-muted" />
   if (!d) return <p role="alert" className="mt-10 text-danger">{t("loadFail")}</p>
   const w = d.warnings
+  const items = history && earlier.data ? earlier.data.items : w.items
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <h1 className="text-title font-semibold">{t("standing")}</h1>
       {d.isBanned && <section className="flex flex-col gap-2 rounded-3xl bg-danger p-5 text-on-primary"><p className="text-lg font-semibold">{t("banned")}</p><p className="text-sm">{t("bannedHelp")}</p></section>}
       {d.isBanned && <><Button look="quiet" onClick={() => setOpen(open === "account" ? "" : "account")} aria-expanded={open === "account"}>{t("appealAccount")}</Button>{open === "account" && <AppealBox kind="ACCOUNT" onDoneAction={() => setOpen("")} />}</>}
       <div className="rounded-3xl bg-surface p-5"><p className="text-sm text-muted">{t("warnings")}</p><p className="text-fare leading-none font-semibold text-ink">{w.active}<span className="text-title text-muted"> / {w.limit}</span></p>{w.cycleEndsAt && <p className="mt-2 text-sm text-muted">{t("cycleEnds", { time: ended(w.cycleEndsAt) })}</p>}</div>
-      {!w.items.length && <p className="text-muted">{t("noWarnings")}</p>}
+      {!items.length && <p className="text-muted">{t("noWarnings")}</p>}
+      <Button look="quiet" onClick={() => setHistory(!history)} aria-pressed={history}>{t(history ? "currentOnly" : "fullHistory")}</Button>
+      {history && earlier.isLoading && <SpinnerIcon size={20} className="animate-spin text-muted" />}
       <ul className="flex flex-col gap-2">
-        {w.items.map((x) => (
+        {items.map((x) => (
           <li key={x.id} className="flex flex-col gap-2 rounded-2xl bg-surface p-4">
             <span className="flex items-start justify-between gap-3"><span className="flex flex-col"><span className="text-ink">{x.reason.replaceAll("_", " ").toLowerCase()}</span>{x.note && <span className="text-sm text-muted">{x.note}</span>}<span className="text-xs text-muted">{stamp(x.createdAt)}</span></span>{x.revokedAt && <span className="text-sm text-success">{t("revoked")}</span>}</span>
             {!x.revokedAt && <Button look="quiet" onClick={() => setOpen(open === x.id ? "" : x.id)} aria-expanded={open === x.id}>{t("appeal")}</Button>}

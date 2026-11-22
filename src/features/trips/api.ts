@@ -4,6 +4,7 @@ import type { Trip } from "@/features/rider/api"
 export type TripFull = Trip & { riderId: string; driverId: string; arrivedAt: string | null; pickupOtp: string | null; relayLeg: "FIRST" | "SECOND" | null; noShowReason: string | null; shareToken: string | null }
 export type Counterpart = { name: string; trustScore: number; vehicle?: string; email?: string; profilePhotoUrl?: string | null }
 export type Live = { available: false } | { available: true; lastLat: number; lastLng: number; remainingKm: number; etaMinutes: number; isDeviated: boolean }
+export type ReturnRoute = { id: string; routeType: "REGULAR" | "ADVANCE"; fromLabel: string; toLabel: string; daysOfWeek: number[]; departureDate: string | null; departureTime: string }
 export type Chat = { id: string; senderId: string; text: string; at: string }
 export type Pay = { id: string; amount: number; method: "ONLINE" | "CASH"; status: string; shares: { id: string; amount?: number; status: string; overdue: boolean }[] }
 export type Coins = { coinBalance: number; eligibleForDiscount: boolean; discountRupees: number; coinsNeeded: number }
@@ -13,6 +14,7 @@ type RateBody = { score: number; review?: string; recommendTag?: string }
 export const tripApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     getTrip: b.query<TripFull, string>({ query: (id) => ({ url: `/trips/${id}` }), providesTags: ["Trip"] }),
+    returnOptions: b.query<ReturnRoute[], string>({ query: (id) => ({ url: `/trips/${id}/return-suggestion` }) }),
     counterpart: b.query<Counterpart, string>({ query: (id) => ({ url: `/trips/${id}/counterpart` }) }),
     live: b.query<Live, string>({ query: (id) => ({ url: `/trips/${id}/location` }) }),
     messages: b.query<Chat[], string>({ query: (id) => ({ url: `/trips/${id}/messages` }), providesTags: ["Chat"] }),
@@ -29,4 +31,4 @@ export const tripApi = baseApi.injectEndpoints({
   }),
 })
 
-export const { useGetTripQuery, useCounterpartQuery, useLiveQuery, useMessagesQuery, useSendMessageMutation, useCancelTripMutation, useShareTripMutation, useStopShareMutation, useExplainNoShowMutation, useGetPaymentQuery, usePayMutation, useCoinsQuery, useRateMutation, useReportMutation } = tripApi
+export const { useGetTripQuery, useReturnOptionsQuery, useCounterpartQuery, useLiveQuery, useMessagesQuery, useSendMessageMutation, useCancelTripMutation, useShareTripMutation, useStopShareMutation, useExplainNoShowMutation, useGetPaymentQuery, usePayMutation, useCoinsQuery, useRateMutation, useReportMutation } = tripApi

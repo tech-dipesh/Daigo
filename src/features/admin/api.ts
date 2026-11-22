@@ -13,6 +13,7 @@ export type Zone = { id: string; name: string; minLat: number; maxLat: number; m
 export type Fare = { id: string; vehicleType: string; perKm: number }
 export type AdminUser = { id: string; email: string; name: string | null; activeRole: string; staffRole: "MODERATOR" | "SUPER_ADMIN" | null; trustScore: number; isBanned: boolean; emailVerifiedAt: string | null; createdAt: string }
 export type AdminUserDetail = AdminUser & { trips: number; warnings: number; complaints: number }
+export type ExportRow = { id: string; type: "trips" | "users" | "complaints"; status: "QUEUED" | "RUNNING" | "READY" | "FAILED"; rangeFrom: string; rangeTo: string; createdAt: string; finishedAt: string | null; error: string | null; url: string | null }
 export type Obj = Record<string, unknown>
 
 export const adminApi = baseApi.injectEndpoints({
@@ -36,10 +37,12 @@ export const adminApi = baseApi.injectEndpoints({
     adminUsers: b.query<AdminUser[], { q: string; staff: boolean }>({ query: ({ q, staff }) => ({ url: "/admin/users", params: { q: q || undefined, staff: String(staff) } }), providesTags: ["Admin"] }),
     adminUser: b.query<AdminUserDetail, string>({ query: (id) => ({ url: `/admin/users/${id}` }) }),
     setStaff: b.mutation<AdminUser, { id: string; staffRole: "MODERATOR" | "SUPER_ADMIN" | null }>({ query: ({ id, staffRole }) => ({ url: `/admin/users/${id}/staff-role`, method: "patch", body: { staffRole } }), invalidatesTags: ["Admin"] }),
-    exportCsv: b.mutation<{ queued: boolean; from: string; to: string }, { type: string; from?: string; to?: string }>({ query: (body) => ({ url: "/admin/exports", method: "post", body }) }),
+    exportCsv: b.mutation<{ queued: boolean; id: string; from: string; to: string }, { type: string; from?: string; to?: string }>({ query: (body) => ({ url: "/admin/exports", method: "post", body }), invalidatesTags: ["Admin"] }),
+    exportHistory: b.query<ExportRow[], void>({ query: () => ({ url: "/admin/exports" }), providesTags: ["Admin"] }),
+    adminJob: b.mutation<Obj, "run-autopost" | "schedule-autopost">({ query: (action) => ({ url: "/admin/jobs", method: "post", body: { action } }) }),
     demoRun: b.mutation<Obj, { url: string; body?: Obj }>({ query: ({ url, body }) => ({ url: `/admin/demo/${url}`, method: "post", body: body ?? {} }), invalidatesTags: ["Admin"] }),
     demoGet: b.query<Obj, string>({ query: (url) => ({ url: `/admin/demo/${url}` }), providesTags: ["Admin"] }),
   }),
 })
 
-export const { useStatsQuery, useAnalyticsQuery, useVerificationsQuery, useReviewVehicleMutation, useReviewDocumentMutation, useUploadLinkMutation, useEmergenciesQuery, useResolveEmergencyMutation, useComplaintsQuery, useDecideComplaintMutation, useAdminAppealsQuery, useDecideAppealMutation, useZonesQuery, usePatchZoneMutation, useFaresQuery, usePatchFareMutation, useAdminUsersQuery, useAdminUserQuery, useSetStaffMutation, useExportCsvMutation, useDemoRunMutation, useDemoGetQuery } = adminApi
+export const { useExportHistoryQuery, useAdminJobMutation, useStatsQuery, useAnalyticsQuery, useVerificationsQuery, useReviewVehicleMutation, useReviewDocumentMutation, useUploadLinkMutation, useEmergenciesQuery, useResolveEmergencyMutation, useComplaintsQuery, useDecideComplaintMutation, useAdminAppealsQuery, useDecideAppealMutation, useZonesQuery, usePatchZoneMutation, useFaresQuery, usePatchFareMutation, useAdminUsersQuery, useAdminUserQuery, useSetStaffMutation, useExportCsvMutation, useDemoRunMutation, useDemoGetQuery } = adminApi
