@@ -1,0 +1,28 @@
+enum ExportType {
+  trips
+  users
+  complaints
+}
+
+enum ExportStatus {
+  QUEUED
+  RUNNING
+  READY
+  FAILED
+}
+
+model ExportJob {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type          ExportType
+  status        ExportStatus @default(QUEUED)
+  rangeFrom     DateTime     @map("range_from") @db.Timestamptz(3)
+  rangeTo       DateTime     @map("range_to") @db.Timestamptz(3)
+  requestedById String       @map("requested_by_id") @db.Uuid
+  fileKey       String?      @map("file_key")
+  error         String?
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  finishedAt    DateTime?    @map("finished_at") @db.Timestamptz(3)
+
+  @@index([createdAt])
+  @@map("export_jobs")
+}
