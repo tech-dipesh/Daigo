@@ -86,7 +86,7 @@ export function DriverTrip({ id }: { id: string }) {
         {active && <Link href={`/trips/${id}/chat`} className={row}><ChatIcon size={20} />{tt("chat")}</Link>}
         {data.status === "COMPLETED" && <Link href={`/trips/${id}/rate`} className={row}>{tt("rate")}</Link>}
         {pending && data.relayLeg === "SECOND" && <Button look="quiet" onClick={() => run(() => late(id).unwrap())} disabled={lating.isLoading}>{t("firstLate")}</Button>}
-        {active && <Link href="/emergency" className={`${row} text-danger`}><HelpIcon size={20} />{tt("help")}</Link>}
+        {active && <Link href={`/emergency?trip=${id}`} className={`${row} text-danger`}><HelpIcon size={20} />{tt("help")}</Link>}
         {active && <CancelPanel id={id} />}
         <Link href={`/trips/${id}/report`} className="self-start text-sm text-muted">{tt("report")}</Link>
       </div>

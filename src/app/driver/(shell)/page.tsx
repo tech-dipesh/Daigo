@@ -1,5 +1,5 @@
-import { DocumentList } from "@/features/driver/vehicle-list"
+import { DriverHome } from "@/features/driver/home"
 
 export default function Page() {
-  return <DocumentList />
+  return <DriverHome />
 }

@@ -28,7 +28,12 @@ export function Realtime({ driver }: { driver: boolean }) {
   const loaded = useAppSelector((s) => s.away.loaded)
   const awayRef = useRef(away)
   const socket = useRef<WebSocket | null>(null)
-  const presence = () => (socket.current?.readyState === WebSocket.OPEN ? socket.current.send(JSON.stringify({ type: driver && !awayRef.current ? "online" : "offline" })) : undefined)
+  const fallback = useRef(false)
+  const beat = async () => {
+    if (!driver) return
+    try { await api.post("/presence", { online: !awayRef.current }) } catch { return }
+  }
+  const presence = () => (socket.current?.readyState === WebSocket.OPEN ? socket.current.send(JSON.stringify({ type: driver && !awayRef.current ? "online" : "offline" })) : fallback.current ? void beat() : undefined)
   useEffect(() => {
     dispatch(restore(saved()))
   }, [dispatch])
@@ -49,6 +54,7 @@ export function Realtime({ driver }: { driver: boolean }) {
     let retry: ReturnType<typeof setTimeout> | undefined
     let ping: ReturnType<typeof setInterval> | undefined
     let poll: ReturnType<typeof setInterval> | undefined
+    let heartbeat: ReturnType<typeof setInterval> | undefined
     const handle = (e: RealtimeEvent) => {
       dispatch(received(e))
       const hit = tags[e.type]
@@ -66,7 +72,9 @@ export function Realtime({ driver }: { driver: boolean }) {
       ws.onopen = () => {
         tries = 0
         clearInterval(poll)
+        clearInterval(heartbeat)
         poll = undefined
+        fallback.current = false
         dispatch(status({ live: true, fallback: false }))
         presence()
         ping = setInterval(() => ws.send(JSON.stringify({ type: "ping" })), 30000)
@@ -81,7 +89,12 @@ export function Realtime({ driver }: { driver: boolean }) {
         tries++
         dispatch(status({ live: false, fallback: tries >= 3 }))
         if (closed) return
-        if (tries >= 3 && !poll) poll = setInterval(drain, 5000)
+        if (tries >= 3 && !poll) {
+          fallback.current = true
+          poll = setInterval(drain, 5000)
+          heartbeat = setInterval(beat, 30000)
+          void beat()
+        }
         retry = setTimeout(open, Math.min(1000 * 2 ** tries, 15000))
       }
     }
@@ -91,6 +104,7 @@ export function Realtime({ driver }: { driver: boolean }) {
       clearTimeout(retry)
       clearInterval(ping)
       clearInterval(poll)
+      clearInterval(heartbeat)
       socket.current?.close()
     }
   }, [dispatch, driver])

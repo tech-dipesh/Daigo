@@ -10,6 +10,7 @@ import { useTripPlacesQuery } from "@/features/driver/trip-api"
 import { useCounterpartQuery, useGetTripQuery, useLiveQuery } from "@/features/trips/api"
 import { CancelPanel } from "@/features/trips/cancel-panel"
 import { NoShowForm } from "@/features/trips/noshow-form"
+import { ReturnRide } from "@/features/trips/return-ride"
 import { SharePanel } from "@/features/trips/share-panel"
 import { Timeline } from "@/features/trips/timeline"
 
@@ -59,8 +60,9 @@ export function TripDetail({ id }: { id: string }) {
         {active && <Link href={`/trips/${id}/chat`} className={row}><ChatIcon size={20} />{t("chat")}</Link>}
         {active && <SharePanel trip={data} />}
         {data.status === "COMPLETED" && rider && <Link href={`/trips/${id}/pay`} className="flex h-12 items-center justify-center rounded-2xl bg-primary px-5 font-medium text-on-primary">{t("payNow")}</Link>}
+        {data.status === "COMPLETED" && rider && <ReturnRide id={id} requestId={data.rideRequestId} />}
         {data.status === "COMPLETED" && <Link href={`/trips/${id}/rate`} className={row}>{t("rate")}</Link>}
-        {active && <Link href="/emergency" className={`${row} text-danger`}><HelpIcon size={20} />{t("help")}</Link>}
+        {active && <Link href={`/emergency?trip=${id}`} className={`${row} text-danger`}><HelpIcon size={20} />{t("help")}</Link>}
         {active && <CancelPanel id={id} />}
         <Link href={`/trips/${id}/report`} className="flex items-center gap-2 self-start text-sm text-muted"><FlagIcon size={16} />{t("report")}</Link>
       </div>

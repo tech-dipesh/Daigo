@@ -3,7 +3,7 @@ import { pushToast } from "@/store/ui"
 export type ApiError = { status: number; message: string; fieldErrors?: Record<string, string[]>; timeout?: boolean; cancelled?: boolean }
 type Dispatch = (a: ReturnType<typeof pushToast>) => unknown
 
-const authPages = ["/login", "/signup", "/forgot-password", "/reset-password"]
+const authPages = ["/login", "/signup", "/forgot-password", "/reset-password", "/emergency"]
 
 export const isApiError = (e: unknown): e is ApiError => typeof e === "object" && e !== null && "status" in e && "message" in e
 export const errText = (e: unknown) => (isApiError(e) && !e.cancelled ? e.message : "")
