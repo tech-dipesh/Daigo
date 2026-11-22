@@ -19,4 +19,9 @@ export const createWithTrust = (data: Parameters<typeof db.rating.create>[0]["da
   })
 
 export const summaryFor = (ratedUserId: string) => db.rating.aggregate({ where: { ratedUserId }, _avg: { score: true }, _count: { _all: true } })
+export const receivedFor = (ratedUserId: string, take: number) =>
+  db.rating.findMany({ where: { ratedUserId, review: { not: null } }, orderBy: { createdAt: "desc" }, take, select: { tripId: true, score: true, review: true, recommendTag: true, createdAt: true } })
+
+export const tripLabels = (ids: string[]) => db.trip.findMany({ where: { id: { in: ids } }, select: { id: true, rideRequest: { select: { fromLabel: true, toLabel: true } } } })
+export const scoresBy = (raterId: string, tripIds: string[]) => db.rating.findMany({ where: { raterId, tripId: { in: tripIds } }, select: { tripId: true, score: true } })
 export const recentFor = (ratedUserId: string) => db.rating.findMany({ where: { ratedUserId }, orderBy: { createdAt: "desc" }, take: 10, select: { score: true, createdAt: true } })
