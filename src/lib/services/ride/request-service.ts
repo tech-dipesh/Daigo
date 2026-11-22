@@ -7,6 +7,7 @@ import { generatePermanentRequest } from "@/lib/infra/matching/permanent"
 import { waitlistHours } from "@/lib/infra/matching/waitlist"
 import * as permanentRequestRepo from "@/lib/repository/ride/permanent-request-repo"
 import * as ratingRepo from "@/lib/repository/trip/rating-repo"
+import * as tripRepo from "@/lib/repository/trip/trip-repo"
 import * as rideRequestRepo from "@/lib/repository/ride/ride-request-repo"
 import * as userRepo from "@/lib/repository/account/user-repo"
 import * as waitlistRepo from "@/lib/repository/ride/waitlist-repo"
@@ -14,7 +15,7 @@ import type { PriceEstimateQueryInput, RideRequestInput } from "@/lib/validation
 
 export const listRequests = (riderId: string) => rideRequestRepo.listByRider(riderId)
 
-export const listWaitlist = (riderId: string) => waitlistRepo.listActive(riderId)
+export const listWaitlist = (riderId: string) => waitlistRepo.listRecent(riderId)
 
 export async function createRequest(riderId: string, { passenger, forEmail, ...data }: RideRequestInput) {
   await requireMember(riderId)
@@ -65,11 +66,19 @@ export async function leaveWaitlist(riderId: string, id: string) {
   return { cancelled: true }
 }
 
+/* only drivers this rider has actually ridden with, minus anyone they rated 2 or less */
 export async function suggestedDrivers(riderId: string) {
-  const goodRatings = await ratingRepo.goodRatingsBy(riderId)
-  const ratedDrivers = goodRatings.map((rating) => rating.ratedUser)
-  const seen = new Set<string>()
-  return ratedDrivers.filter((driver) => (seen.has(driver.id) ? false : seen.add(driver.id)))
+  const trips = await tripRepo.completedWithDrivers(riderId)
+  const mine = await ratingRepo.scoresBy(riderId, trips.map((t) => t.id))
+  const badTrips = new Set(mine.filter((r) => r.score <= 2).map((r) => r.tripId))
+  const badDrivers = new Set(trips.filter((t) => badTrips.has(t.id)).map((t) => t.driverId))
+  const usable = trips.filter((t) => !t.driver.isBanned && !badDrivers.has(t.driverId))
+  const byDriver = new Map<string, { id: string; name: string; trustScore: number; rides: number; lastRideAt: Date | null }>()
+  usable.forEach(({ driver, completedAt }) => {
+    const found = byDriver.get(driver.id)
+    byDriver.set(driver.id, { id: driver.id, name: driver.name ?? driver.email.split("@")[0], trustScore: driver.trustScore, rides: (found?.rides ?? 0) + 1, lastRideAt: found?.lastRideAt ?? completedAt })
+  })
+  return [...byDriver.values()]
 }
 
 /*

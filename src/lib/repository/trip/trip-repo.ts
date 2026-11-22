@@ -6,6 +6,9 @@ type Booked = { id: string; rideRequestId: string; routeId: string; matchId: str
 
 export const listForUser = (userId: string) => db.trip.findMany({ where: { OR: [{ riderId: userId }, { driverId: userId }] }, orderBy: { createdAt: "desc" } })
 
+export const completedWithDrivers = (riderId: string) =>
+  db.trip.findMany({ where: { riderId, status: "COMPLETED" }, orderBy: { completedAt: "desc" }, select: { id: true, driverId: true, completedAt: true, driver: { select: { id: true, name: true, email: true, trustScore: true, isBanned: true } } } })
+
 export const countRecentCancellations = (userId: string, cancelledBy: "RIDER" | "DRIVER", since: Date) =>
   db.trip.count({ where: { cancelledBy, status: "CANCELLED", cancelledAt: { gte: since }, OR: [{ riderId: userId }, { driverId: userId }] } })
 

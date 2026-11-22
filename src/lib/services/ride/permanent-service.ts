@@ -1,6 +1,7 @@
 import { requireMember } from "@/lib/infra/auth/require-verified"
 import { AppError } from "@/lib/infra/http/response"
 import { assertApart } from "@/lib/infra/matching/too-close"
+import { suggestedDrivers } from "@/lib/services/ride/request-service"
 import * as permanentRepo from "@/lib/repository/ride/permanent-manage-repo"
 import type { PermanentInput } from "@/lib/validation/ride/permanent-schema"
 
@@ -13,6 +14,10 @@ export async function createPermanent(riderId: string, { windowStart, windowEnd,
   await requireMember(riderId)
   assertApart(data)
   if (windowEnd <= windowStart) throw new AppError("The window end must be after the start", 400)
+  if (data.preferredDriverId) {
+    const ridden = await suggestedDrivers(riderId)
+    if (!ridden.some((d) => d.id === data.preferredDriverId)) throw new AppError("You can only prefer a driver you have ridden with", 400)
+  }
   if ((await permanentRepo.countActive(riderId)) >= limit) throw new AppError(`You can keep ${limit} weekday rides at a time`, 409)
   return permanentRepo.create({ riderId, ...data, windowStartTime: at(windowStart), windowEndTime: at(windowEnd) })
 }

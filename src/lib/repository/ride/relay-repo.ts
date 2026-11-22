@@ -10,6 +10,13 @@ export const findForDriver = (id: string, driverId: string) =>
     include: { firstRoute: true, secondRoute: true, rideRequest: { include: { rider: true } } },
   })
 
+export const pendingForDriver = (driverId: string) =>
+  db.relayMatch.findMany({
+    where: { status: "PENDING", rideRequest: { status: "PENDING", expiresAt: { gt: new Date() } }, OR: [{ firstRoute: { driverId }, firstLegStatus: "PENDING" }, { secondRoute: { driverId }, secondLegStatus: "PENDING" }] },
+    include: { firstRoute: true, secondRoute: true, rideRequest: true },
+    orderBy: { createdAt: "desc" },
+  })
+
 type RelayCandidate = { rideRequestId: string; firstRouteId: string; secondRouteId: string; transferLat: number; transferLng: number; priceEstimate: number }
 
 export const upsertCandidate = ({ rideRequestId, firstRouteId, secondRouteId, ...data }: RelayCandidate) =>

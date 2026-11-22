@@ -68,5 +68,10 @@ export async function findMatches(riderId: string, id: string) {
       relayRepo.upsertCandidate({ rideRequestId: rideRequest.id, firstRouteId: firstRoute.id, secondRouteId: secondRoute.id, transferLat, transferLng, priceEstimate: pricing.quote(firstRoute.vehicle.type).price }),
     ),
   )
+  const pendingRelays = relayMatches.filter((r) => r.status === "PENDING")
+  const legsOf = (r: (typeof relayMatches)[number]) => [{ leg: "FIRST", driverId: r.firstRoute.driverId, relay: r }, { leg: "SECOND", driverId: r.secondRoute.driverId, relay: r }] as const
+  const legs = pendingRelays.flatMap(legsOf)
+  const relayAlerts = legs.map(({ leg, driverId, relay }) => publishOnce(`alert:relay:${relay.id}:${leg}`, driverId, "request.new", { relayMatchId: relay.id, leg, requestId: rideRequest.id, from: rideRequest.fromLabel, to: rideRequest.toLabel, groupSize: rideRequest.groupSize, price: relay.priceEstimate, expiresAt: rideRequest.expiresAt }))
+  await Promise.all(relayAlerts)
   return { direct: [], relay: relayMatches }
 }

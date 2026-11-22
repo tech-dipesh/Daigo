@@ -14,6 +14,7 @@ export const permanentSchema = z.object({
   windowEnd: clock,
   groupSize: z.number().int().min(1).max(5).default(1),
   vehiclePreference: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]).optional(),
+  preferredDriverId: z.uuid("Please enter a valid preferred driver").optional(),
 })
 
 export type PermanentInput = z.infer<typeof permanentSchema>
