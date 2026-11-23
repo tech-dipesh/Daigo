@@ -4,15 +4,23 @@ on:
     workflows: [ci]
     types: [completed]
     branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: deploy
+  cancel-in-progress: false
 jobs:
-  deploy:
+  build:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        target: [app, ws, migrate]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - id: who
@@ -26,61 +34,74 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          target: app
+          target: ${{ matrix.target }}
           push: true
           tags: |
-            ghcr.io/${{ steps.who.outputs.owner }}/daigo-app:${{ github.event.workflow_run.head_sha }}
-            ghcr.io/${{ steps.who.outputs.owner }}/daigo-app:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: ws
-          push: true
-          tags: |
-            ghcr.io/${{ steps.who.outputs.owner }}/daigo-ws:${{ github.event.workflow_run.head_sha }}
-            ghcr.io/${{ steps.who.outputs.owner }}/daigo-ws:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ghcr.io/${{ steps.who.outputs.owner }}/daigo-${{ matrix.target }}:${{ github.event.workflow_run.head_sha }}
+            ghcr.io/${{ steps.who.outputs.owner }}/daigo-${{ matrix.target }}:latest
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - id: who
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
       - name: Get Runner IP
         id: ip
         run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Open Port 22 for GitHub Runner
         run: |
           aws ec2 authorize-security-group-ingress \
             --group-id ${{ secrets.AWS_SECURITY_GROUP_ID }} \
             --protocol tcp --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
-
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: compose.yml,Caddyfile
+          source: compose.yml,Caddyfile,scripts/rollback.sh
           target: daigo
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          script_stop: true
           script: |
             cd ~/daigo
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             export OWNER=${{ steps.who.outputs.owner }} TAG=${{ github.event.workflow_run.head_sha }}
-            docker compose pull
-            docker compose up -d --remove-orphans
-            docker image prune -f
-
+            prev=$(cat .tag 2>/dev/null || echo latest)
+            docker compose pull app ws migrate
+            docker compose up -d db --wait
+            docker compose run --rm migrate
+            if docker compose up -d --remove-orphans --wait --wait-timeout 120 && curl -fsS --retry 5 --retry-delay 3 --retry-connrefused http://localhost/api/v1/health > /dev/null; then
+              echo "$TAG" > .tag
+              printf 'OWNER=%s\nTAG=%s\nPREV=%s\n' "$OWNER" "$TAG" "$prev" > .release
+              docker image prune -f
+            else
+              echo "unhealthy after deploy, going back to $prev"
+              docker compose logs --tail 40 app ws
+              export TAG=$prev
+              docker compose up -d --remove-orphans --wait --wait-timeout 120
+              exit 1
+            fi
+      - name: Smoke test the public url
+        run: curl -fsS --retry 5 --retry-delay 5 https://daigo.dipsharma.me/api/v1/health
       - name: Close Port 22
         if: always()
         run: |
