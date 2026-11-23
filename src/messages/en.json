@@ -623,7 +623,11 @@
     "reviewsAvg": "{avg} from {count} ratings",
     "reviewStars": "{count} stars",
     "fullHistory": "Show full history",
-    "currentOnly": "Show current cycle only"
+    "currentOnly": "Show current cycle only",
+    "installTitle": "Install DaiGo",
+    "installBody": "Add it to your home screen to open faster and get alerts.",
+    "installButton": "Install",
+    "installIos": "On iPhone, tap Share, then Add to Home Screen."
   },
   "admin": {
     "nav_dashboard": "Dashboard",

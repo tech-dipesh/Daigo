@@ -623,7 +623,11 @@
     "reviewsAvg": "{count} रेटिंग से {avg}",
     "reviewStars": "{count} सितारे",
     "fullHistory": "पूरा इतिहास दिखाएँ",
-    "currentOnly": "सिर्फ़ मौजूदा चक्र दिखाएँ"
+    "currentOnly": "सिर्फ़ मौजूदा चक्र दिखाएँ",
+    "installTitle": "DaiGo इंस्टॉल करें",
+    "installBody": "इसे होम स्क्रीन पर जोड़ें ताकि यह जल्दी खुले और अलर्ट मिलें।",
+    "installButton": "इंस्टॉल करें",
+    "installIos": "iPhone पर शेयर दबाएँ, फिर होम स्क्रीन में जोड़ें चुनें।"
   },
   "admin": {
     "nav_dashboard": "डैशबोर्ड",

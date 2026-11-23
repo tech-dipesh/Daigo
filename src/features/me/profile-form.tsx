@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Avatar } from "@/components/avatar"
+import { SpinnerIcon } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PhotoField, photoIssue } from "@/components/ui/photo"
@@ -59,7 +60,7 @@ export function ProfileForm() {
     await reset(d.email).unwrap()
     dispatch(pushToast({ key: "me.resetSent", kind: "success" }))
   })
-  if (!d) return null
+  if (!d) return me.isError ? <p role="alert" className="mt-10 text-danger">{t("loadFail")}</p> : <SpinnerIcon size={28} className="mt-10 animate-spin text-muted" />
   return (
     <div className="mx-auto flex max-w-md flex-col gap-4">
       <h1 className="text-title font-semibold">{t("editProfile")}</h1>

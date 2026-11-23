@@ -26,6 +26,7 @@ export function DriverHome() {
     <div className="flex flex-col gap-5">
       <PresenceCard />
       {checked && !cleared && <Link href="/onboarding/driver/review" className="rounded-2xl bg-tint p-4 text-ink">{t("pendingDocs")}</Link>}
+      {dash.isError && <p role="alert" className="text-danger">{t("loadFail")}</p>}
       {d && (
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-2xl bg-surface p-4"><p className="text-sm text-muted">{t("earned")}</p><p className="text-title font-semibold text-success">₹{Math.round(d.totalEarned)}</p></div>
@@ -37,7 +38,7 @@ export function DriverHome() {
         <h2 className="text-lg font-semibold">{t("requests")}</h2>
         {away && <p className="text-muted">{t("awayNote")}</p>}
         {!away && incoming.isLoading && <SpinnerIcon size={20} className="animate-spin text-muted" />}
-        {!away && incoming.isError && <p role="alert" className="text-danger">{t("loadFail")}</p>}
+        {!away && (incoming.isError || relays.isError) && <p role="alert" className="text-danger">{t("loadFail")}</p>}
         {!away && incoming.data && relays.data && !incoming.data.length && !relays.data.length && <p className="text-muted">{t("noRequests")}</p>}
         {!away && <ul className="flex flex-col gap-2">{incoming.data?.map((x) => <IncomingRow key={x.id} item={x} />)}{relays.data?.map((x) => <RelayRow key={x.id} item={x} />)}</ul>}
       </section>
