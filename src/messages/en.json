@@ -77,7 +77,14 @@
   "emergency": {
     "title": "Emergency",
     "body": "If you are in danger, call 112 now. It is India's emergency number.",
-    "call": "Call 112"
+    "call": "Call 112",
+    "send": "Alert my emergency contact",
+    "sending": "Sending your alert",
+    "sent": "We told our team and your emergency contact. Call 112 if you need help right now.",
+    "noLocation": "We could not get your location. Allow location in your browser, then try again.",
+    "failed": "The alert did not go through. Call 112 now.",
+    "needLogin": "Log in to alert your emergency contact. You can still call 112.",
+    "tripNote": "This alert is linked to your current trip."
   },
   "onb": {
     "locked": "Complete the details to unlock",
@@ -141,7 +148,8 @@
     "trips": "Trips",
     "alerts": "Alerts",
     "me": "Me",
-    "main": "Main"
+    "main": "Main",
+    "unread": "{count} unread"
   },
   "rider": {
     "homeTitle": "Where to?",
@@ -326,7 +334,10 @@
     "reportSent": "We got your report",
     "reportSentSub": "Our team will look into it and get back to you.",
     "pickupAt": "Pickup",
-    "dropAt": "Drop"
+    "dropAt": "Drop",
+    "returnTitle": "Going back?",
+    "returnBody": "Your driver has a route the other way, leaving {when}. Ask for the ride back.",
+    "returnAsk": "Request the ride back"
   },
   "driver": {
     "offline": "You are offline",
@@ -505,7 +516,12 @@
     "until": "Valid until {time}",
     "waiting": "Waiting",
     "remove": "Leave waitlist",
-    "newRide": "Plan a ride"
+    "newRide": "Plan a ride",
+    "tabWaiting": "Waiting",
+    "tabMatched": "Matched",
+    "emptyMatched": "Nothing matched yet. We will tell you when a driver appears.",
+    "matchedAt": "A driver appeared {time}",
+    "searchAgain": "Search again"
   },
   "routines": {
     "d0": "Sun",
@@ -536,7 +552,12 @@
     "from": "From (India time)",
     "until": "Until (India time)",
     "windowBad": "Pick an end time after the start, and not across 5:30 am.",
-    "posted": "Today's ride is posted"
+    "posted": "Today's ride is posted",
+    "prefers": "Prefers {name}",
+    "yourDriver": "a driver you rode with",
+    "preferDriver": "Prefer a driver",
+    "noPreference": "No preference",
+    "ridesWith": "{count} rides together"
   },
   "child": {
     "title": "Child ride",
@@ -596,7 +617,13 @@
     "sendAppeal": "Send appeal",
     "deleteHelp": "Your account closes and you are signed out. Finish or cancel any active trip first.",
     "slideDelete": "Slide to delete account",
-    "lockedDelete": "Enter your password to unlock"
+    "lockedDelete": "Enter your password to unlock",
+    "reviewsTitle": "What people say",
+    "reviewsEmpty": "No written reviews yet.",
+    "reviewsAvg": "{avg} from {count} ratings",
+    "reviewStars": "{count} stars",
+    "fullHistory": "Show full history",
+    "currentOnly": "Show current cycle only"
   },
   "admin": {
     "nav_dashboard": "Dashboard",
@@ -726,7 +753,20 @@
     "forceArrival": "Mark arrived",
     "running": "Running",
     "result": "Result",
-    "adminNav": "Admin"
+    "adminNav": "Admin",
+    "historyTitle": "Export history",
+    "noExports": "No exports yet.",
+    "exs_QUEUED": "Queued",
+    "exs_RUNNING": "Running",
+    "exs_READY": "Ready",
+    "exs_FAILED": "Failed",
+    "download": "Download",
+    "jobsTitle": "Background jobs",
+    "jobsHelp": "Weekday rides are posted for riders each morning. Run it now to test, or set the 6am schedule.",
+    "runAutopost": "Run auto-post now",
+    "scheduleAutopost": "Schedule daily 6am",
+    "jobQueued": "Queued. Riders with weekday rides will get today's request shortly.",
+    "jobScheduled": "Scheduled for 6am India time every day."
   },
   "tutorial": {
     "title": "How DaiGo works",
@@ -817,5 +857,32 @@
     "body": "You reached the warning limit. You can read why and appeal from your standing page.",
     "appeal": "See standing and appeal",
     "terms": "Read the terms"
+  },
+  "relay": {
+    "loadFail": "We could not load this relay",
+    "titleFirst": "Relay, first leg",
+    "titleSecond": "Relay, second leg",
+    "back": "Back to requests",
+    "mapLabel": "Handover point",
+    "rider": "Rider's trip",
+    "yourRoute": "Your route and time",
+    "handoverFirst": "You drop the rider at the handover point",
+    "handoverSecond": "You pick the rider up at the handover point",
+    "people": "{count} people",
+    "otherYes": "The other driver said yes.",
+    "otherWaiting": "Waiting for the other driver. The trip starts only when both say yes.",
+    "reject": "Reject",
+    "accept": "Accept",
+    "youAccepted": "You accepted. We are waiting for the other driver.",
+    "openTrips": "Open my trips",
+    "closed": "This relay is closed.",
+    "chat": "Chat with the other driver",
+    "chatHelp": "Sort out the handover time and spot. Phone numbers stay hidden.",
+    "chatEmpty": "No messages yet.",
+    "chatHint": "Write a message",
+    "accepted": "You accepted this relay",
+    "rejected": "You rejected this relay",
+    "badgeFirst": "Relay, first leg",
+    "badgeSecond": "Relay, second leg"
   }
 }
