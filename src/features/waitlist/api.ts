@@ -1,6 +1,6 @@
 import { baseApi } from "@/store/api"
 
-export type Entry = { id: string; requestId: string; status: string; expiresAt: string | null; createdAt: string }
+export type Entry = { id: string; requestId: string; status: string; expiresAt: string | null; notifiedAt: string | null; createdAt: string }
 
 export const waitlistApi = baseApi.injectEndpoints({
   endpoints: (b) => ({

@@ -8,7 +8,7 @@ import { errText } from "@/lib/errors"
 import { clockOf, fromUtc, toUtc } from "@/lib/time"
 import { PlaceInput } from "@/features/places/place-input"
 import type { Place } from "@/features/places/search"
-import { useAddSavedMutation, useAddWeekdayMutation, useCancelWeekdayMutation, usePostTodayMutation, useRemoveSavedMutation, useRequestSavedMutation, useSavedQuery, useWeekdayQuery } from "@/features/routines/api"
+import { useRiddenQuery, useAddSavedMutation, useAddWeekdayMutation, useCancelWeekdayMutation, usePostTodayMutation, useRemoveSavedMutation, useRequestSavedMutation, useSavedQuery, useWeekdayQuery } from "@/features/routines/api"
 import { pushToast } from "@/store/ui"
 import { useAppDispatch } from "@/store"
 
@@ -35,6 +35,7 @@ export function Routines() {
   const dispatch = useAppDispatch()
   const saved = useSavedQuery()
   const weekday = useWeekdayQuery()
+  const ridden = useRiddenQuery()
   const [addSaved, addingSaved] = useAddSavedMutation()
   const [removeSaved] = useRemoveSavedMutation()
   const [requestSaved, requesting] = useRequestSavedMutation()
@@ -50,6 +51,7 @@ export function Routines() {
   const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5])
   const [start, setStart] = useState("09:00")
   const [end, setEnd] = useState("10:00")
+  const [pref, setPref] = useState("")
   const [fail, setFail] = useState("")
   const names = [t("d0"), t("d1"), t("d2"), t("d3"), t("d4"), t("d5"), t("d6")]
   const utcStart = toUtc(start, days)
@@ -68,8 +70,9 @@ export function Routines() {
   })
   const saveWeekday = () => run(async () => {
     if (!place) return
-    await addWeekday({ ...place, daysOfWeek: utcStart.days, windowStart: utcStart.time, windowEnd: utcEnd.time }).unwrap()
+    await addWeekday({ ...place, daysOfWeek: utcStart.days, windowStart: utcStart.time, windowEnd: utcEnd.time, preferredDriverId: pref || undefined }).unwrap()
     setFormW(false)
+    setPref("")
   })
   const oneTap = (id: string) => run(async () => {
     const made = await requestSaved(id).unwrap()
@@ -120,7 +123,7 @@ export function Routines() {
         <ul className="flex flex-col gap-2">
           {weekday.data?.map((w) => (
             <li key={w.id} className="flex flex-col gap-2 rounded-2xl bg-surface p-3">
-              <span className="flex flex-col"><span className="truncate font-medium text-ink">{w.fromLabel} - {w.toLabel}</span><span className="text-sm text-muted">{shown(w)}</span></span>
+              <span className="flex flex-col"><span className="truncate font-medium text-ink">{w.fromLabel} - {w.toLabel}</span><span className="text-sm text-muted">{shown(w)}</span>{w.preferredDriverId && <span className="text-sm text-primary">{t("prefers", { name: ridden.data?.find((d) => d.id === w.preferredDriverId)?.name ?? t("yourDriver") })}</span>}</span>
               <span className="grid grid-cols-2 gap-2"><Button look="quiet" onClick={() => today(w.id)} disabled={posting.isLoading}>{t("postToday")}</Button><Button look="danger" onClick={() => cancelWeekday(w.id)}>{t("stop")}</Button></span>
             </li>
           ))}
@@ -136,6 +139,11 @@ export function Routines() {
             </div>
             {!windowOk && <p role="alert" className="text-sm text-danger">{t("windowBad")}</p>}
             <People value={people} onChangeAction={setPeople} />
+            {Boolean(ridden.data?.length) && (
+              <label className="flex flex-col gap-1 rounded-2xl bg-surface px-4 py-2 text-xs text-muted">{t("preferDriver")}
+                <select value={pref} onChange={(e) => setPref(e.target.value)} className="bg-transparent text-base text-ink outline-hidden"><option value="">{t("noPreference")}</option>{ridden.data?.map((d) => <option key={d.id} value={d.id}>{d.name} · {t("ridesWith", { count: d.rides })}</option>)}</select>
+              </label>
+            )}
             <Button onClick={saveWeekday} disabled={!place || !days.length || !windowOk || addingWeek.isLoading}>{t("save")}</Button>
           </div>
         )}
