@@ -1,8 +1,8 @@
 "use client"
-import Image from "next/image"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { ChatIcon, FlagIcon, HelpIcon, SpinnerIcon, UserIcon } from "@/components/icons"
+import { ChatIcon, FlagIcon, HelpIcon, SpinnerIcon } from "@/components/icons"
+import { Avatar } from "@/components/avatar"
 import { trustWord } from "@/lib/trust"
 import { LazyMap } from "@/features/map/map-lazy"
 import { useMeQuery } from "@/features/me/api"
@@ -51,7 +51,7 @@ export function TripDetail({ id }: { id: string }) {
         {active && live.data && !live.data.available && <p className="text-sm text-muted">{t("noLive")}</p>}
         {who.data && (
           <div className="flex items-center gap-3 rounded-2xl bg-surface p-4">
-            {who.data.profilePhotoUrl ? <Image src={who.data.profilePhotoUrl} alt="" width={56} height={56} unoptimized className="size-14 rounded-full object-cover" /> : <span className="flex size-14 items-center justify-center rounded-full bg-tint text-muted"><UserIcon size={28} /></span>}
+            <Avatar url={who.data.profilePhotoUrl} size={56} />
             <span className="flex min-w-0 flex-col"><span className="truncate text-lg font-medium text-ink">{who.data.name}</span><span className="text-sm text-muted">{t(`trust_${trustWord(who.data.trustScore)}`)} · {who.data.trustScore}{who.data.vehicle ? ` · ${who.data.vehicle}` : ""}</span></span>
           </div>
         )}

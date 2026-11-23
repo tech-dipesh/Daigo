@@ -78,8 +78,8 @@ export function RequestForm() {
           <div className="flex h-16 flex-1 items-center justify-between rounded-2xl bg-surface px-4">
             <span className="flex items-center gap-2 text-ink"><PeopleIcon size={20} />{t("people")} {people}</span>
             <span className="flex gap-2">
-              <button type="button" disabled={people <= 1} onClick={() => setPeople(people - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-10 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
-              <button type="button" disabled={people >= 5} onClick={() => setPeople(people + 1)} aria-label={t("morePeople")} title={t("morePeople")} className="flex size-10 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
+              <button type="button" disabled={people <= 1} onClick={() => setPeople(people - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-11 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
+              <button type="button" disabled={people >= 5} onClick={() => setPeople(people + 1)} aria-label={t("morePeople")} title={t("morePeople")} className="flex size-11 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
             </span>
           </div>
           <button type="button" role="switch" aria-checked={luggage} onClick={() => setLuggage(!luggage)} aria-label={t("luggage")} title={t("luggage")} className={`flex size-16 items-center justify-center rounded-2xl outline-hidden ${luggage ? "bg-primary text-on-primary" : "bg-surface text-ink"}`}><LuggageIcon size={22} /></button>

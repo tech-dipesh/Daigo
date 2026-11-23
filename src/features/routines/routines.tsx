@@ -22,8 +22,8 @@ function People({ value, onChangeAction }: { value: number; onChangeAction: (n: 
     <div className="flex h-14 items-center justify-between rounded-2xl bg-surface px-4 text-ink">
       {t("people", { count: value })}
       <span className="flex gap-2">
-        <button type="button" disabled={value <= 1} onClick={() => onChangeAction(value - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-10 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
-        <button type="button" disabled={value >= 5} onClick={() => onChangeAction(value + 1)} aria-label={t("more")} title={t("more")} className="flex size-10 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
+        <button type="button" disabled={value <= 1} onClick={() => onChangeAction(value - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-11 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
+        <button type="button" disabled={value >= 5} onClick={() => onChangeAction(value + 1)} aria-label={t("more")} title={t("more")} className="flex size-11 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
       </span>
     </div>
   )
@@ -101,7 +101,7 @@ export function Routines() {
             <li key={s.id} className="flex items-center gap-3 rounded-2xl bg-surface p-3">
               <span className="flex min-w-0 flex-1 flex-col"><span className="truncate font-medium text-ink">{s.label}</span><span className="truncate text-sm text-muted">{s.fromLabel} - {s.toLabel}</span></span>
               <Button onClick={() => oneTap(s.id)} disabled={requesting.isLoading}>{t("rideNow")}</Button>
-              <button type="button" onClick={() => removeSaved(s.id)} aria-label={t("remove")} title={t("remove")} className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-tint text-danger outline-hidden"><CrossIcon size={18} /></button>
+              <button type="button" onClick={() => removeSaved(s.id)} aria-label={t("remove")} title={t("remove")} className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-tint text-danger outline-hidden"><CrossIcon size={18} /></button>
             </li>
           ))}
         </ul>

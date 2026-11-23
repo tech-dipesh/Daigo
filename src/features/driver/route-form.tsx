@@ -81,8 +81,8 @@ export function RouteForm() {
         <div className="flex h-16 items-center justify-between rounded-2xl bg-surface px-4 text-ink">
           {t("seatsFree", { count: Math.min(seats, max) })}
           <span className="flex gap-2">
-            <button type="button" disabled={seats <= 1} onClick={() => setSeats(seats - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-10 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
-            <button type="button" disabled={seats >= max} onClick={() => setSeats(seats + 1)} aria-label={t("more")} title={t("more")} className="flex size-10 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
+            <button type="button" disabled={seats <= 1} onClick={() => setSeats(seats - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-11 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
+            <button type="button" disabled={seats >= max} onClick={() => setSeats(seats + 1)} aria-label={t("more")} title={t("more")} className="flex size-11 items-center justify-center rounded-xl bg-tint outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
           </span>
         </div>
         <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>

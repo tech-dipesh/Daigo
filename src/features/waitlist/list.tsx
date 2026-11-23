@@ -50,7 +50,7 @@ export function WaitlistView() {
           return (
             <li key={e.id} className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3">
               <span className="flex min-w-0 flex-col"><span className="truncate text-ink">{r ? `${r.fromLabel} - ${r.toLabel}` : t("ride")}</span><span className="text-sm text-muted">{shown === "NOTIFIED" && e.notifiedAt ? t("matchedAt", { time: stamp(e.notifiedAt) }) : e.expiresAt ? t("until", { time: stamp(e.expiresAt) }) : t("waiting")}</span></span>
-              {shown === "WAITING" ? <button type="button" onClick={() => leave(e.requestId)} disabled={leaving.isLoading} aria-label={t("remove")} title={t("remove")} className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-tint text-danger outline-hidden"><CrossIcon size={18} /></button> : <Button onClick={() => again(e.requestId)} disabled={retrying.isLoading}>{t("searchAgain")}</Button>}
+              {shown === "WAITING" ? <button type="button" onClick={() => leave(e.requestId)} disabled={leaving.isLoading} aria-label={t("remove")} title={t("remove")} className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-tint text-danger outline-hidden"><CrossIcon size={18} /></button> : <Button onClick={() => again(e.requestId)} disabled={retrying.isLoading}>{t("searchAgain")}</Button>}
             </li>
           )
         })}

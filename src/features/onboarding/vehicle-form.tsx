@@ -62,8 +62,8 @@ export function VehicleForm({ next = "/onboarding/driver/licence" }: { next?: st
       <div className="flex h-16 items-center justify-between rounded-2xl bg-surface px-4">
         <span className="flex flex-col"><span className="text-xs text-muted">{t("seats")}</span><span className="text-base text-ink">{seats}</span></span>
         <span className="flex gap-2">
-          <button type="button" disabled={seats <= 1} onClick={() => setSeats(seats - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-10 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
-          <button type="button" disabled={seats >= 5} onClick={() => setSeats(seats + 1)} aria-label={t("more")} title={t("more")} className="flex size-10 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
+          <button type="button" disabled={seats <= 1} onClick={() => setSeats(seats - 1)} aria-label={t("fewer")} title={t("fewer")} className="flex size-11 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><MinusIcon size={18} /></button>
+          <button type="button" disabled={seats >= 5} onClick={() => setSeats(seats + 1)} aria-label={t("more")} title={t("more")} className="flex size-11 items-center justify-center rounded-xl bg-tint text-ink outline-hidden disabled:opacity-50"><PlusIcon size={18} /></button>
         </span>
       </div>
       <Input label={t("rc")} value={rc} onChange={(e) => setRc(e.target.value)} error={between(rc, 6, 20) ? undefined : t("rcBad")} />

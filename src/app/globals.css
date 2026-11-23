@@ -41,6 +41,7 @@
 @layer base {
   body { background: var(--base); color: var(--ink); font-family: var(--font-sans); }
   button:not(:disabled), [role="button"]:not(:disabled), select, option, input[type="radio"], input[type="checkbox"] { cursor: pointer; }
+  @media (pointer: coarse) { button, [role="tab"], select, input:not([type="radio"], [type="checkbox"], [type="range"], [type="file"]) { min-height: 44px; } input, select, textarea { font-size: 16px; } }
   @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
 }
 @keyframes siren-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
