@@ -1,4 +1,6 @@
-FROM node:22-alpine AS base
+ARG NODE=24
+
+FROM node:${NODE}-alpine AS base
 WORKDIR /app
 COPY package.json ./
 RUN npm i -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
@@ -22,21 +24,32 @@ ARG STADIA_API=dummy
 COPY . .
 RUN mkdir -p public && pnpm generate && pnpm build
 
-FROM base AS app
+# one shot image, compose runs it before the app starts
+FROM deps AS migrate
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+CMD ["pnpm", "exec", "prisma", "migrate", "deploy"]
+
+# plain node, no pnpm and no build tools, standalone already carries what it needs
+FROM node:${NODE}-alpine AS app
+WORKDIR /app
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/public ./public
+USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
-FROM build AS ws
+
+# ws only imports a handful of files from src, so it skips the whole build stage
+FROM node:${NODE}-alpine AS ws
+WORKDIR /app
 ENV NODE_ENV=production PORT=3001
-
-RUN apk add --no-cache curl bash
-
-# Install Bun
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:${PATH}"
-
+RUN npm i -g bun
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/prisma/generated ./prisma/generated
+COPY package.json tsconfig.json ./
+COPY src ./src
+USER node
 EXPOSE 3001
-CMD ["bun", "run", "src/server/ws-server.ts"]
+CMD ["bun", "src/server/ws-server.ts"]

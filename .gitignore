@@ -43,6 +43,7 @@ yarn-error.log*
 *.zip
 .vercel
 .env*
+!.env.example
 _apply/
 assets/
 daigo_local_data.sql

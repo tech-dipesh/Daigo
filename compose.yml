@@ -1,3 +1,10 @@
+x-log: &log
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
 services:
   db:
     image: postgis/postgis:16-3.4
@@ -15,6 +22,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    <<: *log
+
+  migrate:
+    image: ghcr.io/${OWNER}/daigo-migrate:${TAG:-latest}
+    profiles: ["tools"]
+    env_file: .env
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    <<: *log
 
   app:
     image: ghcr.io/${OWNER}/daigo-app:${TAG:-latest}
@@ -24,6 +42,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/v1/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    <<: *log
 
   ws:
     image: ghcr.io/${OWNER}/daigo-ws:${TAG:-latest}
@@ -33,6 +58,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3001/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    <<: *log
 
   caddy:
     image: caddy:2
@@ -45,8 +77,11 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - app
-      - ws
+      app:
+        condition: service_healthy
+      ws:
+        condition: service_healthy
+    <<: *log
 
 volumes:
   pgdata:

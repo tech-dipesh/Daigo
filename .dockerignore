@@ -1,9 +1,12 @@
-node_modules
-.next
 .git
 .github
+node_modules
+.next
 .env*
-prisma/generated
-*.zip
+!.env.example
 *.md
-docs
+*.zip
+assets
+_apply
+daigo_local_data.sql
+prisma/generated
