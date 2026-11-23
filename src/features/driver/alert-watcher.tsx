@@ -19,8 +19,8 @@ export function AlertWatcher() {
     if (!e) return
     dispatch(consumed(e.id))
     const ends = e.data.expiresAt ? new Date(String(e.data.expiresAt)).getTime() : Infinity
-    if (away || ends <= Date.now() || path.startsWith("/driver/incoming/")) return
-    router.push(`/driver/incoming/${String(e.data.matchId)}`)
+    if (away || ends <= Date.now() || path.startsWith("/driver/incoming/") || path.startsWith("/driver/relay/")) return
+    router.push(e.data.relayMatchId ? `/driver/relay/${String(e.data.relayMatchId)}` : `/driver/incoming/${String(e.data.matchId)}`)
   }, [events, away, path, router, dispatch])
   return null
 }

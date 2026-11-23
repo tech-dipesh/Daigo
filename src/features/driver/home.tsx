@@ -2,8 +2,9 @@
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { ArrowIcon, SpinnerIcon } from "@/components/icons"
-import { useDriverDashboardQuery, useIncomingQuery } from "@/features/driver/api"
+import { useDriverDashboardQuery, useIncomingQuery, useIncomingRelaysQuery } from "@/features/driver/api"
 import { IncomingRow } from "@/features/driver/incoming-row"
+import { RelayRow } from "@/features/driver/relay-row"
 import { PresenceCard } from "@/features/driver/presence-card"
 import { useListLicencesQuery, useListVehiclesQuery } from "@/features/onboarding/api"
 import { useAppSelector } from "@/store"
@@ -15,6 +16,7 @@ export function DriverHome() {
   const away = useAppSelector((s) => s.away.away)
   const dash = useDriverDashboardQuery()
   const incoming = useIncomingQuery(undefined, { pollingInterval: away ? 0 : 6000 })
+  const relays = useIncomingRelaysQuery(undefined, { pollingInterval: away ? 0 : 6000 })
   const vehicles = useListVehiclesQuery()
   const licences = useListLicencesQuery()
   const d = dash.data
@@ -36,8 +38,8 @@ export function DriverHome() {
         {away && <p className="text-muted">{t("awayNote")}</p>}
         {!away && incoming.isLoading && <SpinnerIcon size={20} className="animate-spin text-muted" />}
         {!away && incoming.isError && <p role="alert" className="text-danger">{t("loadFail")}</p>}
-        {!away && incoming.data && !incoming.data.length && <p className="text-muted">{t("noRequests")}</p>}
-        {!away && <ul className="flex flex-col gap-2">{incoming.data?.map((x) => <IncomingRow key={x.id} item={x} />)}</ul>}
+        {!away && incoming.data && relays.data && !incoming.data.length && !relays.data.length && <p className="text-muted">{t("noRequests")}</p>}
+        {!away && <ul className="flex flex-col gap-2">{incoming.data?.map((x) => <IncomingRow key={x.id} item={x} />)}{relays.data?.map((x) => <RelayRow key={x.id} item={x} />)}</ul>}
       </section>
       <nav className="flex flex-col gap-2" aria-label={t("shortcuts")}>
         <Link href="/driver/earnings" className={link}>{t("myEarnings")}<ArrowIcon size={18} /></Link>
