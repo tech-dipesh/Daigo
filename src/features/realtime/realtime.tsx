@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react"
 import { api } from "@/lib/api"
 import type { Envelope } from "@/lib/api"
+import { WS } from "@/lib/env"
 import { baseApi } from "@/store/api"
 import { useAppDispatch, useAppSelector } from "@/store"
 import { restore } from "@/store/away"
@@ -66,8 +67,17 @@ export function Realtime({ driver }: { driver: boolean }) {
         if (res.data.success) res.data.data.forEach(handle)
       } catch { return }
     }
+    /* production goes through caddy on the same host, dev needs NEXT_PUBLIC_WS or it just polls */
+    const base = WS || (process.env.NODE_ENV === "production" ? `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}` : "")
+    const fallbackOn = () => {
+      if (poll) return
+      fallback.current = true
+      poll = setInterval(drain, 5000)
+      heartbeat = setInterval(beat, 30000)
+      void beat()
+    }
     const open = () => {
-      const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/v1/ws`)
+      const ws = new WebSocket(`${base}/api/v1/ws`)
       socket.current = ws
       ws.onopen = () => {
         tries = 0
@@ -89,16 +99,15 @@ export function Realtime({ driver }: { driver: boolean }) {
         tries++
         dispatch(status({ live: false, fallback: tries >= 3 }))
         if (closed) return
-        if (tries >= 3 && !poll) {
-          fallback.current = true
-          poll = setInterval(drain, 5000)
-          heartbeat = setInterval(beat, 30000)
-          void beat()
-        }
+        if (tries >= 3) fallbackOn()
         retry = setTimeout(open, Math.min(1000 * 2 ** tries, 15000))
       }
     }
-    open()
+    if (base) open()
+    else {
+      dispatch(status({ live: false, fallback: true }))
+      fallbackOn()
+    }
     return () => {
       closed = true
       clearTimeout(retry)
