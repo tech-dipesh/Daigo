@@ -1,4 +1,4 @@
-ARG NODE=24
+ARG NODE=26.13.1
 
 FROM node:${NODE}-alpine AS base
 WORKDIR /app
