@@ -17,6 +17,15 @@ Prisma cannot express "within X metres of a line", so matching is raw SQL with t
 ## Pricing
 Per km rate by vehicle, times zone (hills cost more), time of day, weather and demand. The stacked multiplier is capped at 1.5, the rate at 40 a km, and the final rupee value is rounded first and capped after, so rounding can never push a fare over the cap. The price is only a suggestion, drivers and riders agree it in chat.
 
+## Payments
+Online payments go through Razorpay in test mode. The browser result is not trusted on its own: the server fetches the order from Razorpay and checks the signature and the paid amount. The webhook does the same check on its side, and both end in one guarded update from PENDING to PAID, so whichever arrives second is a no-op. Orders carry the payment or share id in their notes, so there is no extra column to keep in sync. A reconcile job covers a missed webhook. The cost: split shares have no stored order id, so they rely on the webhook. Demo accounts and a missing key keep an instant mock, so the demo console never blocks on a checkout window.
+
+## Events
+Notifications used to be sent inline. Now they are events on a Redis stream and a worker inside the Bun process delivers them, because a slow mail or database call should not sit in a rider's request. Redis over HTTP cannot block, so the worker is woken by pub/sub instead of polling, which keeps the command count low on a free tier. If no worker has reported alive in the last 90 seconds, producers send the old direct way, so a dead worker never means silent notifications. The cost: two delivery paths to keep correct.
+
+## Route deviation
+The check compares the driver's position with the road route from Stadia, cached per route, and needs two bad points in a row more than 1 km away. Only the rider is told. It does not know about a legitimate detour the driver announced, so it can warn when nothing is wrong, which is why it is a banner and not an automatic alarm.
+
 ## Privacy by distance
 The driver's name and phone stay hidden until they are within 10 km of the pickup, and the photo until 3 km. This is checked on the server, the data is never sent early, so hiding it in the UI is not the protection.
 

@@ -45,5 +45,5 @@ yarn-error.log*
 .env*
 !.env.example
 _apply/
-assets/
+assets/generic-to-specific-ai-ui-prompt-ladder-9402-20260920-0e679c94524583b5.webp
 daigo_local_data.sql

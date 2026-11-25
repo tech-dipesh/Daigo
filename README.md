@@ -126,6 +126,21 @@ sequenceDiagram
 - If the socket drops, the client falls back to polling, and a driver in fallback keeps a presence beat going every 30 seconds so they still show as online
 - The driver alert is a full screen takeover with a siren and a countdown, and the nav shows an unread dot for new notifications
 
+### Real payments in test mode
+
+- Online payment uses Razorpay (test keys, no real money). The server creates the order, the browser opens Razorpay Checkout, and the result is checked twice: once by verifying the checkout signature and the order amount with Razorpay, and once by a signed webhook (`order.paid`, `payment.failed`)
+- Both paths end in one function with a guarded update (PENDING to PAID), so whichever arrives second does nothing, and a repeated webhook is skipped by its event id
+- A reconcile job runs every 15 minutes: a payment still pending after 15 minutes is asked about at Razorpay and settled if it was paid, and a payment shown as paid but refunded or failed at Razorpay is reported to the super admins once
+- Split bills work the same way, each share gets its own order. Cash stays as it was, with a photo as proof
+- Without keys, or for demo accounts, payment stays an instant mock so the demo console keeps working
+
+### Notification stream
+
+- Notifications are events on a Redis stream. A worker in the Bun process reads them through a consumer group, sends them live and saves the row, and acknowledges each one
+- A failed event stays pending and is reclaimed after 30 seconds, and after 5 tries it moves to a dead stream that the demo console health tab counts
+- The worker is woken by a pub/sub message, so there is no polling and almost no Redis commands while idle. If no worker is alive (local dev, or a restart) notifications are sent the old direct way so nothing is stuck
+- The same worker turns an expired request into an event once, so the rider hears that nobody accepted
+
 ### Pricing engine
 
 - A rate per km by vehicle (7 to 40), times a zone multiplier (hill terrain starts at 1.5, plains at 1.0), time of day, weather from OpenWeatherMap, group discount and a demand multiplier
@@ -136,6 +151,7 @@ sequenceDiagram
 ### Trust, safety and abuse resistance
 
 - Distance-gated privacy: the driver sees the rider's first name and reviews, then more only within 10 km, and the rider sees the driver's photo only within 3 km. It is checked on the server, so the data is never sent early
+- Route deviation: the driver's position is compared with the real road route from Stadia (not a straight line). Two bad points in a row more than 1 km off are needed, so one jittery GPS point does nothing, and only the rider is alerted, with a banner and a shortcut to the emergency page
 - Emergency button: grabs one location, emails the contact and the admin, and shows live on the admin dashboard
 - Guardian-booked rides for children (13 and under) go only to drivers with trust 90 or more and at least 10 completed trips, with mandatory live location and a small premium
 - GPS spoof detection flags a jump faster than 150 km/h, and cancellation gaming flags 3 cancellations in 24 hours. Both give a warning
@@ -166,7 +182,7 @@ sequenceDiagram
 - Files, email and payments
   - AWS S3: licence, RC, profile and payment proof photos, only through short lived signed links
   - Brevo: transactional email
-  - Mock payment gateway for now
+  - Razorpay in test mode for online payments, signed webhooks and a reconcile job
 - Runtime and delivery
   - Node 26.13.1 and pnpm 12.21.0, pinned in package.json
   - Bun and ws: the websocket server
@@ -216,8 +232,15 @@ Fill `.env` first. Every key is checked when the server starts, and if one is mi
 - Email: `BREVO_API_KEY`, `BREVO_FROM_EMAIL`
 - Maps and weather: `STADIA_API`, `NEXT_PUBLIC_STADIA_API`, `OWM_KEY`
 - Storage: `S3_URL`, `S3_BUCKET`, `S3_REGION`, `S3_KEY`, `S3_SECRET`
+- Payments (optional, without them payment is the instant mock): `RZP_KEY`, `RZP_SECRET`, `RZP_HOOK`
 - App: `APP_URL`, `DEMO_MODE`, `DEMO_LIVE_EMAIL`
+- Local websocket (optional, without it local dev polls): `NEXT_PUBLIC_WS=ws://localhost:3001`, then run the Bun server with `pn ws`
 - Scripts: `pn dev`, `pn build`, `pn lint`, `pn type`, `pn generate`, `pn migrate`
+
+### Razorpay setup
+- Put the test key id and secret in `RZP_KEY` and `RZP_SECRET`
+- In the Razorpay dashboard add a webhook to `https://<your host>/api/v1/payments/webhook`, tick `order.paid` and `payment.failed`, and put the webhook secret in `RZP_HOOK`
+- Test card numbers are in the Razorpay docs, and nothing is charged in test mode
 
 ## Deployment
 
@@ -457,19 +480,15 @@ erDiagram
 - Security headers at Caddy: HSTS, nosniff, referrer policy and a permissions policy
 - Webhook safety: background job calls are verified with the QStash signature before anything runs
 - Abuse resistance: see Key Highlights
-- Route deviation: it already flags a driver more than 2 km off the straight line between the route ends, and it adds an admin text. It has no road-based check and nothing is shown to the rider.
-Payments: the gateway is a mock that returns mock_<uuid> instantly.
-Expiry: requests only expire by a timestamp check. Nothing emits an "expired" or "running" event, and no worker reads events.
-Background jobs: four QStash jobs (email, notification save, weekday auto-post, CSV export), with no dead-letter handling.
-Security headers: Caddy sends HSTS and a few more, but no CSP.
-Your jobs ideas: these describe Yeti Jobs, a different repo. In DaiGo, idempotency keys and signed S3 uploads are already built. The only one that doesn't exist here is the popular-endpoint-with-Redis-cache idea.
 
 ## Reliability
 
 Done
 
 - Idempotency keys on risky POST routes, kept 24 hours in Redis
-- Signed webhook verification for background jobs
+- Signed webhook verification for background jobs and for Razorpay (raw body, HMAC, timing safe compare, event id dedupe)
+- Payment reconcile every 15 minutes as the safety net behind the webhook
+- Notification stream with a consumer group, acknowledgements, reclaim of stuck events and a dead stream
 - Rate limiting per IP and capped OTP attempts
 - Revocable tokens with rotation
 - Atomic transactions with guarded updates for accept, relay confirm, cancel, payment and coins
@@ -479,13 +498,13 @@ Done
 Missing (written down on purpose, see [docs/reliability.md](docs/reliability.md))
 
 - Automated tests
-- Real payment webhooks and reconciliation
+- Reconcile for split shares (they keep no order id, so they rely on the webhook)
 - Per-user and per-route rate limits
 - Account lock after wrong passwords
-- A dead-letter queue for failed jobs
+- Dead letters for QStash jobs (only stream events have them)
 - Metrics, alerts and central logs
 - Automated database backups
-- A content security policy
+- A content security policy (skipped on purpose for now)
 
 ## Development Rules
 
@@ -541,24 +560,24 @@ Missing (written down on purpose, see [docs/reliability.md](docs/reliability.md)
 
 ## Limitations
 
-- Payments are a mock gateway
+- Payments run in Razorpay test mode, no real money, and demo accounts use an instant mock
 - Licence and RC checks are format checks plus admin review, not government verification
 - Location is shared by the user, not tracked in the background
-- Route deviation uses a straight line, not the real road
+- Route deviation compares with the planned road from the route start to its end, not with where the driver is heading right now
 - Trust farming has no countermeasure yet
 - There are no automated tests, so correctness rests on the demo console scenarios
 - One server, so no failover, and no automated backups
 - Mapped for a few regions of north India only
-- Real payment gateway with webhooks and reconciliation
-- A Redis Stream queue with a notification worker and dead letters
 
 ## Future Improvements
+
+- Razorpay live mode with refunds and payouts to drivers
 - Automated tests for pricing, matching and cancellation penalties
-- Road-based route deviation using the routing service
+- Re-route aware deviation that follows the driver's current leg
+- More event types on the stream (trip started, payment confirmed) with their own consumers
 - Per-user rate limits and an account lock after repeated failures
 - Metrics, alerts and database backups
 - A demo console scenario for relay matching
 - A native app shell for background location
 
 Thanks for reading, and if you try it and something breaks, please tell me.
-# :)
