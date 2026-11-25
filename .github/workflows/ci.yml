@@ -11,6 +11,8 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      DB_URL: postgresql://user:pass@localhost:5432/daigo
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

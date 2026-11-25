@@ -11,6 +11,7 @@ const publicPaths = [
   "/api/v1/logout",
   "/api/v1/jobs/run",
   "/api/v1/health",
+  "/api/v1/payments/webhook",
   "/api/v1/refresh",
   "/api/v1/password-reset/request",
   "/api/v1/password-reset/confirm",

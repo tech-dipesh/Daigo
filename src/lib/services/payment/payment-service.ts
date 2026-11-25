@@ -3,6 +3,7 @@ import { AppError } from "@/lib/infra/http/response"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
 import { coinsRequiredToRedeem, redemptionDiscountRupees } from "@/lib/infra/economy/coins"
 import { notify } from "@/lib/infra/realtime/notify"
+import { gatewayOn, startCheckout } from "@/lib/services/payment/payment-gateway-service"
 import { inviteShares, planShares } from "@/lib/services/payment/payment-split-service"
 import * as paymentRepo from "@/lib/repository/payment/payment-repo"
 import * as userRepo from "@/lib/repository/account/user-repo"
@@ -13,12 +14,18 @@ export async function payTrip(riderId: string, id: string, { method, redeemCoins
   if (trip.riderId !== riderId) throw new AppError("Only the rider pays for a trip", 403)
   if (trip.status !== "COMPLETED") throw new AppError("You can pay once the trip is completed", 409)
   const [existing, rider] = await Promise.all([paymentRepo.findByTrip(trip.id), userRepo.getById(riderId)])
-  if (existing) throw new AppError("This trip already has a payment", 409)
+  if (existing) {
+    const again = existing.method === "ONLINE" && existing.status === "PENDING" && gatewayOn(rider.email)
+    const checkout = again ? await startCheckout(rider.email, existing) : null
+    if (!checkout) throw new AppError(again ? "Waiting for the other riders to pay their shares" : "This trip already has a payment", 409)
+    return { ...existing, checkout }
+  }
   const discount = redeemCoins ? Math.min(redemptionDiscountRupees, trip.priceEstimate) : 0
   const total = trip.priceEstimate - discount
   const online = method === "ONLINE"
-  const shares = await planShares(trip.rideRequestId, rider.email, total, splitWith, online)
-  const paidNow = online && shares.length === 0
+  const live = online && total > 0 && gatewayOn(rider.email)
+  const shares = await planShares(trip.rideRequestId, rider.email, total, splitWith, online, live)
+  const paidNow = online && !live && shares.length === 0
   const payment = await paymentRepo.createRedeeming(
     {
       tripId: trip.id,
@@ -34,7 +41,9 @@ export async function payTrip(riderId: string, id: string, { method, redeemCoins
   )
   if (shares.length) await inviteShares(trip.id, rider.email)
   if (paidNow) await notify(trip.driverId, "PAYMENT", "Payment received", "The rider paid online", { tripId: trip.id })
-  return payment
+  const saved = live ? await paymentRepo.findByTrip(trip.id) : null
+  const checkout = saved ? await startCheckout(rider.email, saved) : null
+  return checkout ? { ...payment, checkout } : payment
 }
 
 export async function getPayment(userId: string, id: string) {
