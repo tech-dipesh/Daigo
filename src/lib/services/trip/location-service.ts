@@ -1,11 +1,11 @@
 import { AppError } from "@/lib/infra/http/response"
 import { getTripForUser } from "@/lib/infra/auth/trip-access"
-import { sendEmailBestEffort } from "@/lib/infra/clients/email"
 import { looksSpoofed, spoofPenalty } from "@/lib/infra/economy/abuse"
 import { issueWarning } from "@/lib/infra/economy/warnings"
-import { deviationThresholdKm, distanceFromPathKm } from "@/lib/infra/matching/deviation"
 import { etaMinutes } from "@/lib/infra/matching/eta"
 import { distanceKm } from "@/lib/infra/matching/geo"
+import { offRoute } from "@/lib/infra/matching/off-route"
+import { notify } from "@/lib/infra/realtime/notify"
 import { publishEvent } from "@/lib/infra/realtime/publish"
 import * as routeRepo from "@/lib/repository/driver/route-repo"
 import * as tripRepo from "@/lib/repository/trip/trip-repo"
@@ -39,16 +39,11 @@ export async function postLocation(driverId: string, id: string, { lat, lng }: L
   let isDeviated = false
   if (trip.status === "IN_PROGRESS") {
     const route = await routeRepo.getById(trip.routeId)
-    const offPathKm = distanceFromPathKm(lat, lng, route.fromLat, route.fromLng, route.toLat, route.toLng)
-    isDeviated = offPathKm > deviationThresholdKm
+    isDeviated = await offRoute(trip.id, lat, lng, route)
   }
   const updated = await tripRepo.saveLocation(trip.id, lat, lng, isDeviated)
   await publishEvent(trip.riderId, "trip.location", { tripId: trip.id, lat, lng, isDeviated })
-  if (isDeviated && !trip.isDeviated) {
-    const superAdmins = await userRepo.superAdmins()
-    const text = `Trip ${trip.id} has drifted more than ${deviationThresholdKm}km off its expected path.`
-    await Promise.all(superAdmins.map((admin) => sendEmailBestEffort({ to: admin.email, subject: "Trip route deviation detected", text })))
-  }
+  if (isDeviated && !trip.isDeviated) await notify(trip.riderId, "TRIP_STATUS", "Your driver is off the planned route", "Check the live map. If something feels wrong, use the emergency button.", { tripId: trip.id, deviated: true })
   return { lastLat: updated.lastLat, lastLng: updated.lastLng, lastLocationAt: updated.lastLocationAt, isDeviated: updated.isDeviated }
 }
 

@@ -48,6 +48,7 @@ export function TripDetail({ id }: { id: string }) {
           </div>
         )}
         {active && live.data?.available && <p className="rounded-2xl bg-tint px-4 py-3 text-ink">{t("liveLine", { km: live.data.remainingKm, minutes: live.data.etaMinutes })}{live.data.isDeviated ? ` · ${t("deviated")}` : ""}</p>}
+        {active && live.data?.available && live.data.isDeviated && <Link href={`/emergency?trip=${id}`} role="alert" className="rounded-2xl bg-tint px-4 py-3 font-medium text-danger">{t("deviatedAlert")}</Link>}
         {active && live.data && !live.data.available && <p className="text-sm text-muted">{t("noLive")}</p>}
         {who.data && (
           <div className="flex items-center gap-3 rounded-2xl bg-surface p-4">
