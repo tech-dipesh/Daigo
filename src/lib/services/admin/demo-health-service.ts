@@ -3,6 +3,8 @@ import { redis } from "@/lib/infra/clients/redis"
 import { routeInfo } from "@/lib/infra/clients/stadia"
 import { weatherMultiplier } from "@/lib/infra/clients/weather"
 import { queueEnabled } from "@/lib/infra/queue/queue"
+import { streamStats } from "@/lib/infra/realtime/stream"
+import { razorpayOn } from "@/lib/infra/clients/razorpay"
 import * as demoResetRepo from "@/lib/repository/admin/demo-reset-repo"
 
 type Check = { name: string; ok: boolean; ms: number; note: string }
@@ -28,6 +30,11 @@ async function stadiaRoute() {
   return { ok: route.km > 0, note: `${route.km.toFixed(1)} km, ${route.minutes} min (cached or straight line fallback counts too)` }
 }
 
+async function eventStream() {
+  const { length, dead, alive } = await streamStats()
+  return { ok: alive && dead === 0, note: alive ? `worker is running, ${length} events kept, ${dead} in the dead stream` : "no worker heartbeat, notifications are sent directly" }
+}
+
 export async function runHealth() {
   const storageSet = Boolean(env.S3_BUCKET)
   return Promise.all([
@@ -37,6 +44,8 @@ export async function runHealth() {
     check("weather", async () => (env.OWM_KEY ? { ok: true, note: `factor ${await weatherMultiplier(30.73, 76.77)}` } : { ok: true, note: "skipped, no OWM_KEY" })),
     check("file storage", async () => ({ ok: storageSet, note: storageSet ? `bucket ${env.S3_BUCKET}` : "S3_BUCKET not set" })),
     check("queue", async () => ({ ok: true, note: queueEnabled ? "qstash is on" : "running jobs inline, no public url or token" })),
+    check("event worker", eventStream),
+    check("payments", async () => ({ ok: true, note: razorpayOn ? "razorpay test keys are set" : "no RZP_KEY, payments use the instant mock" })),
     check("email", async () => ({ ok: Boolean(env.BREVO_API_KEY), note: "key is set, nothing was sent" })),
   ])
 }

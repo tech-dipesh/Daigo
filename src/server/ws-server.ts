@@ -3,6 +3,7 @@ import { createServer } from "node:http"
 import { WebSocketServer } from "ws"
 import { verifyAccessToken } from "@/lib/infra/auth/token"
 import { attachSocket } from "@/lib/infra/realtime/socket"
+import { startWorker } from "@/server/event-worker"
 import * as userRepo from "@/lib/repository/account/user-repo"
 
 const port = Number(process.env.PORT ?? 3001)
@@ -32,4 +33,7 @@ server.on("upgrade", async (req, socket, head) => {
   }
 })
 
-server.listen(port, () => console.log(`ws server on ${port}`))
+server.listen(port, () => {
+  console.log(`ws server on ${port}`)
+  startWorker().catch((err) => console.error("event worker did not start", err))
+})
