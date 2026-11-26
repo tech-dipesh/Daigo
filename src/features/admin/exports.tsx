@@ -29,11 +29,11 @@ export function Exports() {
       await send({ type: kind, from: new Date(`${from}T00:00:00+05:30`).toISOString(), to: new Date(`${to}T23:59:59+05:30`).toISOString() }).unwrap()
     } catch (err) { setFail(errText(err)) }
   }
-  const runJob = async (action: "run-autopost" | "schedule-autopost") => {
+  const runJob = async (action: "run-autopost" | "schedule-autopost" | "run-reconcile" | "schedule-reconcile") => {
     setNote("")
     try {
       await job(action).unwrap()
-      setNote(t(action === "run-autopost" ? "jobQueued" : "jobScheduled"))
+      setNote(t(action === "run-autopost" ? "jobQueued" : action === "schedule-autopost" ? "jobScheduled" : action === "run-reconcile" ? "reconcileQueued" : "reconcileScheduled"))
     } catch (err) { setNote(errText(err)) }
   }
   return (
@@ -62,7 +62,7 @@ export function Exports() {
       <section className="flex flex-col gap-2">
         <h2 className="font-semibold">{t("jobsTitle")}</h2>
         <p className="text-muted">{t("jobsHelp")}</p>
-        <div className="grid gap-2 sm:grid-cols-2"><Button look="quiet" onClick={() => runJob("run-autopost")} disabled={jobbing.isLoading}>{t("runAutopost")}</Button><Button look="quiet" onClick={() => runJob("schedule-autopost")} disabled={jobbing.isLoading}>{t("scheduleAutopost")}</Button></div>
+        <div className="grid gap-2 sm:grid-cols-2"><Button look="quiet" onClick={() => runJob("run-reconcile")} disabled={jobbing.isLoading}>{t("runReconcile")}</Button><Button look="quiet" onClick={() => runJob("schedule-reconcile")} disabled={jobbing.isLoading}>{t("scheduleReconcile")}</Button><Button look="quiet" onClick={() => runJob("run-autopost")} disabled={jobbing.isLoading}>{t("runAutopost")}</Button><Button look="quiet" onClick={() => runJob("schedule-autopost")} disabled={jobbing.isLoading}>{t("scheduleAutopost")}</Button></div>
         <p role="status" className="min-h-5 text-sm text-muted">{note}</p>
       </section>
     </div>

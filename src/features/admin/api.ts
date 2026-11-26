@@ -39,7 +39,7 @@ export const adminApi = baseApi.injectEndpoints({
     setStaff: b.mutation<AdminUser, { id: string; staffRole: "MODERATOR" | "SUPER_ADMIN" | null }>({ query: ({ id, staffRole }) => ({ url: `/admin/users/${id}/staff-role`, method: "patch", body: { staffRole } }), invalidatesTags: ["Admin"] }),
     exportCsv: b.mutation<{ queued: boolean; id: string; from: string; to: string }, { type: string; from?: string; to?: string }>({ query: (body) => ({ url: "/admin/exports", method: "post", body }), invalidatesTags: ["Admin"] }),
     exportHistory: b.query<ExportRow[], void>({ query: () => ({ url: "/admin/exports" }), providesTags: ["Admin"] }),
-    adminJob: b.mutation<Obj, "run-autopost" | "schedule-autopost">({ query: (action) => ({ url: "/admin/jobs", method: "post", body: { action } }) }),
+    adminJob: b.mutation<Obj, "run-autopost" | "schedule-autopost" | "run-reconcile" | "schedule-reconcile">({ query: (action) => ({ url: "/admin/jobs", method: "post", body: { action } }) }),
     demoRun: b.mutation<Obj, { url: string; body?: Obj }>({ query: ({ url, body }) => ({ url: `/admin/demo/${url}`, method: "post", body: body ?? {} }), invalidatesTags: ["Admin"] }),
     demoGet: b.query<Obj, string>({ query: (url) => ({ url: `/admin/demo/${url}` }), providesTags: ["Admin"] }),
   }),

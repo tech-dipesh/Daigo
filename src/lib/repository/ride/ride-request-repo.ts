@@ -4,6 +4,8 @@ type NewRequest = Parameters<typeof db.rideRequest.create>[0]["data"]
 type Trip = { fromLat: number; fromLng: number; toLat: number; toLng: number; windowStart: Date; windowEnd: Date }
 export type RideRequest = NonNullable<Awaited<ReturnType<typeof findOwned>>>
 
+/* pending requests whose time ran out in the last few minutes */
+export const recentlyExpired = (since: Date) => db.rideRequest.findMany({ where: { status: "PENDING", expiresAt: { lt: new Date(), gt: since } }, select: { id: true, riderId: true }, take: 100 })
 export const listByRider = (riderId: string) => db.rideRequest.findMany({ where: { riderId } })
 export const findOwned = (id: string, riderId: string) => db.rideRequest.findFirst({ where: { id, riderId } })
 export const groupSizeOf = async (id: string) => (await db.rideRequest.findUniqueOrThrow({ where: { id }, select: { groupSize: true } })).groupSize
