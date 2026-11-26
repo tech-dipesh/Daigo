@@ -10,7 +10,7 @@ const strikeSeconds = 600
 /*
   one bad gps point or a quick shortcut should not scare a rider
   so it takes two bad points in a row, a good point clears the count
-  without a road shape from stadia it falls back to the old straight line check
+   for this the without a road shape from stadia it falls back to the old straight line check
 */
 export async function offRoute(tripId: string, lat: number, lng: number, route: Ends) {
   const { line, road } = await routeLine({ lat: route.fromLat, lng: route.fromLng }, { lat: route.toLat, lng: route.toLng })

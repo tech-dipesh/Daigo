@@ -28,7 +28,6 @@ export function distanceFromPathKm(
 export const roadThresholdKm = 1
 const kmPerLat = 110.57
 
-/* flat local map around the point, good enough for a few km, then the nearest bit of every segment */
 export function distanceToLineKm(lat: number, lng: number, line: [number, number][]) {
   const kmPerLng = 111.32 * Math.cos((lat * Math.PI) / 180)
   const flat = ([x, y]: [number, number]) => [(x - lng) * kmPerLng, (y - lat) * kmPerLat] as const

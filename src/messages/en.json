@@ -276,7 +276,7 @@
     "shareHelp": "Anyone with the link can follow this trip live, until you stop sharing.",
     "copy": "Copy link",
     "copied": "Link copied",
-    "payNow": "Pay for this trip",
+    "payNow": "Pay now",
     "rate": "Rate this trip",
     "help": "Help",
     "cancel": "Cancel trip",
@@ -337,7 +337,12 @@
     "dropAt": "Drop",
     "returnTitle": "Going back?",
     "returnBody": "Your driver has a route the other way, leaving {when}. Ask for the ride back.",
-    "returnAsk": "Request the ride back"
+    "returnAsk": "Request the ride back",
+    "payOpening": "Opening payment",
+    "payCancelled": "Payment was not completed. You can try again.",
+    "payWaiting": "Your payment is being confirmed. This page updates by itself.",
+    "pendingOnline": "Your payment has not gone through yet. You can pay now.",
+    "deviatedAlert": "Your driver looks off the planned route. If something feels wrong, tap here for the emergency page."
   },
   "driver": {
     "offline": "You are offline",
@@ -770,7 +775,11 @@
     "runAutopost": "Run auto-post now",
     "scheduleAutopost": "Schedule daily 6am",
     "jobQueued": "Queued. Riders with weekday rides will get today's request shortly.",
-    "jobScheduled": "Scheduled for 6am India time every day."
+    "jobScheduled": "Scheduled for 6am India time every day.",
+    "runReconcile": "Check payments now",
+    "scheduleReconcile": "Check payments every 15 minutes",
+    "reconcileQueued": "Queued. Stuck online payments will be checked at Razorpay shortly.",
+    "reconcileScheduled": "Scheduled to run every 15 minutes."
   },
   "tutorial": {
     "title": "How DaiGo works",
@@ -848,7 +857,9 @@
     "slide": "Slide to pay",
     "home": "Go home",
     "loadFail": "We could not load this share",
-    "wrongAccount": "Log in with the email this share was sent to."
+    "wrongAccount": "Log in with the email this share was sent to.",
+    "payCancelled": "Payment was not completed. You can try again.",
+    "payWaiting": "Your payment is being confirmed. This page updates by itself."
   },
   "offline": {
     "title": "You are offline",
