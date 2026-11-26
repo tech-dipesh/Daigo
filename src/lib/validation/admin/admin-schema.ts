@@ -35,7 +35,7 @@ export const fareRatePatchSchema = z.object({ perKm: z.number().min(1).max(40) }
 
 export const fareRateTypeSchema = z.object({ type: z.enum(["BIKE", "SCOOTER", "CAR", "AUTO", "CAB"]) })
 
-export const adminJobSchema = z.object({ action: z.enum(["schedule-autopost", "run-autopost"]) })
+export const adminJobSchema = z.object({ action: z.enum(["schedule-autopost", "run-autopost", "schedule-reconcile", "run-reconcile"]) })
 
 export const staffRoleSchema = z.object({
   staffRole: z.enum(["MODERATOR", "SUPER_ADMIN"]).nullable(),

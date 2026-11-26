@@ -1,6 +1,7 @@
 import { sendEmail } from "@/lib/infra/clients/email"
 import { autopostToday } from "@/lib/infra/matching/permanent"
 import { buildExport } from "@/lib/infra/storage/exports"
+import { reconcilePayments } from "@/lib/services/payment/payment-gateway-service"
 import type { Job } from "@/lib/infra/queue/types"
 import * as notificationRepo from "@/lib/repository/account/notification-repo"
 
@@ -14,6 +15,10 @@ export async function runJob(job: Job) {
     }
     case "permanent.autopost":
       return autopostToday()
+    case "payments.reconcile": {
+      await reconcilePayments()
+      return
+    }
     case "export.csv":
       return buildExport(job.payload)
   }

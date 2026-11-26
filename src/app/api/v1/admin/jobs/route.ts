@@ -16,12 +16,17 @@ export const POST = withErrorHandling(async (request) => {
     await enqueue({ name: "permanent.autopost", payload: {} })
     return successResponse({ queued: true })
   }
+  if (action === "run-reconcile") {
+    await enqueue({ name: "payments.reconcile", payload: {} })
+    return successResponse({ queued: true })
+  }
   if (!queueClient || !queueEnabled) throw new AppError("Queue needs QTASH_TOKEN and a public APP_URL", 409)
+  const reconcile = action === "schedule-reconcile"
   const schedule = await queueClient.schedules.create({
-    scheduleId: "daigo-autopost",
+    scheduleId: reconcile ? "daigo-reconcile" : "daigo-autopost",
     destination: jobUrl,
-    cron: "CRON_TZ=Asia/Kolkata 0 6 * * *",
-    body: JSON.stringify({ name: "permanent.autopost", payload: {} }),
+    cron: reconcile ? "*/15 * * * *" : "CRON_TZ=Asia/Kolkata 0 6 * * *",
+    body: JSON.stringify({ name: reconcile ? "payments.reconcile" : "permanent.autopost", payload: {} }),
     headers: { "Content-Type": "application/json" },
   })
   return successResponse(schedule, 201)
