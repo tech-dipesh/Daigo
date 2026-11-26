@@ -1,4 +1,5 @@
 import { baseApi } from "@/store/api"
+import type { Checkout } from "@/features/payments/checkout"
 import type { Trip } from "@/features/rider/api"
 
 export type TripFull = Trip & { riderId: string; driverId: string; arrivedAt: string | null; pickupOtp: string | null; relayLeg: "FIRST" | "SECOND" | null; noShowReason: string | null; shareToken: string | null }
@@ -6,7 +7,7 @@ export type Counterpart = { name: string; trustScore: number; vehicle?: string; 
 export type Live = { available: false } | { available: true; lastLat: number; lastLng: number; remainingKm: number; etaMinutes: number; isDeviated: boolean }
 export type ReturnRoute = { id: string; routeType: "REGULAR" | "ADVANCE"; fromLabel: string; toLabel: string; daysOfWeek: number[]; departureDate: string | null; departureTime: string }
 export type Chat = { id: string; senderId: string; text: string; at: string }
-export type Pay = { id: string; amount: number; method: "ONLINE" | "CASH"; status: string; shares: { id: string; amount?: number; status: string; overdue: boolean }[] }
+export type Pay = { id: string; amount: number; method: "ONLINE" | "CASH"; status: string; checkout?: Checkout; shares: { id: string; amount?: number; status: string; overdue: boolean }[] }
 export type Coins = { coinBalance: number; eligibleForDiscount: boolean; discountRupees: number; coinsNeeded: number }
 type PayBody = { method: "ONLINE" | "CASH"; redeemCoins: boolean; splitWith: string[] }
 type RateBody = { score: number; review?: string; recommendTag?: string }

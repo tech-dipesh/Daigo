@@ -3,11 +3,14 @@ import { useState } from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { CrossIcon, SpinnerIcon } from "@/components/icons"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slide } from "@/components/ui/slide"
 import { Toggle } from "@/components/ui/toggle"
 import { errText, isApiError } from "@/lib/errors"
 import { emailOk } from "@/features/auth/rules"
+import { useCheckout } from "@/features/payments/use-checkout"
+import type { Outcome } from "@/features/payments/use-checkout"
 import { useCoinsQuery, useGetPaymentQuery, useGetTripQuery, usePayMutation } from "@/features/trips/api"
 
 export function Pay({ id }: { id: string }) {
@@ -16,6 +19,7 @@ export function Pay({ id }: { id: string }) {
   const paid = useGetPaymentQuery(id, { pollingInterval: 5000 })
   const coins = useCoinsQuery()
   const [pay] = usePayMutation()
+  const checkout = useCheckout()
   const [method, setMethod] = useState<"ONLINE" | "CASH">("ONLINE")
   const [redeem, setRedeem] = useState(false)
   const [friends, setFriends] = useState<string[]>([])
@@ -24,9 +28,13 @@ export function Pay({ id }: { id: string }) {
   const none = isApiError(paid.error) && paid.error.status === 404
   const discount = redeem && coins.data?.eligibleForDiscount ? coins.data.discountRupees : 0
   const total = Math.max(0, (trip.data?.priceEstimate ?? 0) - discount)
-  const go = async () => {
+  const said = (outcome: Outcome) => setFail(outcome === "cancelled" ? t("payCancelled") : outcome === "waiting" ? t("payWaiting") : "")
+  const go = async (again = false) => {
     setFail("")
-    try { await pay({ id, method, redeemCoins: redeem, splitWith: friends }).unwrap() } catch (err) { setFail(errText(err)) }
+    try {
+      const res = await pay({ id, method: again ? "ONLINE" : method, redeemCoins: again ? false : redeem, splitWith: again ? [] : friends }).unwrap()
+      if (res.checkout) said(await checkout.run(res.checkout))
+    } catch (err) { setFail(errText(err)) }
   }
   const add = () => {
     if (!emailOk(mail) || friends.includes(mail) || friends.length >= 4) return
@@ -40,7 +48,9 @@ export function Pay({ id }: { id: string }) {
       <div className="mx-auto flex max-w-md flex-col gap-4">
         <h1 className="text-title font-semibold">{p.status === "PAID" ? t("paidTitle") : t("pendingTitle")}</h1>
         <p className="text-fare leading-none font-semibold text-primary">₹{p.amount}</p>
-        <p className="text-muted">{p.status === "PAID" ? t("paidSub") : p.method === "CASH" ? t("cashSub") : t("sharesSub")}</p>
+        <p className="text-muted">{p.status === "PAID" ? t("paidSub") : p.method === "CASH" ? t("cashSub") : p.shares.length ? t("sharesSub") : t("pendingOnline")}</p>
+        {p.status === "PENDING" && p.method === "ONLINE" && <Button onClick={() => go(true)} disabled={checkout.busy}>{checkout.busy ? t("payOpening") : t("payNow")}</Button>}
+        <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
         {p.shares.length > 0 && <ul className="flex flex-col gap-2">{p.shares.map((s) => <li key={s.id} className="flex justify-between rounded-2xl bg-surface px-4 py-3"><span>{s.amount ? `₹${s.amount}` : t("share")}</span><span className={s.overdue ? "text-danger" : "text-muted"}>{s.overdue ? t("overdue") : s.status}</span></li>)}</ul>}
         <Link href={`/trips/${id}/rate`} className="flex h-12 items-center justify-center rounded-2xl bg-primary px-5 font-medium text-on-primary">{t("rate")}</Link>
       </div>
@@ -62,7 +72,7 @@ export function Pay({ id }: { id: string }) {
         <ul className="flex flex-wrap gap-2">{friends.map((f) => <li key={f} className="flex items-center gap-2 rounded-xl bg-surface px-3 py-2 text-sm text-ink">{f}<button type="button" onClick={() => setFriends(friends.filter((x) => x !== f))} aria-label={t("remove")} title={t("remove")} className="text-muted outline-hidden"><CrossIcon size={14} /></button></li>)}</ul>
       </div>
       <p role="alert" className="min-h-5 text-sm text-danger">{fail}</p>
-      <Slide label={t("slidePay")} lockedLabel={t("lockedPay")} locked={trip.data?.status !== "COMPLETED"} onDoneAction={go} />
+      <Slide label={t("slidePay")} lockedLabel={t("lockedPay")} locked={trip.data?.status !== "COMPLETED"} onDoneAction={() => go()} />
     </div>
   )
 }
