@@ -21,6 +21,8 @@ model Route {
   status         RouteStatus @default(ACTIVE)
   createdAt      DateTime    @default(now()) @map("created_at")
   updatedAt      DateTime    @updatedAt @map("updated_at")
+  fromGeog       Unsupported("geography(Point,4326)")? @map("from_geog")
+  toGeog         Unsupported("geography(Point,4326)")? @map("to_geog")
   matches        Match[]
   driver         User        @relation(fields: [driverId], references: [id])
   vehicle        Vehicle     @relation(fields: [vehicleId], references: [id])
@@ -28,6 +30,8 @@ model Route {
   firstLegRelayMatches  RelayMatch[] @relation("FirstLegRoutes")
   secondLegRelayMatches RelayMatch[] @relation("SecondLegRoutes")
 
+  @@index([fromGeog], type: Gist, map: "routes_from_geog_idx")
+  @@index([toGeog], type: Gist, map: "routes_to_geog_idx")
   @@map("routes")
 }
 
