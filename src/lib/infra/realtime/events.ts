@@ -3,3 +3,4 @@ export type RealtimeEvent = { id: string; type: EventType; data: unknown; at: st
 export const userChannel = (userId: string) => `user:${userId}`
 export const inboxKey = (userId: string) => `inbox:${userId}`
 export const adminChannel = "admin"
+export const wakeChannel = "daigo:events:wake"
