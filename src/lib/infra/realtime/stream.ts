@@ -1,10 +1,10 @@
 import { z } from "zod"
 import { redis } from "@/lib/infra/clients/redis"
 import { notificationTypes } from "@/lib/infra/queue/types"
+import { wakeChannel } from "@/lib/infra/realtime/events"
 
 export const streamKey = "daigo:events"
 export const deadKey = "daigo:events:dead"
-export const wakeChannel = "daigo:events:wake"
 export const aliveKey = "daigo:worker:alive"
 const triesKey = "daigo:events:tries"
 const group = "workers"

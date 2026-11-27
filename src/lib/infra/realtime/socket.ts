@@ -1,10 +1,10 @@
 import type { RawData, WebSocket } from "ws"
-import { redis } from "@/lib/infra/clients/redis"
-import { adminChannel, userChannel } from "@/lib/infra/realtime/events"
-import type { RealtimeEvent } from "@/lib/infra/realtime/events"
+import { listen } from "@/lib/infra/realtime/hub"
 import { setOffline, setOnline } from "@/lib/infra/realtime/presence"
 import type * as userRepo from "@/lib/repository/account/user-repo"
 import { wsMessageSchema } from "@/lib/validation/driver/realtime-schema"
+
+const openState = 1
 
 type Who = { userId: string } & Awaited<ReturnType<typeof userRepo.roles>>
 
@@ -15,9 +15,9 @@ function parseMessage(raw: RawData) {
 /* shared by the vercel route and the ec2 ws server, so both behave the same */
 export function attachSocket(ws: WebSocket, { userId, activeRole, staffRole }: Who) {
   let live = false
-  const channels = staffRole ? [userChannel(userId), adminChannel] : [userChannel(userId)]
-  const sub = redis.subscribe<RealtimeEvent>(channels)
-  sub.on("message", ({ message }) => ws.send(JSON.stringify(message)))
+  const stop = listen(userId, Boolean(staffRole), (event) => {
+    if (ws.readyState === openState) ws.send(JSON.stringify(event))
+  })
   ws.send(JSON.stringify({ type: "ready" }))
   ws.on("message", async (raw) => {
     const parsed = parseMessage(raw)
@@ -29,7 +29,7 @@ export function attachSocket(ws: WebSocket, { userId, activeRole, staffRole }: W
     else await setOffline(userId)
   })
   ws.on("close", async () => {
-    await sub.unsubscribe()
+    stop()
     await setOffline(userId)
   })
 }

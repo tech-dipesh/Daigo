@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { verifyAccessToken, rotateRefreshToken } from "@/lib/infra/auth/token"
 import { setAuthCookies, clearAuthCookies } from "@/lib/infra/auth/cookies"
-import { rateLimit } from "@/lib/infra/clients/rate-limit"
+import { limitOn, memberLimit, rateLimit } from "@/lib/infra/clients/rate-limit"
 
 const publicPaths = [
   "/api/v1/signup",
@@ -51,32 +51,37 @@ async function pageProxy(request: NextRequest) {
   return stale ? clearAuthCookies(response) : response
 }
 
+function tooMany() {
+  return NextResponse.json(
+    { success: false, data: null, error: { message: "Too many requests. Please slow down." } },
+    { status: 429 },
+  )
+}
+
+async function over(limiter: typeof rateLimit, key: string) {
+  if (!limitOn) return false
+  const { success } = await limiter.limit(key)
+  return !success
+}
+
 export async function proxy(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/api/")) return pageProxy(request)
 
   const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-  const { success } = await rateLimit.limit(clientIp)
-
-  if (!success) {
-    return NextResponse.json(
-      { success: false, data: null, error: { message: "Too many requests. Please slow down." } },
-      { status: 429 },
-    )
-  }
-
   const isPublic = publicPaths.includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/api/v1/trips/shared/")
-  if (isPublic) {
-    return NextResponse.next()
-  }
+  if (isPublic) return (await over(rateLimit, clientIp)) ? tooMany() : NextResponse.next()
 
   const accessTokenCookie = request.cookies.get("access_token")?.value
   const accessPayload = accessTokenCookie ? await verifyAccessToken(accessTokenCookie) : null
 
   if (accessPayload) {
+    if (await over(memberLimit, `user:${accessPayload.userId}`)) return tooMany()
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set("x-user-id", accessPayload.userId)
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
+  // no good access token means a refresh, that is database work and a door for guessing, so it is counted by ip
+  if (await over(rateLimit, clientIp)) return tooMany()
   // when acc tok is missing we make a sildent refresh
   const refreshTokenCookie = request.cookies.get("refresh_token")?.value
 

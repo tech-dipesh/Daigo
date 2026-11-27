@@ -1,6 +1,7 @@
 import { redis } from "@/lib/infra/clients/redis"
 import { publishEvent } from "@/lib/infra/realtime/publish"
-import { aliveKey, drain, emit, ensureGroup, reclaim, wakeChannel } from "@/lib/infra/realtime/stream"
+import { onWake } from "@/lib/infra/realtime/hub"
+import { aliveKey, drain, emit, ensureGroup, reclaim } from "@/lib/infra/realtime/stream"
 import type { StreamEvent } from "@/lib/infra/realtime/stream"
 import * as notificationRepo from "@/lib/repository/account/notification-repo"
 import * as rideRequestRepo from "@/lib/repository/ride/ride-request-repo"
@@ -49,7 +50,7 @@ export async function startWorker() {
       await run()
     } catch (err) { console.error("worker sweep failed", err) }
   }
-  redis.subscribe(wakeChannel).on("message", () => void run())
+  onWake(() => void run())
   await beat()
   setInterval(() => void beat(), minute)
   setInterval(() => void sweep(), minute)
