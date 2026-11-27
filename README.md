@@ -580,4 +580,4 @@ Missing (written down on purpose, see [docs/reliability.md](docs/reliability.md)
 - A demo console scenario for relay matching
 - A native app shell for background location
 
-Thanks for reading, and if you try it and something breaks, please tell me.
+Thanks

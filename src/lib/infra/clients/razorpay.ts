@@ -25,13 +25,14 @@ export const fetchOrderPayments = (orderId: string) => call<{ items: PaymentInfo
 export const fetchOrder = (id: string) => call<Order>(`/orders/${id}`)
 
 const same = (a: string, b: string) => {
-  const x = Buffer.from(a)
-  const y = Buffer.from(b)
+  // Apply Uint8Array for the newer node type
+  const x = Uint8Array.from(Buffer.from(a))
+  const y = Uint8Array.from(Buffer.from(b))
   return x.length === y.length && timingSafeEqual(x, y)
 }
 
-/* what the checkout sends back after a good payment, signed with our secret */
+// Signed our secret
 export const checkoutSignatureOk = (orderId: string, paymentId: string, signature: string) => same(createHmac("sha256", env.RZP_SECRET ?? "").update(`${orderId}|${paymentId}`).digest("hex"), signature)
 
-/* webhooks are signed over the raw body, so the body must not be parsed before this */
+// Webhook are signed with the raw body
 export const webhookSignatureOk = (raw: string, signature: string) => Boolean(env.RZP_HOOK) && same(createHmac("sha256", env.RZP_HOOK ?? "").update(raw).digest("hex"), signature)
