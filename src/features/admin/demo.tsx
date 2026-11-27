@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button"
 import { errText } from "@/lib/errors"
 import { useDemoGetQuery, useDemoRunMutation } from "@/features/admin/api"
 import type { Obj } from "@/features/admin/api"
+import { demoTabs } from "@/features/admin/demo-tabs"
+import type { DemoTab } from "@/features/admin/demo-tabs"
 import { Title, field } from "@/features/admin/ui"
-
-export const demoTabs = ["status", "seed", "reset", "scenarios", "force", "health", "benchmark"] as const
-export type DemoTab = (typeof demoTabs)[number]
 
 const scenarios = ["all", "normal-match", "no-driver", "double-accept", "emergency", "cancel-after-accept", "payment-mismatch", "vulnerable-request"]
 
