@@ -72,7 +72,8 @@
   "prefs": {
     "language": "Language",
     "theme": "Switch theme",
-    "sos": "Emergency"
+    "sos": "Emergency",
+    "logout": "Log out"
   },
   "emergency": {
     "title": "Emergency",

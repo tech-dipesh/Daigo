@@ -1,4 +1,4 @@
-import { ArrowRight, Bell, Bike, Camera, Car, CarTaxiFront, Check, ChevronDown, ChevronRight, ChevronUp, Circle, Clock, Copy, Eye, EyeOff, Flag, House, Loader2, LifeBuoy, LocateFixed, Luggage, MapPin, MessageCircle, Minus, Moon, Plus, Route, Send, Share2, ShieldCheck, Star, Sun, Truck, UserRound, Users, X } from "lucide-react"
+import { ArrowRight, Bell, Bike, Camera, Car, CarTaxiFront, Check, ChevronDown, ChevronRight, ChevronUp, Circle, Clock, Copy, Eye, EyeOff, Flag, House, Loader2, LifeBuoy, LocateFixed, LogOut, Luggage, MapPin, MessageCircle, Minus, Moon, Plus, Route, Send, Share2, ShieldCheck, Star, Sun, Truck, UserRound, Users, X } from "lucide-react"
 import type { LucideIcon, LucideProps } from "lucide-react"
 
 const stroke = 1.75
@@ -16,6 +16,7 @@ export const SpinnerIcon = wrap(Loader2)
 export const MoonIcon = wrap(Moon)
 export const SunIcon = wrap(Sun)
 export const SosIcon = wrap(ShieldCheck)
+export const LogoutIcon = wrap(LogOut)
 export const CameraIcon = wrap(Camera)
 export const PlusIcon = wrap(Plus)
 export const MinusIcon = wrap(Minus)

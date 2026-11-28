@@ -36,7 +36,10 @@ export function buildPlan(size: DemoSize, passwordHash: string, liveEmail: strin
   const riderRows = Array.from({ length: riders }, (_, i) => person(`rider${pad(i + 1)}${demoDomain}`, `Rider ${pad(i + 1)}`, "RIDER", 70 + ((i * 7) % 30)))
   if (liveEmail) riderRows.push(person(liveEmail, "Live Demo", "RIDER", 100))
   const driverRows = Array.from({ length: drivers }, (_, i) => person(`driver${pad(i + 1)}${demoDomain}`, `Driver ${pad(i + 1)}`, "DRIVER", 85 + ((i * 3) % 15)))
-  const vehicles = driverRows.map((d, i) => ({ id: randomUUID(), ownerId: d.id, ...kinds[i % kinds.length], seatCapacity: kinds[i % kinds.length].seats, plateNumber: `DEMO-${pad(i + 1)}`, rcNumber: `RC-DEMO-${pad(i + 1)}`, verificationStatus: "APPROVED" as const, reviewedAt: now }))
+  const vehicles = driverRows.map((d, i) => {
+    const { seats, ...kind } = kinds[i % kinds.length]
+    return { id: randomUUID(), ownerId: d.id, ...kind, seatCapacity: seats, plateNumber: `DEMO-${pad(i + 1)}`, rcNumber: `RC-DEMO-${pad(i + 1)}`, verificationStatus: "APPROVED" as const, reviewedAt: now }
+  })
   const documents = driverRows.map((d, i) => ({ id: randomUUID(), userId: d.id, licenseNumber: `DL-DEMO-${pad(i + 1)}`, verificationStatus: "APPROVED" as const, reviewedAt: now }))
   const routes = driverRows.map((d, i) => {
     const from = places[i % places.length]

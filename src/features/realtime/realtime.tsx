@@ -76,7 +76,13 @@ export function Realtime({ driver }: { driver: boolean }) {
       heartbeat = setInterval(beat, 30000)
       void beat()
     }
-    const open = () => {
+    /* the socket upgrade skips the proxy, so an expired access cookie is only renewed by a normal api call first */
+    const warm = async () => {
+      try { await api.get("/me") } catch { return }
+    }
+    const open = async () => {
+      if (tries > 0) await warm()
+      if (closed) return
       const ws = new WebSocket(`${base}/api/v1/ws`)
       socket.current = ws
       ws.onopen = () => {
@@ -100,10 +106,10 @@ export function Realtime({ driver }: { driver: boolean }) {
         dispatch(status({ live: false, fallback: tries >= 3 }))
         if (closed) return
         if (tries >= 3) fallbackOn()
-        retry = setTimeout(open, Math.min(1000 * 2 ** tries, 15000))
+        retry = setTimeout(() => void open(), Math.min(1000 * 2 ** tries, 15000))
       }
     }
-    if (base) open()
+    if (base) void open()
     else {
       dispatch(status({ live: false, fallback: true }))
       fallbackOn()

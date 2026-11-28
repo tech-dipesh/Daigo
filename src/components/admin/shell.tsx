@@ -12,7 +12,7 @@ export async function AdminShell({ isSuper, children }: { isSuper: boolean; chil
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between gap-3 px-5 py-3">
           <span className="text-lg font-semibold text-primary">DaiGo <span className="text-sm font-normal text-muted">{isSuper ? t("superAdmin") : t("moderator")}</span></span>
-          <div className="flex items-center gap-3"><Prefs /><LogoutButton /></div>
+          <div className="flex items-center gap-3"><Prefs /><LogoutButton icon /></div>
         </header>
         <main className="w-full flex-1 px-5 pb-10">{children}</main>
       </div>

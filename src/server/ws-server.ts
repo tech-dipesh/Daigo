@@ -24,10 +24,11 @@ server.on("upgrade", async (req, socket, head) => {
   try {
     const token = cookie(req.headers.cookie, "access_token")
     const payload = token ? await verifyAccessToken(token) : null
-    if (!payload) throw new Error("not authenticated")
+    if (!payload) throw new Error(token ? "access token expired or invalid" : "no access_token cookie on the request")
     const roles = await userRepo.roles(payload.userId)
     wss.handleUpgrade(req, socket, head, (ws) => attachSocket(ws, { userId: payload.userId, ...roles }))
-  } catch {
+  } catch (err) {
+    console.error("ws upgrade refused:", err instanceof Error ? err.message : err)
     socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n")
     socket.destroy()
   }
